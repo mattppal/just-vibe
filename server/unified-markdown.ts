@@ -16,62 +16,104 @@ import { Node } from 'unist';
 function rehypeEnhanceCodeBlocks() {
   return (tree: Node) => {
     visit(tree, 'element', (node: any) => {
-      // Enhance code blocks
-      if (node.tagName === 'pre' && node.children?.[0]?.tagName === 'code') {
-        // Add classes for styling with Tailwind Typography
-        node.properties.className = [
-          ...(node.properties.className || []),
-          'not-prose', // Exclude from prose styling to apply custom styles
-          'rounded-md',
-          'bg-[#111]',
-          'p-4',
-          'my-6',
-          'overflow-x-auto'
-        ];
+      // Add Tailwind classes to all elements that need styling
+      if (node.tagName) {
+        // Initialize className array if it doesn't exist
+        node.properties.className = node.properties.className || [];
 
-        // Get language from the code element
-        const code = node.children[0];
-        const lang = code.properties?.className
-          ?.find((cls: string) => cls.startsWith('language-'))
-          ?.replace('language-', '');
-
-        // Add language label if available
-        if (lang && lang !== 'text') {
-          // Create a language indicator
-          const langNode = {
-            type: 'element',
-            tagName: 'div',
-            properties: {
-              className: [
-                'text-xs',
-                'text-slate-400',
-                'mb-2',
-                'italic'
-              ],
-            },
-            children: [
-              {
-                type: 'text',
-                value: lang
-              }
-            ]
-          };
-
-          // Add the language indicator before the code
-          node.children = [langNode, ...node.children];
+        // Add specific styling based on element type
+        switch (node.tagName) {
+          case 'h1':
+          case 'h2':
+          case 'h3':
+          case 'h4':
+          case 'h5':
+          case 'h6':
+            node.properties.className.push('text-white', 'font-semibold');
+            break;
+          case 'p':
+            node.properties.className.push('text-white');
+            break;
+          case 'ul':
+            node.properties.className.push('list-disc', 'pl-6');
+            break;
+          case 'ol':
+            node.properties.className.push('list-decimal', 'pl-6');
+            break;
+          case 'li':
+            node.properties.className.push('text-white', 'mb-1');
+            break;
+          case 'a':
+            node.properties.className.push('text-blue-400', 'hover:underline');
+            break;
+          case 'blockquote':
+            node.properties.className.push('border-l-4', 'border-gray-700', 'pl-4', 'py-1', 'italic', 'text-gray-300');
+            break;
+          case 'table':
+            node.properties.className.push('w-full', 'border-collapse', 'my-4');
+            break;
+          case 'th':
+          case 'td':
+            node.properties.className.push('border', 'border-gray-700', 'px-4', 'py-2', 'text-white');
+            break;
         }
-      }
 
-      // Style inline code
-      if (node.tagName === 'code' && node.parent?.tagName !== 'pre') {
-        node.properties.className = [
-          ...(node.properties.className || []),
-          'bg-[#111]',
-          'text-[#d1d5db]',
-          'px-1.5',
-          'py-0.5',
-          'rounded'
-        ];
+        // Enhance code blocks
+        if (node.tagName === 'pre' && node.children?.[0]?.tagName === 'code') {
+          // Add classes for styling with Tailwind Typography
+          node.properties.className.push(
+            'not-prose', // Exclude from prose styling to apply custom styles
+            'rounded-md',
+            'bg-[#111]',
+            'p-4',
+            'my-6',
+            'overflow-x-auto'
+          );
+
+          // Get language from the code element
+          const code = node.children[0];
+          const lang = code.properties?.className
+            ?.find((cls: string) => cls.startsWith('language-'))
+            ?.replace('language-', '');
+
+          // Add language label if available
+          if (lang && lang !== 'text') {
+            // Create a language indicator
+            const langNode = {
+              type: 'element',
+              tagName: 'div',
+              properties: {
+                className: [
+                  'text-xs',
+                  'text-slate-400',
+                  'mb-2',
+                  'italic'
+                ],
+              },
+              children: [
+                {
+                  type: 'text',
+                  value: lang
+                }
+              ]
+            };
+
+            // Add the language indicator before the code
+            node.children = [langNode, ...node.children];
+          }
+        }
+
+        // Style inline code
+        if (node.tagName === 'code' && node.parent?.tagName !== 'pre') {
+          node.properties.className.push(
+            'bg-[#111]',
+            'text-[#d1d5db]',
+            'px-1.5',
+            'py-0.5',
+            'rounded',
+            'font-mono'
+          );
+        }
       }
     });
   };

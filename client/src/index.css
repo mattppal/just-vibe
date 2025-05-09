@@ -58,25 +58,17 @@
 
 /* Markdown content styling */
 .prose {
-  @apply text-white leading-normal;
+  @apply text-white leading-normal font-sans max-w-none;
   color: white !important;
 }
 
-/* Force all text elements to be white */
-.prose p, 
-.prose li, 
-.prose h1, 
-.prose h2, 
-.prose h3, 
-.prose h4, 
-.prose h5, 
-.prose h6,
-.prose strong, 
-.prose em,
-.prose blockquote,
-.prose figcaption,
-.prose a:not(:hover) {
+.prose :where(h1, h2, h3, h4, h5, h6, p, li, strong, em, blockquote, figcaption) {
   color: white !important;
+  font-family: 'Geist Sans', system-ui, sans-serif !important;
+}
+
+.prose :where(code, pre) {
+  font-family: 'Geist Mono', monospace !important;
 }
 
 /* Exception for links */
