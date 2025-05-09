@@ -1,11 +1,12 @@
 import { Link, useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ChevronRight, Search, X } from "lucide-react";
+import { ChevronRight, Search, X, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DocPage, getAllDocs, getDocsBySection } from "@/lib/docs";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { debounce } from "@/lib/utils";
 
 interface SidebarProps {
   open: boolean;
@@ -19,7 +20,26 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const [sections, setSections] = useState<SectionData>({});
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<DocPage[]>([]);
+  const [allDocs, setAllDocs] = useState<DocPage[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   
+  // Get all docs for searching
+  useEffect(() => {
+    async function fetchAllDocs() {
+      try {
+        const docs = await getAllDocs();
+        setAllDocs(docs);
+      } catch (error) {
+        console.error("Error fetching all docs:", error);
+      }
+    }
+    
+    fetchAllDocs();
+  }, []);
+  
+  // Get docs organized by section for normal navigation
   useEffect(() => {
     async function fetchDocs() {
       try {
@@ -34,6 +54,45 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     
     fetchDocs();
   }, []);
+  
+  // Handle search query
+  const performSearch = useRef(
+    debounce((query: string) => {
+      if (!query) {
+        setSearchResults([]);
+        setIsSearching(false);
+        return;
+      }
+      
+      setIsSearching(true);
+      const normalizedQuery = query.toLowerCase().trim();
+      
+      // Search in title, description, and content
+      const results = allDocs.filter(doc => {
+        return (
+          doc.title.toLowerCase().includes(normalizedQuery) ||
+          doc.description.toLowerCase().includes(normalizedQuery) ||
+          doc.content.toLowerCase().includes(normalizedQuery)
+        );
+      });
+      
+      setSearchResults(results);
+    }, 300) // 300ms debounce
+  ).current;
+  
+  // Search handler
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    performSearch(query);
+  };
+  
+  // Clear search
+  const clearSearch = () => {
+    setSearchQuery("");
+    setSearchResults([]);
+    setIsSearching(false);
+  };
   
   // Format section names for display
   const formatSectionName = (section: string) => {
@@ -81,31 +140,94 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
               type="search" 
               placeholder="Search..." 
               className="w-full bg-[#111] text-white border-[#333] placeholder-gray-500"
+              value={searchQuery}
+              onChange={handleSearch}
             />
-            <Search className="absolute right-3 top-2.5 w-4 h-4 text-secondary" />
+            {searchQuery ? (
+              <button 
+                onClick={clearSearch}
+                className="absolute right-3 top-2.5 text-gray-400 hover:text-white"
+                aria-label="Clear search"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            ) : (
+              <Search className="absolute right-3 top-2.5 w-4 h-4 text-secondary" />
+            )}
           </div>
         </div>
         
         <nav className="px-4">
           {loading ? (
             <div className="text-secondary text-sm p-4">Loading documentation...</div>
+          ) : isSearching ? (
+            // Search results view
+            <div>
+              <div className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-300">
+                SEARCH RESULTS
+              </div>
+              
+              {searchResults.length === 0 ? (
+                <div className="text-secondary text-sm p-2 bg-[#111]/50 rounded-md">
+                  No results found for "{searchQuery}"
+                </div>
+              ) : (
+                <ul className="space-y-1 mb-6">
+                  {searchResults.map(doc => (
+                    <li key={doc.slug}>
+                      {doc.requiresAuth && !isAuthenticated ? (
+                        <div
+                          title="Login required to view this content"
+                          className="block px-3 py-2 rounded-md text-sm opacity-50 cursor-not-allowed text-gray-500"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span role="img" aria-label="lock">🔒</span>
+                            <span>{doc.sidebarTitle || doc.title}</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <Link 
+                          href={doc.path}
+                          className={cn(
+                            "nav-link block relative px-3 py-2 rounded-md hover:bg-[#111] text-sm",
+                            location === doc.path ? "active text-white bg-[#111] font-medium" : "text-gray-400 hover:text-white"
+                          )}
+                          onClick={() => {
+                            // Optionally close search after clicking a result
+                            if (window.innerWidth < 1024) { // Close on mobile
+                              onClose();
+                            }
+                          }}
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-medium">{doc.sidebarTitle || doc.title}</span>
+                            <span className="text-xs text-gray-500 truncate mt-1">{doc.description}</span>
+                          </div>
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           ) : Object.keys(sections).length === 0 ? (
             <div className="text-secondary text-sm p-4">No documentation found.</div>
           ) : (
+            // Normal navigation by sections
             Object.entries(sections).map(([sectionName, sectionDocs]) => (
-              <div key={sectionName} className="mb-6">
-                <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-300">
+              <div key={sectionName} className="mb-8"> {/* Increased margin bottom */}
+                <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-300">
                   {formatSectionName(sectionName).toUpperCase()}
                 </div>
                 
-                <ul className="space-y-2">
+                <ul className="space-y-1"> {/* Reduced item spacing for better visual grouping */}
                   {sectionDocs.map(doc => (
                     <li key={doc.slug}>
                       {doc.requiresAuth && !isAuthenticated ? (
                         <div
                           title="Login required to view this content"
                           className={cn(
-                            "block px-3 py-2 rounded-md text-sm opacity-50 cursor-not-allowed",
+                            "block px-3 py-1.5 rounded-md text-sm opacity-50 cursor-not-allowed", /* Adjusted padding */
                             location === doc.path ? "text-white bg-[#111]" : "text-gray-500"
                           )}
                         >
@@ -118,8 +240,8 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                         <Link 
                           href={doc.path}
                           className={cn(
-                            "nav-link block relative px-3 py-2 rounded-md hover:bg-[#111] text-sm",
-                            location === doc.path ? "active text-white bg-[#111]" : "text-gray-400 hover:text-white"
+                            "nav-link block relative px-3 py-1.5 rounded-md hover:bg-[#111] text-sm transition-colors duration-150", /* Adjusted padding and added transition */
+                            location === doc.path ? "active text-white bg-[#111] font-medium" : "text-gray-400 hover:text-white"
                           )}
                         >
                           <div className="flex items-center gap-2">
