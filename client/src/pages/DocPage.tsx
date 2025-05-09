@@ -3,7 +3,10 @@ import { useLocation } from "wouter";
 import { getDocByPath, DocPage as DocPageType } from "@/lib/docs";
 import TableOfContents from "@/components/TableOfContents";
 import { useAuth } from "@/hooks/useAuth";
-import { Lock } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Lock, LogIn, Home, AlertTriangle } from "lucide-react";
+import { Link } from "wouter";
 
 export default function DocPage() {
   const [location, setLocation] = useLocation();
@@ -16,16 +19,8 @@ export default function DocPage() {
   // Determine the path from the URL
   const path = location;
   
-  // Redirect to home page if unauthorized access attempt
-  useEffect(() => {
-    if (authRequired && !isAuthenticated) {
-      // Redirect with a small delay to avoid immediate redirects
-      setTimeout(() => {
-        console.log('Redirecting due to authentication requirement');
-        setLocation('/');
-      }, 100);
-    }
-  }, [authRequired, isAuthenticated, setLocation]);
+  // We no longer immediately redirect on auth errors
+  // Instead, we show a proper login screen with options to navigate elsewhere
 
   useEffect(() => {
     async function fetchDoc() {
@@ -86,12 +81,18 @@ export default function DocPage() {
   
   if (loading) {
     return (
-      <div className="animate-pulse">
-        <div className="h-8 w-1/3 bg-[hsl(var(--code))] rounded mb-6"></div>
-        <div className="space-y-4">
-          <div className="h-4 bg-[hsl(var(--code))] rounded w-full"></div>
-          <div className="h-4 bg-[hsl(var(--code))] rounded w-5/6"></div>
-          <div className="h-4 bg-[hsl(var(--code))] rounded w-4/6"></div>
+      <div className="flex-1 py-8">
+        <div className="animate-pulse">
+          <div className="h-10 w-1/3 bg-[#111] rounded mb-6"></div>
+          <div className="h-6 w-2/3 bg-[#111]/50 rounded mb-10"></div>
+          <div className="space-y-6">
+            <div className="h-4 bg-[#111] rounded w-full"></div>
+            <div className="h-4 bg-[#111] rounded w-5/6"></div>
+            <div className="h-4 bg-[#111] rounded w-4/6"></div>
+            <div className="h-20 bg-[#111] rounded w-full"></div>
+            <div className="h-4 bg-[#111] rounded w-full"></div>
+            <div className="h-4 bg-[#111] rounded w-3/6"></div>
+          </div>
         </div>
       </div>
     );
@@ -99,24 +100,43 @@ export default function DocPage() {
   
   if (authRequired && !isAuthenticated) {
     return (
-      <div className="py-20 text-center">
-        <h1 className="text-2xl font-bold mb-4">Authentication Required</h1>
-        <p className="text-secondary mb-8">You need to be logged in to view this content.</p>
-        <button
-          onClick={login}
-          className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-        >
-          Log in
-        </button>
+      <div className="flex flex-col items-center justify-center p-8 min-h-[400px] text-center">
+        <Lock className="h-12 w-12 text-yellow-500 mb-4" />
+        <h1 className="text-2xl font-bold mb-4">Login Required</h1>
+        <p className="text-gray-400 mb-8">You need to be logged in to view this content.</p>
+        <div className="flex gap-3">
+          <Button onClick={login} className="gap-2">
+            <LogIn className="h-4 w-4" /> Login to continue
+          </Button>
+          <Button variant="outline" onClick={() => setLocation('/')} className="gap-2">
+            <Home className="h-4 w-4" /> Back to Home
+          </Button>
+        </div>
+        <Alert variant="default" className="mt-8 max-w-md bg-[#111] border-yellow-700/50">
+          <Lock className="h-4 w-4" />
+          <AlertTitle>Protected Content</AlertTitle>
+          <AlertDescription>
+            This documentation page requires authentication. Please login to access all content.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
   
   if (error || !doc) {
     return (
-      <div className="py-20 text-center">
-        <h1 className="text-2xl font-bold mb-4">Error</h1>
-        <p className="text-secondary">{error || "Document not found"}</p>
+      <div className="flex flex-col items-center justify-center p-8 min-h-[400px] text-center">
+        <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
+        <h1 className="text-2xl font-bold mb-4">{!doc ? "Page Not Found" : "Error Loading Page"}</h1>
+        <p className="text-gray-400 mb-8">{error || "The document you're looking for doesn't exist or has been moved."}</p>
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={() => window.location.reload()} className="gap-2">
+            Try again
+          </Button>
+          <Button variant="default" onClick={() => setLocation('/')} className="gap-2">
+            <Home className="h-4 w-4" /> Back to Home
+          </Button>
+        </div>
       </div>
     );
   }
