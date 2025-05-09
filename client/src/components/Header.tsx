@@ -1,9 +1,17 @@
 import { Link, useLocation } from "wouter";
-import { Menu, Github, ExternalLink, LogIn, LogOut, Lock } from "lucide-react";
+import { Menu, Github, ExternalLink, LogIn, LogOut, Lock, User, ChevronDown } from "lucide-react";
 import { DocPage, getDocByPath } from "@/lib/docs";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface HeaderProps {
   onOpenSidebar: () => void;

@@ -63,16 +63,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const allDocs = await getAllDocs();
       
-      // For unauthenticated users, only include basic info for authenticated docs
-      if (!req.isAuthenticated()) {
-        allDocs.forEach(doc => {
-          if (doc.authenticated !== false) {
-            doc.content = "";
-            doc.html = "";
-            (doc as any).requiresAuth = true; // Flag for frontend
-          }
-        });
-      }
+      // For unauthenticated users, we'll still include content for search functionality
+      // but flag protected docs
+      allDocs.forEach(doc => {
+        if (doc.authenticated !== false && !req.isAuthenticated()) {
+          // Add a flag for frontend to know this requires auth
+          (doc as any).requiresAuth = true;
+        }
+      });
       
       return res.json(allDocs);
     } catch (error) {

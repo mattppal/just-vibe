@@ -29,6 +29,15 @@ export async function getAllDocs(): Promise<DocPage[]> {
   
   try {
     const docs = await apiRequest("/api/docs");
+    // Log the first doc to see its structure
+    if (docs && docs.length > 0) {
+      console.log("First doc structure:", {
+        title: docs[0].title,
+        description: docs[0].description,
+        contentLength: docs[0].content?.length || 'No content',
+        html: docs[0].html?.substring(0, 100) + '...' || 'No HTML'
+      });
+    }
     docsCache = docs;
     return docs;
   } catch (error) {

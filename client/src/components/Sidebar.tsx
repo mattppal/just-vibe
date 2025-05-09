@@ -67,15 +67,19 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       setIsSearching(true);
       const normalizedQuery = query.toLowerCase().trim();
       
+      console.log("Search query:", normalizedQuery);
+      console.log("Available docs for search:", allDocs.length);
+      
       // Search in title, description, and content
       const results = allDocs.filter(doc => {
-        return (
-          doc.title.toLowerCase().includes(normalizedQuery) ||
-          doc.description.toLowerCase().includes(normalizedQuery) ||
-          doc.content.toLowerCase().includes(normalizedQuery)
-        );
+        const titleMatch = doc.title?.toLowerCase().includes(normalizedQuery);
+        const descMatch = doc.description?.toLowerCase().includes(normalizedQuery);
+        const contentMatch = doc.content?.toLowerCase().includes(normalizedQuery);
+        
+        return titleMatch || descMatch || contentMatch;
       });
       
+      console.log("Search results:", results.length);
       setSearchResults(results);
     }, 300) // 300ms debounce
   ).current;
