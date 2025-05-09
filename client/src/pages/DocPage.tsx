@@ -33,6 +33,45 @@ export default function DocPage() {
         
         if (docData) {
           setDoc(docData);
+          
+          // Preload adjacent documents (next and previous) based on section if possible
+          if (docData.section) {
+            // Import here to avoid circular dependencies
+            import('@/lib/docs').then(async ({ getDocsBySection }) => {
+              try {
+                const sectionsData = await getDocsBySection();
+                const currentSection = sectionsData[docData.section];
+                
+                if (currentSection) {
+                  // Find current document index
+                  const currentIndex = currentSection.findIndex(d => d.slug === docData.slug);
+                  
+                  if (currentIndex !== -1) {
+                    // Preload next document if available
+                    if (currentIndex < currentSection.length - 1) {
+                      const nextDoc = currentSection[currentIndex + 1];
+                      queryClient.prefetchQuery({
+                        queryKey: [`/api/docs/path${nextDoc.path}`],
+                        queryFn: () => getDocByPath(nextDoc.path)
+                      });
+                    }
+                    
+                    // Preload previous document if available
+                    if (currentIndex > 0) {
+                      const prevDoc = currentSection[currentIndex - 1];
+                      queryClient.prefetchQuery({
+                        queryKey: [`/api/docs/path${prevDoc.path}`],
+                        queryFn: () => getDocByPath(prevDoc.path)
+                      });
+                    }
+                  }
+                }
+              } catch (e) {
+                // Silently fail for preloading
+                console.log('Preloading adjacent docs failed:', e);
+              }
+            });
+          }
         } else {
           setError("Document not found");
         }

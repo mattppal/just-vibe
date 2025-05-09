@@ -62,6 +62,7 @@
     "front-matter": "^4.0.2",
     "glob": "^11.0.2",
     "gray-matter": "^4.0.3",
+    "helmet": "^8.1.0",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.453.0",
     "marked": "^15.0.11",

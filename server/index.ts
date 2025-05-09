@@ -1,8 +1,45 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import helmet from "helmet";
 
 const app = express();
+
+// Configure Helmet security headers
+// Use different CSP configurations for development and production
+const isDevelopment = app.get('env') === 'development';
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: isDevelopment 
+        ? ["'self'", "'unsafe-inline'", "'unsafe-eval'", "'wasm-unsafe-eval'"] // Needed for dev tools
+        : ["'self'", "'unsafe-inline'"], // More strict in production
+      connectSrc: isDevelopment
+        ? ["'self'", "ws:", "wss:"] // Allow WebSockets for HMR
+        : ["'self'"],
+      imgSrc: ["'self'", "data:", "https://replit.com", "https://*.replit.com"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      fontSrc: ["'self'", "data:"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      frameAncestors: ["'none'"],
+      formAction: ["'self'"],
+      // Only apply upgradeInsecureRequests in production
+      ...(isDevelopment ? {} : { upgradeInsecureRequests: [] }),
+    },
+  },
+  // Enable XSS protection
+  xssFilter: true,
+  // Prevent clickjacking
+  frameguard: { action: 'deny' },
+  // Hide X-Powered-By header
+  hidePoweredBy: true,
+  // Sets Referrer-Policy header
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
