@@ -41,7 +41,9 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
           <Menu className="w-5 h-5" />
         </button>
         
-        <nav className="flex items-center gap-1 text-sm ml-4 md:ml-0">
+        <div className="text-white font-bold text-xl flex items-center mr-4 tracking-tight">Just Vibe</div>
+        
+        <nav className="flex items-center gap-1 text-sm">
           <Link href="/" className="text-gray-400 hover:text-white">
             Docs
           </Link>
@@ -63,7 +65,6 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
         </nav>
         
         <div className="ml-auto flex items-center gap-2">
-          <div className="text-white font-bold text-xl hidden md:flex items-center mr-6 tracking-tight">Just Vibe</div>
           
           {isLoading ? (
             <div className="w-24 h-9 animate-pulse bg-[#111] rounded-md" />
