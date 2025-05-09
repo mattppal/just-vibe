@@ -23,7 +23,7 @@ export default function DocLayout({ children }: DocLayoutProps) {
       <Header 
         onOpenSidebar={() => setSidebarOpen(true)}
       />
-      <div className="flex flex-1 flex-col lg:flex-row">
+      <div className="flex flex-1 flex-col lg:flex-row lg:flex-nowrap">
         <Sidebar 
           open={sidebarOpen} 
           onClose={() => setSidebarOpen(false)}
