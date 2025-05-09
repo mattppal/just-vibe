@@ -35,7 +35,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Docs are authenticated by default unless explicitly set to false
       if (doc.authenticated !== false) {
-        return isAuthenticated(req, res, next);
+        // Check if user is authenticated
+        if (!req.isAuthenticated() || !req.user) {
+          // Instead of redirecting, return an error status with a flag for the frontend
+          return res.status(401).json({ 
+            message: "Authentication required", 
+            requiresAuth: true,
+            title: doc.title,
+            section: doc.section,
+            path: doc.path
+          });
+        }
+        
+        return next();
       }
       
       // If the doc is public, continue
@@ -91,7 +103,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/docs/path/:path", async (req, res, next) => {
     try {
-      const pagePath = req.params.path === "root" ? "/" : `/${req.params.path}`;
+      let pagePath = req.params.path === "root" ? "/" : `/${req.params.path}`;
+      
+      // Special handling for root path
+      if (pagePath === "/") {
+        // First try to find a document specifically for the root path
+        const rootDoc = await getDocByPath("/");
+        
+        // If not found, try to get the introduction document instead
+        if (!rootDoc) {
+          const introDoc = await getDocByPath("/introduction");
+          if (introDoc) {
+            // For API consistency, we'll add a special flag to indicate it's also available at root
+            res.locals.doc = { ...introDoc, rootAlias: true };
+            return next();
+          }
+        } else {
+          res.locals.doc = rootDoc;
+          return next();
+        }
+      }
+      
+      // Normal path handling for non-root paths
       const doc = await getDocByPath(pagePath);
       
       if (!doc) {

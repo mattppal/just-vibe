@@ -70,8 +70,9 @@ function getSlugFromFilename(filename: string, dir: string): string {
 
 // Get page path from slug
 function getPathFromSlug(slug: string, dir: string): string {
+  // Special case: 'introduction' can be accessed from both '/' and '/introduction'
   if (slug === 'introduction') {
-    return '/';
+    return '/introduction';
   }
   // For directory-prefixed slugs, just use the base part
   const parts = slug.split('/');

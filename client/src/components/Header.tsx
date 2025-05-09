@@ -40,7 +40,10 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
           {currentDoc?.section && (
             <>
               <span className="text-gray-400">/</span>
-              <span className="text-gray-400">{currentDoc.section.replace(/^\d+-/, '').replace(/-/g, ' ')}</span>
+              <span className="text-gray-400">{currentDoc.section.replace(/^\d+-/, '')
+                .split('-')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ')}</span>
             </>
           )}
           {currentDoc?.title && (
