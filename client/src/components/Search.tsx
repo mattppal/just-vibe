@@ -19,7 +19,7 @@ export default function Search() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [, navigate] = useLocation();
 
-  const handleSearch = (query: string) => {
+  const handleSearch = async (query: string) => {
     setSearchQuery(query);
     
     if (query.length < 2) {
@@ -28,13 +28,13 @@ export default function Search() {
     }
     
     // Search through documentation
-    const docs = getAllDocs();
-    const filtered = docs.filter(doc => 
+    const docs = await getAllDocs();
+    const filtered = docs.filter((doc) => 
       doc.title.toLowerCase().includes(query.toLowerCase()) || 
       doc.content.toLowerCase().includes(query.toLowerCase())
     );
     
-    setResults(filtered.map(doc => ({
+    setResults(filtered.map((doc) => ({
       title: doc.title,
       path: doc.path,
       excerpt: doc.content.substring(0, 100) + "..."
@@ -98,7 +98,7 @@ export default function Search() {
               ref={inputRef}
               placeholder="Type to search..."
               value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={async (e) => await handleSearch(e.target.value)}
               className="bg-[hsl(var(--code))] text-foreground border-border"
             />
             {searchQuery && (
@@ -106,7 +106,7 @@ export default function Search() {
                 variant="ghost"
                 size="icon"
                 className="absolute right-0 top-0 h-full rounded-l-none"
-                onClick={() => handleSearch("")}
+                onClick={async () => await handleSearch("")}
               >
                 <X className="h-4 w-4" />
               </Button>
