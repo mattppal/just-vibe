@@ -24,29 +24,29 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
   }, [location]);
   
   return (
-    <header className="sticky top-0 z-20 w-full border-b border-border bg-background/80 backdrop-blur-sm">
+    <header className="sticky top-0 z-20 w-full border-b border-[#333] bg-black/90 backdrop-blur-sm">
       <div className="flex h-14 items-center px-4 md:px-6">
         <button
           onClick={onOpenSidebar}
-          className="md:hidden mr-2 p-1 text-secondary hover:text-foreground"
+          className="md:hidden mr-2 p-1 text-gray-400 hover:text-white"
         >
           <Menu className="w-5 h-5" />
         </button>
         
         <nav className="flex items-center gap-1 text-sm ml-4 md:ml-0">
-          <Link href="/" className="text-secondary hover:text-foreground">
+          <Link href="/" className="text-gray-400 hover:text-white">
             Docs
           </Link>
           {currentDoc?.section && (
             <>
-              <span className="text-secondary">/</span>
-              <span className="text-secondary">{currentDoc.section}</span>
+              <span className="text-gray-400">/</span>
+              <span className="text-gray-400">{currentDoc.section}</span>
             </>
           )}
           {currentDoc?.title && (
             <>
-              <span className="text-secondary">/</span>
-              <span className="text-foreground">{currentDoc.title}</span>
+              <span className="text-gray-400">/</span>
+              <span className="text-white">{currentDoc.title}</span>
             </>
           )}
         </nav>
@@ -56,7 +56,7 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
             href="https://github.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden md:inline-flex rounded-md p-1.5 text-secondary hover:text-foreground"
+            className="hidden md:inline-flex rounded-md p-1.5 text-gray-400 hover:text-white"
           >
             <Github className="w-5 h-5" />
             <span className="sr-only">GitHub</span>
@@ -65,20 +65,20 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
             href="https://example.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden md:inline-flex rounded-md p-1.5 text-secondary hover:text-foreground"
+            className="hidden md:inline-flex rounded-md p-1.5 text-gray-400 hover:text-white"
           >
             <ExternalLink className="w-5 h-5" />
             <span className="sr-only">External Link</span>
           </a>
           
           {isLoading ? (
-            <div className="w-24 h-9 animate-pulse bg-[hsl(var(--code))] rounded-md" />
+            <div className="w-24 h-9 animate-pulse bg-[#111] rounded-md" />
           ) : isAuthenticated ? (
             <Button
               onClick={logout}
               variant="outline"
               size="sm"
-              className="gap-1.5"
+              className="gap-1.5 bg-transparent border-[#333] text-white hover:bg-[#111] hover:text-white"
             >
               <LogOut className="w-4 h-4" />
               <span>Logout</span>
@@ -88,7 +88,7 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
               onClick={login}
               variant="outline"
               size="sm"
-              className="gap-1.5"
+              className="gap-1.5 bg-transparent border-[#333] text-white hover:bg-[#111] hover:text-white"
             >
               <LogIn className="w-4 h-4" />
               <span>Login</span>
