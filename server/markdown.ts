@@ -36,20 +36,48 @@ function getSectionFromDir(dir: string): string {
   return sectionMap[dir] || dir;
 }
 
+// Get order from directory name
+function getOrderFromDir(dir: string): number {
+  // Extract order from directory name if it follows pattern: "1-directory-name"
+  const match = dir.match(/^(\d+)-/);
+  if (match) {
+    return parseInt(match[1], 10);
+  }
+  
+  // Fallback to predefined order if no number prefix
+  const sectionOrder: Record<string, number> = {
+    'getting-started': 0,
+    'core-concepts': 1,
+    'api-reference': 2,
+  };
+  
+  return sectionOrder[dir] !== undefined ? sectionOrder[dir] : 999;
+}
+
 // Extract slug from filename by removing order prefix and extension
-function getSlugFromFilename(filename: string): string {
+function getSlugFromFilename(filename: string, dir: string): string {
   // Remove order prefix (e.g., "1-" from "1-introduction.md")
   const withoutOrder = filename.replace(/^\d+-/, '');
   // Remove extension
-  return withoutOrder.replace(/\.md$/, '');
+  const baseSlug = withoutOrder.replace(/\.md$/, '');
+  
+  // For introduction in getting-started, just return 'introduction'
+  if (baseSlug === 'introduction' && dir === 'getting-started') {
+    return baseSlug;
+  }
+  
+  // Otherwise include the directory in the slug for uniqueness
+  return `${dir}/${baseSlug}`;
 }
 
 // Get page path from slug
 function getPathFromSlug(slug: string, dir: string): string {
-  if (slug === 'introduction' && dir === 'getting-started') {
+  if (slug === 'introduction') {
     return '/';
   }
-  return `/${slug}`;
+  // For directory-prefixed slugs, just use the base part
+  const parts = slug.split('/');
+  return `/${parts[parts.length - 1]}`;
 }
 
 // Parse markdown file and extract frontmatter, content, and HTML
@@ -69,7 +97,7 @@ export async function parseMarkdownFile(filePath: string): Promise<Doc> {
   const filename = path.basename(filePath);
   
   // Extract slug from filename
-  const slug = getSlugFromFilename(filename);
+  const slug = getSlugFromFilename(filename, dir);
   
   // Derive other metadata
   const section = getSectionFromDir(dir);
@@ -98,29 +126,51 @@ export async function getAllMarkdownFiles(): Promise<string[]> {
 export async function getAllDocs(): Promise<Doc[]> {
   const markdownFiles = await getAllMarkdownFiles();
   
-  // Process all markdown files in parallel
-  const docs = await Promise.all(markdownFiles.map(file => parseMarkdownFile(file)));
+  // Process all markdown files in parallel and add source info for sorting
+  const docPromises = markdownFiles.map(async (file) => {
+    const doc = await parseMarkdownFile(file);
+    
+    // Store original path information for sorting
+    const relativePath = path.relative(CONTENT_DIR, file);
+    const [dir] = relativePath.split(path.sep);
+    const filename = path.basename(file);
+    
+    // Add metadata for sorting
+    (doc as any).sourceDir = dir;
+    (doc as any).sourceFilename = filename;
+    
+    return doc;
+  });
+  
+  const docs = await Promise.all(docPromises);
   
   // Sort docs by section and order
   return docs.sort((a, b) => {
-    // First sort by section (using the directory order)
-    const sectionOrder = {
-      'Getting Started': 0,
-      'Core Concepts': 1,
-      'API Reference': 2,
-    };
+    // Extract source directory for directory-based ordering
+    const dirA = (a as any).sourceDir || '';
+    const dirB = (b as any).sourceDir || '';
     
-    const sectionA = sectionOrder[a.section as keyof typeof sectionOrder] || 999;
-    const sectionB = sectionOrder[b.section as keyof typeof sectionOrder] || 999;
+    // Get directory orders (from numeric prefix or predefined order)
+    const dirOrderA = getOrderFromDir(dirA);
+    const dirOrderB = getOrderFromDir(dirB);
     
-    if (sectionA !== sectionB) {
-      return sectionA - sectionB;
+    // First sort by directory order
+    if (dirOrderA !== dirOrderB) {
+      return dirOrderA - dirOrderB;
     }
     
-    // If in the same section, sort by order
-    const orderA = a.order || 0;
-    const orderB = b.order || 0;
-    return orderA - orderB;
+    // If in the same directory, sort by document order
+    
+    // First try to use frontmatter order
+    if (a.order !== undefined && b.order !== undefined) {
+      return a.order - b.order;
+    }
+    
+    // If either document doesn't have frontmatter order, use filename order
+    const filenameA = (a as any).sourceFilename || '';
+    const filenameB = (b as any).sourceFilename || '';
+    
+    return getOrderFromFilename(filenameA) - getOrderFromFilename(filenameB);
   });
 }
 
@@ -136,9 +186,15 @@ export async function getDocByPath(pagePath: string): Promise<Doc | undefined> {
   return docs.find(doc => doc.path === pagePath);
 }
 
+// Extract order prefix from filename
+function getOrderFromFilename(filename: string): number {
+  const match = filename.match(/^(\d+)-/);
+  return match ? parseInt(match[1], 10) : 999; // Default to high number if no order found
+}
+
 // Group documents by section
 export async function getDocsBySection(): Promise<Record<string, Doc[]>> {
-  const docs = await getAllDocs();
+  const docs = await getAllDocs(); // Reuse the sorting logic from getAllDocs
   
   // Group docs by section
   const sections: Record<string, Doc[]> = {};
@@ -151,14 +207,8 @@ export async function getDocsBySection(): Promise<Record<string, Doc[]>> {
     sections[doc.section || ''].push(doc);
   }
   
-  // Sort docs within each section
-  for (const section in sections) {
-    sections[section].sort((a, b) => {
-      const orderA = a.order || 0;
-      const orderB = b.order || 0;
-      return orderA - orderB;
-    });
-  }
+  // The docs are already sorted by getAllDocs, and since we're pushing them in order,
+  // each section will maintain the same order
   
   return sections;
 }
