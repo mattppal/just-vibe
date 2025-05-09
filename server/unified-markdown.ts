@@ -161,40 +161,54 @@ export async function processMarkdown(content: string): Promise<string> {
 }
 
 /**
- * Extract headings from markdown content
+ * Extract headings from markdown content, excluding those in code blocks
  * 
  * @param content The markdown content
  * @returns Array of headings with ID, title, and level
  */
 export async function extractHeadings(content: string): Promise<Array<{ id: string; title: string; level: number }>> {
-  // Regular expression to match headings in markdown
-  const headingRegex = /^(#{1,6})\s+(.+)$/gm;
   const headings: Array<{ id: string; title: string; level: number }> = [];
-  
-  // Keep track of used IDs to avoid duplicates
   const usedIds = new Set<string>();
   
-  let match;
-  while ((match = headingRegex.exec(content)) !== null) {
-    const level = match[1].length;
-    const title = match[2].trim();
+  // Split content into lines to process code blocks correctly
+  const lines = content.split('\n');
+  let inCodeBlock = false;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
     
-    // Generate ID from title (same logic as rehype-slug uses)
-    let id = title.toLowerCase()
-      .replace(/[^\w\s-]/g, '') // Remove special chars
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/^-+|-+$/g, ''); // Remove trailing hyphens
-    
-    // Ensure unique IDs
-    let uniqueId = id;
-    let counter = 1;
-    while (usedIds.has(uniqueId)) {
-      uniqueId = `${id}-${counter}`;
-      counter++;
+    // Check for code block delimiters (``` or ~~~)
+    if (line.trim().match(/^(`{3}|~{3})/) !== null) {
+      inCodeBlock = !inCodeBlock;
+      continue;
     }
     
-    usedIds.add(uniqueId);
-    headings.push({ id: uniqueId, title, level });
+    // Skip if in code block
+    if (inCodeBlock) continue;
+    
+    // Match heading pattern only when outside code blocks
+    const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+    if (headingMatch) {
+      const level = headingMatch[1].length;
+      const title = headingMatch[2].trim();
+      
+      // Generate ID from title (same logic as rehype-slug uses)
+      let id = title.toLowerCase()
+        .replace(/[^\w\s-]/g, '') // Remove special chars
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/^-+|-+$/g, ''); // Remove trailing hyphens
+      
+      // Ensure unique IDs
+      let uniqueId = id;
+      let counter = 1;
+      while (usedIds.has(uniqueId)) {
+        uniqueId = `${id}-${counter}`;
+        counter++;
+      }
+      
+      usedIds.add(uniqueId);
+      headings.push({ id: uniqueId, title, level });
+    }
   }
   
   return headings;
