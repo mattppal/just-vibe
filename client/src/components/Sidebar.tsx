@@ -62,6 +62,14 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     return section.toLowerCase().replace(/[^\w]+/g, '-');
   };
   
+  // Format section names for display
+  const formatSectionName = (section: string) => {
+    return section.replace(/^\d+-/, '')
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+  
   return (
     <>
       {/* Mobile backdrop */}
@@ -114,7 +122,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             Object.entries(sections).map(([sectionName, sectionDocs]) => (
               <div key={sectionName} className="mb-6">
                 <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-secondary">
-                  {sectionName}
+                  {formatSectionName(sectionName)}
                 </div>
                 
                 {/* Simple list if section has few documents */}
@@ -157,7 +165,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                     {/* Group by first 2 characters of slug or some other criterion */}
                     <AccordionItem value={getSectionId(sectionName)} className="border-none">
                       <AccordionTrigger className="py-2 px-3 hover:bg-[hsl(var(--code))] rounded-md text-sm text-secondary hover:text-foreground">
-                        <span>{sectionName}</span>
+                        <span>{formatSectionName(sectionName)}</span>
                       </AccordionTrigger>
                       <AccordionContent className="pt-1 pb-0">
                         <ul className="pl-4 space-y-2">
