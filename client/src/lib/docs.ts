@@ -20,7 +20,7 @@ export async function getAllDocs(): Promise<DocPage[]> {
   if (docsCache) return docsCache;
   
   try {
-    const response = await apiRequest("/api/docs");
+    const response = await apiRequest("GET", "/api/docs");
     const docs = await response.json();
     
     // Transform data to match our DocPage interface
@@ -45,7 +45,7 @@ export async function getDocByPath(path: string): Promise<DocPage | undefined> {
 
 export async function getDocBySlug(slug: string): Promise<DocPage | undefined> {
   try {
-    const response = await apiRequest(`/api/docs/${slug}`);
+    const response = await apiRequest("GET", `/api/docs/${slug}`);
     const doc = await response.json();
     
     return {

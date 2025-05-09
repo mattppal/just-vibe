@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Menu, Github, ExternalLink } from "lucide-react";
-import { getDocByPath } from "@/lib/docs";
+import { DocPage, getDocByPath } from "@/lib/docs";
+import { useEffect, useState } from "react";
 
 interface HeaderProps {
   onOpenSidebar: () => void;
@@ -8,7 +9,16 @@ interface HeaderProps {
 
 export default function Header({ onOpenSidebar }: HeaderProps) {
   const [location] = useLocation();
-  const currentDoc = getDocByPath(location);
+  const [currentDoc, setCurrentDoc] = useState<DocPage | undefined>(undefined);
+  
+  useEffect(() => {
+    async function fetchDoc() {
+      const doc = await getDocByPath(location);
+      setCurrentDoc(doc);
+    }
+    
+    fetchDoc();
+  }, [location]);
   
   return (
     <header className="sticky top-0 z-20 w-full border-b border-border bg-background/80 backdrop-blur-sm">
