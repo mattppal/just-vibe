@@ -23,12 +23,12 @@ export default function DocLayout({ children }: DocLayoutProps) {
       <Header 
         onOpenSidebar={() => setSidebarOpen(true)}
       />
-      <div className="flex flex-1 flex-col md:flex-row">
+      <div className="flex flex-1 flex-col lg:flex-row">
         <Sidebar 
-          open={sidebarOpen || !isMobile} 
+          open={sidebarOpen} 
           onClose={() => setSidebarOpen(false)}
         />
-        <main className="flex-1">
+        <main className="flex-1 pt-8 px-4 md:px-8 lg:px-10">
           {children}
         </main>
       </div>

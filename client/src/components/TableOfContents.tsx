@@ -60,20 +60,20 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
   };
 
   return (
-    <div className="hidden lg:block w-64 shrink-0 sticky self-start top-24 h-[calc(100vh-6rem)] overflow-y-auto pb-10">
-      <div className="space-y-1 pt-10">
-        <h3 className="font-medium mb-2 text-foreground">On This Page</h3>
-        <ul className="text-sm space-y-1">
+    <div className="hidden xl:block w-64 shrink-0 sticky self-start top-24 h-[calc(100vh-6rem)] overflow-y-auto pb-10">
+      <div className="space-y-2 pt-6">
+        <h3 className="font-medium mb-3 text-foreground text-sm">On This Page</h3>
+        <ul className="text-sm space-y-2 border-l border-border pl-3">
           {items.map((item) => (
             <li key={item.id}>
               <a
                 href={`#${item.id}`}
                 onClick={(e) => handleClick(e, item.id)}
                 className={cn(
-                  "block px-2 py-1 rounded-md",
+                  "block pl-3 py-1 border-l -ml-[1px]",
                   activeId === item.id
-                    ? "text-primary"
-                    : "text-secondary hover:text-foreground"
+                    ? "text-primary border-primary"
+                    : "text-secondary hover:text-foreground border-transparent"
                 )}
               >
                 {item.title}
