@@ -8,8 +8,9 @@ import {
 } from "@/components/ui/accordion";
 import { ChevronRight, Search, X, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { DocPage, getAllDocs, getDocsBySection } from "@/lib/docs";
+import { DocPage, getAllDocs, getDocsBySection, getDocByPath } from "@/lib/docs";
 import { useEffect, useState, useRef, useMemo } from "react";
+import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { debounce } from "@/lib/utils";
 
@@ -227,6 +228,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                               ? "active text-white bg-[#111] font-medium"
                               : "text-gray-400 hover:text-white",
                           )}
+                          onMouseEnter={() => {
+                            // Prefetch content when hovering over search result
+                            queryClient.prefetchQuery({
+                              queryKey: [`/api/docs/path${doc.path}`],
+                              queryFn: () => getDocByPath(doc.path)
+                            });
+                          }}
                           onClick={() => {
                             // Optionally close search after clicking a result
                             if (window.innerWidth < 1024) {
@@ -294,6 +302,14 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                               ? "active text-white bg-[#111] font-medium"
                               : "text-gray-400 hover:text-white",
                           )}
+                          onMouseEnter={() => {
+                            // Prefetch the document content when hovering over the link
+                            // This will make navigation feel instant once the user clicks
+                            queryClient.prefetchQuery({
+                              queryKey: [`/api/docs/path${doc.path}`],
+                              queryFn: () => getDocByPath(doc.path)
+                            });
+                          }}
                         >
                           <div className="flex items-center gap-2">
                             <span>{doc.sidebarTitle}</span>

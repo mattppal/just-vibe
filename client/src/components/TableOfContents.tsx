@@ -15,22 +15,47 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
 
   useEffect(() => {
     // Create an observer to track which heading is currently visible
+    // Create a debounce function to avoid too many state updates
+    const debounce = (func: Function, wait: number) => {
+      let timeout: NodeJS.Timeout;
+      return (...args: any[]) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func(...args), wait);
+      };
+    };
+    
+    // Debounced version of setActiveId to reduce jumpiness
+    const debouncedSetActiveId = debounce((id: string) => {
+      setActiveId(id);
+    }, 100); // 100ms debounce time
+
     const observer = new IntersectionObserver(
       (entries) => {
-        // Sort entries by their current intersection ratio to find the most visible heading
+        // Get all entries that are currently visible
         const visibleEntries = entries
           .filter(entry => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+          .sort((a, b) => {
+            // First sort by y-position (closer to top gets priority)
+            const aRect = a.boundingClientRect;
+            const bRect = b.boundingClientRect;
+            
+            // If elements are very close in position, use intersection ratio as tiebreaker
+            if (Math.abs(aRect.top - bRect.top) < 50) {
+              return b.intersectionRatio - a.intersectionRatio;
+            }
+            
+            // Otherwise, sort by position (closer to the top of viewport gets priority)
+            return aRect.top - bRect.top;
+          });
         
         if (visibleEntries.length > 0) {
-          setActiveId(visibleEntries[0].target.id);
+          debouncedSetActiveId(visibleEntries[0].target.id);
         }
       },
       {
-        // Adjust rootMargin to consider top of viewport as the trigger area
-        // Negative values mean we're looking at elements already inside the viewport
-        rootMargin: "-100px 0px -70% 0px",
-        threshold: [0, 0.25, 0.5, 0.75, 1], // Multiple thresholds for better accuracy
+        // Adjust rootMargin to consider elements close to viewport top
+        rootMargin: "-80px 0px -80% 0px",
+        threshold: [0.1, 0.5], // Fewer thresholds for more stable detection
       }
     );
 
@@ -55,9 +80,17 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
     e.preventDefault();
     const element = document.getElementById(id);
     if (element) {
+      // Set the active ID immediately to avoid a delay in highlighting
+      setActiveId(id);
+      
+      // Get the element's position accounting for any layout shifts
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - 110; // More offset for better positioning
+      
+      // More natural scrolling with smooth behavior
       window.scrollTo({
-        top: element.offsetTop - 100,
-        behavior: "smooth",
+        top: offsetPosition,
+        behavior: "smooth"
       });
       
       // Update URL without scrolling
