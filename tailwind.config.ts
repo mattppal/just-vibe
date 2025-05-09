@@ -5,8 +5,8 @@ export default {
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     fontFamily: {
-      sans: ["Geist Sans", "ui-sans-serif", "system-ui", "sans-serif"],
-      mono: ["Geist Mono", "ui-monospace", "monospace"],
+      sans: ["Geist", "system-ui", "sans-serif"],
+      mono: ["Geist Mono", "monospace"],
     },
     extend: {
       borderRadius: {
@@ -87,6 +87,69 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            color: '#fff',
+            a: {
+              color: '#fff',
+              '&:hover': {
+                color: '#fff',
+                textDecoration: 'underline',
+              },
+            },
+            blockquote: {
+              borderLeftColor: '#333',
+              color: '#d1d5db',
+            },
+            h1: {
+              color: '#fff',
+              fontWeight: '500',
+            },
+            h2: {
+              color: '#fff',
+              fontWeight: '500',
+            },
+            h3: {
+              color: '#fff',
+              fontWeight: '500',
+            },
+            h4: {
+              color: '#fff',
+              fontWeight: '500',
+            },
+            strong: {
+              color: '#fff',
+            },
+            code: {
+              color: '#d1d5db',
+              backgroundColor: '#111',
+              padding: '0.25rem',
+              borderRadius: '0.25rem',
+            },
+            pre: {
+              backgroundColor: '#111',
+            },
+            hr: {
+              borderColor: '#333',
+            },
+            ol: {
+              li: {
+                '&::marker': {
+                  color: '#d1d5db',
+                },
+              },
+            },
+            ul: {
+              li: {
+                '&::marker': {
+                  color: '#d1d5db',
+                },
+              },
+            },
+          },
+        },
       },
     },
   },
