@@ -144,6 +144,29 @@ export default function DocPage() {
   return (
     <div className="flex">
       <article className="max-w-none flex-1">
+        <nav className="flex items-center gap-1 text-sm mb-4">
+          <Link href="/" className="text-gray-400 hover:text-white">
+            Docs
+          </Link>
+          {doc.section && (
+            <>
+              <span className="text-gray-400">/</span>
+              <span className="text-gray-400">
+                {doc.section
+                  .replace(/^\d+-/, "")
+                  .split("-")
+                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(" ")}
+              </span>
+            </>
+          )}
+          {doc.title && (
+            <>
+              <span className="text-gray-400">/</span>
+              <span className="text-white">{doc.title}</span>
+            </>
+          )}
+        </nav>
         <h1 className="text-3xl lg:text-4xl font-medium mb-4">{doc.title}</h1>
         <p className="text-muted-foreground text-lg mb-8">{doc.description}</p>
         

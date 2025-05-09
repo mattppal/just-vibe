@@ -21,57 +21,38 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
   const [location] = useLocation();
   const [currentDoc, setCurrentDoc] = useState<DocPage | undefined>(undefined);
   const { isAuthenticated, isLoading, user, login, logout } = useAuth();
-  
+
   useEffect(() => {
     async function fetchDoc() {
       const doc = await getDocByPath(location);
       setCurrentDoc(doc);
     }
-    
+
     fetchDoc();
   }, [location]);
-  
+
   return (
     <header className="sticky top-0 z-20 w-full border-b border-[#333] bg-black/90 backdrop-blur-sm">
       <div className="flex h-14 items-center px-4 md:px-6">
+        <div className="text-white font-bold text-xl flex items-center mr-6 tracking-tight">Just Vibe</div>
+        
         <button
           onClick={onOpenSidebar}
           className="md:hidden mr-2 p-1 text-gray-400 hover:text-white"
         >
           <Menu className="w-5 h-5" />
         </button>
-        
-        <div className="text-white font-bold text-xl flex items-center mr-4 tracking-tight">Just Vibe</div>
-        
-        <nav className="flex items-center gap-1 text-sm">
-          <Link href="/" className="text-gray-400 hover:text-white">
-            Docs
-          </Link>
-          {currentDoc?.section && (
-            <>
-              <span className="text-gray-400">/</span>
-              <span className="text-gray-400">{currentDoc.section.replace(/^\d+-/, '')
-                .split('-')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ')}</span>
-            </>
-          )}
-          {currentDoc?.title && (
-            <>
-              <span className="text-gray-400">/</span>
-              <span className="text-white">{currentDoc.title}</span>
-            </>
-          )}
-        </nav>
-        
+
         <div className="ml-auto flex items-center gap-2">
-          
           {isLoading ? (
             <div className="w-24 h-9 animate-pulse bg-[#111] rounded-md" />
           ) : isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-9 w-9 rounded-full bg-transparent p-0 hover:bg-[#111]">
+                <Button
+                  variant="ghost"
+                  className="relative h-9 w-9 rounded-full bg-transparent p-0 hover:bg-[#111]"
+                >
                   <Avatar className="h-9 w-9 border border-[#333]">
                     {user?.profileImageUrl ? (
                       <AvatarImage src={user.profileImageUrl} alt="Profile" />
@@ -84,7 +65,10 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
                   <span className="sr-only">User menu</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-black border border-[#333] p-1 text-white">
+              <DropdownMenuContent
+                align="end"
+                className="w-56 bg-black border border-[#333] p-1 text-white"
+              >
                 <div className="flex items-center justify-start gap-3 p-2">
                   <Avatar className="h-9 w-9 border border-[#333]">
                     {user?.profileImageUrl ? (
@@ -97,15 +81,17 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
                   </Avatar>
                   <div className="flex flex-col space-y-0.5">
                     <p className="text-sm font-medium">
-                      {user?.firstName && user?.lastName 
-                        ? `${user.firstName} ${user.lastName}` 
-                        : 'Welcome'}
+                      {user?.firstName && user?.lastName
+                        ? `${user.firstName} ${user.lastName}`
+                        : "Welcome"}
                     </p>
-                    <p className="text-xs text-gray-400 truncate">@{user?.id || 'user'}</p>
+                    <p className="text-xs text-gray-400 truncate">
+                      @{user?.id || "user"}
+                    </p>
                   </div>
                 </div>
                 <DropdownMenuSeparator className="bg-[#333] my-1" />
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={logout}
                   className="cursor-pointer flex items-center gap-2 focus:bg-[#111] focus:text-white hover:bg-[#111] transition-colors duration-200"
                 >
