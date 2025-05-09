@@ -4,7 +4,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { ChevronRight, Search, X, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DocPage, getAllDocs, getDocsBySection } from "@/lib/docs";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { debounce } from "@/lib/utils";
 
@@ -29,7 +29,20 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   useEffect(() => {
     async function fetchAllDocs() {
       try {
+        console.log("Fetching all docs for search functionality");
         const docs = await getAllDocs();
+        console.log(`Retrieved ${docs.length} documents for search`);
+        
+        // Log a sample doc to see what's available for search
+        if (docs.length > 0) {
+          console.log("Sample document for search:", {
+            title: docs[0].title,
+            hasContent: !!docs[0].content,
+            contentLength: docs[0].content?.length || 0,
+            description: docs[0].description,
+          });
+        }
+        
         setAllDocs(docs);
       } catch (error) {
         console.error("Error fetching all docs:", error);
@@ -38,6 +51,14 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     
     fetchAllDocs();
   }, []);
+  
+  // Reset search results when allDocs gets updated
+  useEffect(() => {
+    if (searchQuery && allDocs.length > 0) {
+      console.log(`Refreshing search with ${allDocs.length} docs available`);
+      performSearch(searchQuery);
+    }
+  }, [allDocs, searchQuery]);
   
   // Get docs organized by section for normal navigation
   useEffect(() => {
@@ -55,34 +76,32 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     fetchDocs();
   }, []);
   
-  // Handle search query
-  const performSearch = useRef(
-    debounce((query: string) => {
-      if (!query) {
-        setSearchResults([]);
-        setIsSearching(false);
-        return;
-      }
+  // Handle search query directly
+  function performSearch(query: string) {
+    if (!query) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+    
+    setIsSearching(true);
+    const normalizedQuery = query.toLowerCase().trim();
+    
+    console.log("Search query:", normalizedQuery);
+    console.log("Available docs for search:", allDocs.length);
+    
+    // Search in title, description, and content
+    const results = allDocs.filter(doc => {
+      const titleMatch = doc.title?.toLowerCase().includes(normalizedQuery);
+      const descMatch = doc.description?.toLowerCase().includes(normalizedQuery);
+      const contentMatch = doc.content?.toLowerCase().includes(normalizedQuery);
       
-      setIsSearching(true);
-      const normalizedQuery = query.toLowerCase().trim();
-      
-      console.log("Search query:", normalizedQuery);
-      console.log("Available docs for search:", allDocs.length);
-      
-      // Search in title, description, and content
-      const results = allDocs.filter(doc => {
-        const titleMatch = doc.title?.toLowerCase().includes(normalizedQuery);
-        const descMatch = doc.description?.toLowerCase().includes(normalizedQuery);
-        const contentMatch = doc.content?.toLowerCase().includes(normalizedQuery);
-        
-        return titleMatch || descMatch || contentMatch;
-      });
-      
-      console.log("Search results:", results.length);
-      setSearchResults(results);
-    }, 300) // 300ms debounce
-  ).current;
+      return titleMatch || descMatch || contentMatch;
+    });
+    
+    console.log("Search results:", results.length);
+    setSearchResults(results);
+  }
   
   // Search handler
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
