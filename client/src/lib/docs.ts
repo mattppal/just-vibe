@@ -42,8 +42,15 @@ export async function getDocByPath(path: string): Promise<DocPage | undefined> {
     // For root path, we need to use "root" as a placeholder
     const pathParam = path === "/" ? "root" : path.substring(1);
     return await apiRequest(`/api/docs/path/${pathParam}`);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching doc by path:", error);
+    
+    // If this is an authentication error (status 401), rethrow the error
+    // so that the AuthRequired component can handle it correctly
+    if (error?.response?.status === 401 && error?.response?.data?.requiresAuth) {
+      throw error;
+    }
+    
     return undefined;
   }
 }
