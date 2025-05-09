@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { marked } from 'marked';
 import { glob } from 'glob';
+import { processMarkdown, extractHeadings } from './unified-markdown';
 
 // Content directory
 const CONTENT_DIR = path.join(process.cwd(), 'content');
@@ -53,35 +53,15 @@ function getPathFromSlug(slug: string, dir: string): string {
 }
 
 // Parse markdown file and extract frontmatter, content, and HTML
-export function parseMarkdownFile(filePath: string): Doc {
+export async function parseMarkdownFile(filePath: string): Promise<Doc> {
   const fileContents = fs.readFileSync(filePath, 'utf8');
   const { data, content } = matter(fileContents);
-  const html = marked(content);
   
-  // Extract headings from markdown content
-  const headingRegex = /^(#{1,6})\s+(.+)$/gm;
-  const headings: { id: string; title: string; level: number }[] = [];
-  let match;
+  // Use the unified ecosystem to process markdown
+  const html = await processMarkdown(content);
   
-  // Keep track of used IDs to avoid duplicates
-  const usedIds = new Set<string>();
-  
-  while ((match = headingRegex.exec(content)) !== null) {
-    const level = match[1].length;
-    const title = match[2].trim();
-    let id = title.toLowerCase().replace(/[^\w]+/g, '-');
-    
-    // If the ID is already used, add a numeric suffix
-    let counter = 1;
-    let uniqueId = id;
-    while (usedIds.has(uniqueId)) {
-      uniqueId = `${id}-${counter}`;
-      counter++;
-    }
-    
-    usedIds.add(uniqueId);
-    headings.push({ id: uniqueId, title, level });
-  }
+  // Extract headings from markdown content (for table of contents)
+  const headings = await extractHeadings(content);
   
   // Determine dir and filename
   const relativePath = path.relative(CONTENT_DIR, filePath);
@@ -117,7 +97,9 @@ export async function getAllMarkdownFiles(): Promise<string[]> {
 // Get all documents
 export async function getAllDocs(): Promise<Doc[]> {
   const markdownFiles = await getAllMarkdownFiles();
-  const docs = markdownFiles.map(parseMarkdownFile);
+  
+  // Process all markdown files in parallel
+  const docs = await Promise.all(markdownFiles.map(file => parseMarkdownFile(file)));
   
   // Sort docs by section and order
   return docs.sort((a, b) => {

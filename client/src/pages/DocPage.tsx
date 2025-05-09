@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { getDocByPath, DocPage as DocPageType } from "@/lib/docs";
 import TableOfContents from "@/components/TableOfContents";
-import CodeBlock from "@/components/CodeBlock";
 
 export default function DocPage() {
   const [location] = useLocation();
@@ -37,31 +36,7 @@ export default function DocPage() {
     fetchDoc();
   }, [path]);
   
-  // Extract code blocks from HTML content
-  const processHtml = (html: string) => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
-    
-    // Process all code blocks
-    doc.querySelectorAll("pre code").forEach((codeBlock) => {
-      const language = codeBlock.className.replace("language-", "");
-      const code = codeBlock.textContent || "";
-      
-      // Replace with our custom code block component (rendered as string)
-      const codeBlockWrapper = document.createElement("div");
-      codeBlockWrapper.dataset.code = code;
-      codeBlockWrapper.dataset.language = language || "javascript";
-      codeBlockWrapper.className = "code-block-placeholder";
-      
-      // Replace the pre element with our wrapper
-      const preElement = codeBlock.parentNode;
-      if (preElement && preElement.parentNode) {
-        preElement.parentNode.replaceChild(codeBlockWrapper, preElement);
-      }
-    });
-    
-    return doc.body.innerHTML;
-  };
+  // No longer need to process HTML content as rehype-highlight handles code blocks
   
   // Set IDs for headings to support table of contents
   useEffect(() => {
@@ -84,32 +59,7 @@ export default function DocPage() {
     }, 0);
   }, [doc]);
   
-  // Render code blocks after the HTML has been inserted into the DOM
-  useEffect(() => {
-    if (!doc) return;
-    
-    // Find all code block placeholders and render the CodeBlock component
-    document.querySelectorAll(".code-block-placeholder").forEach((placeholder) => {
-      const code = placeholder.getAttribute("data-code") || "";
-      const language = placeholder.getAttribute("data-language") || "javascript";
-      
-      // Create a container for the code block
-      const container = document.createElement("div");
-      container.className = "my-6";
-      
-      // Replace the placeholder with the container
-      if (placeholder.parentNode) {
-        placeholder.parentNode.replaceChild(container, placeholder);
-        
-        // Render the CodeBlock component to a string and set as innerHTML
-        container.innerHTML = `<pre><code class="language-${language}">${code}</code></pre>`;
-        
-        // Apply syntax highlighting
-        // Note: In a full implementation, you would render the CodeBlock component here
-        // This is a simplified version that just wraps the code in pre and code tags
-      }
-    });
-  }, [doc]);
+  // We no longer need this code block processing - rehype-highlight does it for us
   
   if (loading) {
     return (
