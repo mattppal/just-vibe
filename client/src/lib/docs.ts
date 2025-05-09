@@ -1,16 +1,22 @@
 import { apiRequest } from "./queryClient";
 
-export interface DocPage {
-  id: number;
+export interface Heading {
+  id: string;
   title: string;
-  path?: string;
+  level: number;
+}
+
+export interface DocPage {
+  title: string;
+  sidebarTitle: string;
+  description: string;
+  section: string;
   slug: string;
-  section?: string;
+  path: string;
   content: string;
-  order: number;
-  published: boolean;
-  createdAt: string;
-  updatedAt: string;
+  html: string;
+  headings: Heading[];
+  order?: number;
 }
 
 // This cache improves performance by storing retrieved docs
@@ -20,18 +26,9 @@ export async function getAllDocs(): Promise<DocPage[]> {
   if (docsCache) return docsCache;
   
   try {
-    const response = await apiRequest("GET", "/api/docs");
-    const docs = await response.json();
-    
-    // Transform data to match our DocPage interface
-    const transformedDocs = docs.map((doc: any) => ({
-      ...doc,
-      path: getPathFromSlug(doc.slug),
-      section: doc.section?.name
-    }));
-    
-    docsCache = transformedDocs;
-    return transformedDocs;
+    const docs = await apiRequest("/api/docs");
+    docsCache = docs;
+    return docs;
   } catch (error) {
     console.error("Error fetching docs:", error);
     return [];
@@ -39,28 +36,30 @@ export async function getAllDocs(): Promise<DocPage[]> {
 }
 
 export async function getDocByPath(path: string): Promise<DocPage | undefined> {
-  const docs = await getAllDocs();
-  return docs.find((doc) => doc.path === path);
+  try {
+    // For root path, we need to use "root" as a placeholder
+    const pathParam = path === "/" ? "root" : path.substring(1);
+    return await apiRequest(`/api/docs/path/${pathParam}`);
+  } catch (error) {
+    console.error("Error fetching doc by path:", error);
+    return undefined;
+  }
 }
 
 export async function getDocBySlug(slug: string): Promise<DocPage | undefined> {
   try {
-    const response = await apiRequest("GET", `/api/docs/${slug}`);
-    const doc = await response.json();
-    
-    return {
-      ...doc,
-      path: getPathFromSlug(doc.slug),
-      section: doc.section?.name
-    };
+    return await apiRequest(`/api/docs/${slug}`);
   } catch (error) {
     console.error(`Error fetching doc with slug ${slug}:`, error);
     return undefined;
   }
 }
 
-// Helper function to convert slug to path
-function getPathFromSlug(slug: string): string {
-  if (slug === "introduction") return "/";
-  return `/${slug}`;
+export async function getDocsBySection(): Promise<Record<string, DocPage[]>> {
+  try {
+    return await apiRequest("/api/sections");
+  } catch (error) {
+    console.error("Error fetching doc sections:", error);
+    return {};
+  }
 }

@@ -60,7 +60,7 @@ export function parseMarkdownFile(filePath: string): Doc {
   
   // Extract headings from markdown content
   const headingRegex = /^(#{1,6})\s+(.+)$/gm;
-  const headings = [];
+  const headings: { id: string; title: string; level: number }[] = [];
   let match;
   
   while ((match = headingRegex.exec(content)) !== null) {

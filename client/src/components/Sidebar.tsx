@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ChevronRight, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { DocPage, getAllDocs } from "@/lib/docs";
+import { DocPage, getAllDocs, getDocsBySection } from "@/lib/docs";
 import { useEffect, useState } from "react";
 
 interface SidebarProps {
@@ -11,16 +11,18 @@ interface SidebarProps {
   onClose: () => void;
 }
 
+type SectionData = Record<string, DocPage[]>;
+
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const [location] = useLocation();
-  const [docs, setDocs] = useState<DocPage[]>([]);
+  const [sections, setSections] = useState<SectionData>({});
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     async function fetchDocs() {
       try {
-        const result = await getAllDocs();
-        setDocs(result);
+        const sectionsData = await getDocsBySection();
+        setSections(sectionsData);
       } catch (error) {
         console.error("Error fetching docs:", error);
       } finally {
@@ -30,6 +32,11 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     
     fetchDocs();
   }, []);
+  
+  // Generate unique IDs for accordion items
+  const getSectionId = (section: string) => {
+    return section.toLowerCase().replace(/[^\w]+/g, '-');
+  };
   
   return (
     <>
@@ -75,155 +82,65 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         </div>
         
         <nav className="px-4">
-          <div className="mb-6">
-            <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-secondary">
-              Getting Started
-            </div>
-            <ul className="space-y-2">
-              <li>
-                <Link 
-                  href="/"
-                  className={cn(
-                    "nav-link block relative px-3 py-2 rounded-md hover:bg-[hsl(var(--code))] text-sm",
-                    location === "/" ? "active text-foreground bg-[hsl(var(--code))]" : "text-secondary"
-                  )}
-                >
-                  Introduction
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/installation" 
-                  className={cn(
-                    "nav-link block relative px-3 py-2 rounded-md hover:bg-[hsl(var(--code))] text-sm",
-                    location === "/installation" ? "active text-foreground bg-[hsl(var(--code))]" : "text-secondary"
-                  )}
-                >
-                  Installation
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/quick-start"
-                  className={cn(
-                    "nav-link block relative px-3 py-2 rounded-md hover:bg-[hsl(var(--code))] text-sm",
-                    location === "/quick-start" ? "active text-foreground bg-[hsl(var(--code))]" : "text-secondary"
-                  )}
-                >
-                  Quick Start
-                </Link>
-              </li>
-            </ul>
-          </div>
-          
-          <div className="mb-6">
-            <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-secondary">
-              Core Concepts
-            </div>
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="architecture" className="border-none">
-                <AccordionTrigger className="py-2 px-3 hover:bg-[hsl(var(--code))] rounded-md text-sm text-secondary hover:text-foreground">
-                  <span>Architecture</span>
-                </AccordionTrigger>
-                <AccordionContent className="pt-1 pb-0">
-                  <ul className="pl-4 space-y-2">
-                    <li>
-                      <Link
-                        href="#"
-                        className="block px-3 py-2 text-secondary rounded-md hover:bg-[hsl(var(--code))] text-sm"
-                      >
-                        Overview
-                      </Link>
-                    </li>
+          {loading ? (
+            <div className="text-secondary text-sm p-4">Loading documentation...</div>
+          ) : Object.keys(sections).length === 0 ? (
+            <div className="text-secondary text-sm p-4">No documentation found.</div>
+          ) : (
+            Object.entries(sections).map(([sectionName, sectionDocs]) => (
+              <div key={sectionName} className="mb-6">
+                <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-secondary">
+                  {sectionName}
+                </div>
+                
+                {/* Simple list if section has few documents */}
+                {sectionDocs.length <= 3 ? (
+                  <ul className="space-y-2">
+                    {sectionDocs.map(doc => (
+                      <li key={doc.slug}>
+                        <Link 
+                          href={doc.path}
+                          className={cn(
+                            "nav-link block relative px-3 py-2 rounded-md hover:bg-[hsl(var(--code))] text-sm",
+                            location === doc.path ? "active text-foreground bg-[hsl(var(--code))]" : "text-secondary"
+                          )}
+                        >
+                          {doc.sidebarTitle}
+                        </Link>
+                      </li>
+                    ))}
                   </ul>
-                </AccordionContent>
-              </AccordionItem>
-              
-              <AccordionItem value="data-flow" className="border-none">
-                <AccordionTrigger className="py-2 px-3 hover:bg-[hsl(var(--code))] rounded-md text-sm text-secondary hover:text-foreground">
-                  <span>Data Flow</span>
-                </AccordionTrigger>
-                <AccordionContent className="pt-1 pb-0">
-                  <ul className="pl-4 space-y-2">
-                    <li>
-                      <Link
-                        href="#"
-                        className="block px-3 py-2 text-secondary rounded-md hover:bg-[hsl(var(--code))] text-sm"
-                      >
-                        Overview
-                      </Link>
-                    </li>
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-              
-              <AccordionItem value="resources" className="border-none">
-                <AccordionTrigger className="py-2 px-3 hover:bg-[hsl(var(--code))] rounded-md text-sm text-secondary hover:text-foreground">
-                  <span>Resources</span>
-                </AccordionTrigger>
-                <AccordionContent className="pt-1 pb-0">
-                  <ul className="pl-4 space-y-2">
-                    <li>
-                      <Link
-                        href="#"
-                        className="block px-3 py-2 text-secondary rounded-md hover:bg-[hsl(var(--code))] text-sm"
-                      >
-                        Resource Types
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="block px-3 py-2 text-secondary rounded-md hover:bg-[hsl(var(--code))] text-sm"
-                      >
-                        Lifecycle
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="block px-3 py-2 text-secondary rounded-md hover:bg-[hsl(var(--code))] text-sm"
-                      >
-                        Dependencies
-                      </Link>
-                    </li>
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
-          
-          <div className="mb-6">
-            <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-secondary">
-              API Reference
-            </div>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="#"
-                  className="nav-link block relative px-3 py-2 text-secondary rounded-md hover:bg-[hsl(var(--code))] text-sm"
-                >
-                  CLI
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="nav-link block relative px-3 py-2 text-secondary rounded-md hover:bg-[hsl(var(--code))] text-sm"
-                >
-                  Configuration
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="nav-link block relative px-3 py-2 text-secondary rounded-md hover:bg-[hsl(var(--code))] text-sm"
-                >
-                  Hooks
-                </Link>
-              </li>
-            </ul>
-          </div>
+                ) : (
+                  /* Accordion for sections with more documents */
+                  <Accordion type="multiple" defaultValue={[]} className="w-full">
+                    {/* Group by first 2 characters of slug or some other criterion */}
+                    <AccordionItem value={getSectionId(sectionName)} className="border-none">
+                      <AccordionTrigger className="py-2 px-3 hover:bg-[hsl(var(--code))] rounded-md text-sm text-secondary hover:text-foreground">
+                        <span>{sectionName}</span>
+                      </AccordionTrigger>
+                      <AccordionContent className="pt-1 pb-0">
+                        <ul className="pl-4 space-y-2">
+                          {sectionDocs.map(doc => (
+                            <li key={doc.slug}>
+                              <Link
+                                href={doc.path}
+                                className={cn(
+                                  "block px-3 py-2 rounded-md text-sm",
+                                  location === doc.path ? "text-foreground bg-[hsl(var(--code))]" : "text-secondary hover:bg-[hsl(var(--code))]"
+                                )}
+                              >
+                                {doc.sidebarTitle}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                )}
+              </div>
+            ))
+          )}
         </nav>
       </aside>
     </>
