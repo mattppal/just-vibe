@@ -101,23 +101,32 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-black border border-[#333] p-1 text-white">
-                <div className="flex items-center justify-start gap-2 p-2">
+                <div className="flex items-center justify-start gap-3 p-2">
+                  <Avatar className="h-9 w-9 border border-[#333]">
+                    {user?.profileImageUrl ? (
+                      <AvatarImage src={user.profileImageUrl} alt="Profile" />
+                    ) : (
+                      <AvatarFallback className="bg-[#111] text-white">
+                        <User className="h-5 w-5" />
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
                   <div className="flex flex-col space-y-0.5">
                     <p className="text-sm font-medium">
                       {user?.firstName && user?.lastName 
                         ? `${user.firstName} ${user.lastName}` 
-                        : 'Replit User'}
+                        : 'Welcome'}
                     </p>
-                    <p className="text-xs text-gray-400 truncate">User ID: {user?.id}</p>
+                    <p className="text-xs text-gray-400 truncate">@{user?.id || 'user'}</p>
                   </div>
                 </div>
                 <DropdownMenuSeparator className="bg-[#333] my-1" />
                 <DropdownMenuItem 
                   onClick={logout}
-                  className="cursor-pointer flex items-center gap-2 focus:bg-[#111] focus:text-white"
+                  className="cursor-pointer flex items-center gap-2 focus:bg-[#111] focus:text-white hover:bg-[#111] transition-colors duration-200"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
-                  <span>Log out</span>
+                  <span>Sign out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -126,10 +135,10 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
               onClick={login}
               variant="outline"
               size="sm"
-              className="gap-1.5 bg-transparent border-[#333] text-white hover:bg-[#111] hover:text-white"
+              className="gap-1.5 bg-transparent border-[#333] text-white hover:bg-[#111] hover:text-white transition-colors duration-200"
             >
               <LogIn className="w-4 h-4" />
-              <span>Login</span>
+              <span>Sign in</span>
             </Button>
           )}
         </div>
