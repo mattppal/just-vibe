@@ -1,10 +1,11 @@
 import { Link, useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ChevronRight, Search, X } from "lucide-react";
+import { ChevronRight, Lock, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DocPage, getAllDocs, getDocsBySection } from "@/lib/docs";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface SidebarProps {
   open: boolean;

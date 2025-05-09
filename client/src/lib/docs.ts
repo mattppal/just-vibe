@@ -17,6 +17,8 @@ export interface DocPage {
   html: string;
   headings: Heading[];
   order?: number;
+  authenticated?: boolean; // If true or undefined, the doc requires authentication
+  requiresAuth?: boolean; // Added by server to indicate auth status for frontend
 }
 
 // This cache improves performance by storing retrieved docs
