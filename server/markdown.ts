@@ -115,6 +115,8 @@ export async function parseMarkdownFile(filePath: string): Promise<Doc> {
     content,
     html,
     headings,
+    // Default to true/undefined for authenticated unless explicitly set to false
+    authenticated: data.authenticated === false ? false : (data.authenticated || undefined),
     ...data, // Include any other frontmatter fields
   };
 }

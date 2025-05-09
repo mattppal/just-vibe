@@ -2,21 +2,37 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { getDocByPath, DocPage as DocPageType } from "@/lib/docs";
 import TableOfContents from "@/components/TableOfContents";
+import { useAuth } from "@/hooks/useAuth";
+import { Lock } from "lucide-react";
 
 export default function DocPage() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [doc, setDoc] = useState<DocPageType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [authRequired, setAuthRequired] = useState(false);
+  const { isAuthenticated, login } = useAuth();
   
   // Determine the path from the URL
   const path = location;
   
+  // Redirect to home page if unauthorized access attempt
+  useEffect(() => {
+    if (authRequired && !isAuthenticated) {
+      // Redirect with a small delay to avoid immediate redirects
+      setTimeout(() => {
+        console.log('Redirecting due to authentication requirement');
+        setLocation('/');
+      }, 100);
+    }
+  }, [authRequired, isAuthenticated, setLocation]);
+
   useEffect(() => {
     async function fetchDoc() {
       try {
         setLoading(true);
         setError(null);
+        setAuthRequired(false);
         
         const docData = await getDocByPath(path);
         
@@ -25,9 +41,16 @@ export default function DocPage() {
         } else {
           setError("Document not found");
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error fetching document:", err);
-        setError("Failed to load document");
+        
+        // Check if this is an auth error (401)
+        if (err?.response?.status === 401 || 
+            (typeof err === 'object' && err.message === "Unauthorized")) {
+          setAuthRequired(true);
+        } else {
+          setError("Failed to load document");
+        }
       } finally {
         setLoading(false);
       }
@@ -70,6 +93,21 @@ export default function DocPage() {
           <div className="h-4 bg-[hsl(var(--code))] rounded w-5/6"></div>
           <div className="h-4 bg-[hsl(var(--code))] rounded w-4/6"></div>
         </div>
+      </div>
+    );
+  }
+  
+  if (authRequired && !isAuthenticated) {
+    return (
+      <div className="py-20 text-center">
+        <h1 className="text-2xl font-bold mb-4">Authentication Required</h1>
+        <p className="text-secondary mb-8">You need to be logged in to view this content.</p>
+        <button
+          onClick={login}
+          className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+        >
+          Log in
+        </button>
       </div>
     );
   }

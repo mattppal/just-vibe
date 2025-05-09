@@ -1,7 +1,9 @@
 import { Link, useLocation } from "wouter";
-import { Menu, Github, ExternalLink } from "lucide-react";
+import { Menu, Github, ExternalLink, LogIn, LogOut, Lock } from "lucide-react";
 import { DocPage, getDocByPath } from "@/lib/docs";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
   onOpenSidebar: () => void;
@@ -10,6 +12,7 @@ interface HeaderProps {
 export default function Header({ onOpenSidebar }: HeaderProps) {
   const [location] = useLocation();
   const [currentDoc, setCurrentDoc] = useState<DocPage | undefined>(undefined);
+  const { isAuthenticated, isLoading, user, login, logout } = useAuth();
   
   useEffect(() => {
     async function fetchDoc() {
@@ -67,6 +70,30 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
             <ExternalLink className="w-5 h-5" />
             <span className="sr-only">External Link</span>
           </a>
+          
+          {isLoading ? (
+            <div className="w-24 h-9 animate-pulse bg-[hsl(var(--code))] rounded-md" />
+          ) : isAuthenticated ? (
+            <Button
+              onClick={logout}
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </Button>
+          ) : (
+            <Button
+              onClick={login}
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>Login</span>
+            </Button>
+          )}
         </div>
       </div>
     </header>

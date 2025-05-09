@@ -19,6 +19,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const [sections, setSections] = useState<SectionData>({});
   const [loading, setLoading] = useState(true);
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
+  const { isAuthenticated } = useAuth();
   
   // Determine which section to expand based on the current location
   useEffect(() => {
@@ -125,10 +126,16 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                           href={doc.path}
                           className={cn(
                             "nav-link block relative px-3 py-2 rounded-md hover:bg-[hsl(var(--code))] text-sm",
-                            location === doc.path ? "active text-foreground bg-[hsl(var(--code))]" : "text-secondary"
+                            location === doc.path ? "active text-foreground bg-[hsl(var(--code))]" : "text-secondary",
+                            doc.requiresAuth && !isAuthenticated && "opacity-50"
                           )}
                         >
-                          {doc.sidebarTitle}
+                          <div className="flex items-center gap-2">
+                            {doc.requiresAuth && !isAuthenticated && (
+                              <Lock className="w-3 h-3 text-secondary" aria-hidden="true" />
+                            )}
+                            <span>{doc.sidebarTitle}</span>
+                          </div>
                         </Link>
                       </li>
                     ))}
@@ -149,10 +156,16 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                                 href={doc.path}
                                 className={cn(
                                   "block px-3 py-2 rounded-md text-sm",
-                                  location === doc.path ? "text-foreground bg-[hsl(var(--code))]" : "text-secondary hover:bg-[hsl(var(--code))]"
+                                  location === doc.path ? "text-foreground bg-[hsl(var(--code))]" : "text-secondary hover:bg-[hsl(var(--code))]",
+                                  doc.requiresAuth && !isAuthenticated && "opacity-50"
                                 )}
                               >
-                                {doc.sidebarTitle}
+                                <div className="flex items-center gap-2">
+                                  {doc.requiresAuth && !isAuthenticated && (
+                                    <Lock className="w-3 h-3 text-secondary" aria-hidden="true" />
+                                  )}
+                                  <span>{doc.sidebarTitle}</span>
+                                </div>
                               </Link>
                             </li>
                           ))}
