@@ -91,62 +91,85 @@ export default {
       typography: {
         DEFAULT: {
           css: {
-            color: '#fff',
+            '--tw-prose-body': '#fff',
+            '--tw-prose-headings': '#fff',
+            '--tw-prose-lead': '#d1d5db',
+            '--tw-prose-links': 'hsl(217.2, 91.2%, 59.8%)',
+            '--tw-prose-bold': '#fff',
+            '--tw-prose-counters': '#d1d5db',
+            '--tw-prose-bullets': '#d1d5db',
+            '--tw-prose-hr': '#333',
+            '--tw-prose-quotes': '#d1d5db',
+            '--tw-prose-quote-borders': '#333',
+            '--tw-prose-captions': '#d1d5db',
+            '--tw-prose-code': '#d1d5db',
+            '--tw-prose-pre-code': '#d1d5db',
+            '--tw-prose-pre-bg': '#111',
+            '--tw-prose-th-borders': '#333',
+            '--tw-prose-td-borders': '#333',
+            
+            // Dark mode overwrites
+            '--tw-prose-invert-body': '#fff',
+            '--tw-prose-invert-headings': '#fff',
+            '--tw-prose-invert-lead': '#d1d5db',
+            '--tw-prose-invert-links': 'hsl(217.2, 91.2%, 59.8%)',
+            '--tw-prose-invert-bold': '#fff',
+            '--tw-prose-invert-counters': '#d1d5db',
+            '--tw-prose-invert-bullets': '#d1d5db',
+            '--tw-prose-invert-hr': '#333',
+            '--tw-prose-invert-quotes': '#d1d5db',
+            '--tw-prose-invert-quote-borders': '#333',
+            '--tw-prose-invert-captions': '#d1d5db',
+            '--tw-prose-invert-code': '#d1d5db',
+            '--tw-prose-invert-pre-code': '#d1d5db',
+            '--tw-prose-invert-pre-bg': '#111',
+            '--tw-prose-invert-th-borders': '#333',
+            '--tw-prose-invert-td-borders': '#333',
+            
+            // Additional specific styling
+            color: 'var(--tw-prose-body)',
             a: {
-              color: '#fff',
+              color: 'var(--tw-prose-links)',
               '&:hover': {
-                color: '#fff',
+                color: 'var(--tw-prose-links)',
                 textDecoration: 'underline',
               },
             },
-            blockquote: {
-              borderLeftColor: '#333',
-              color: '#d1d5db',
-            },
             h1: {
-              color: '#fff',
+              color: 'var(--tw-prose-headings)',
               fontWeight: '500',
             },
             h2: {
-              color: '#fff',
+              color: 'var(--tw-prose-headings)',
               fontWeight: '500',
             },
             h3: {
-              color: '#fff',
+              color: 'var(--tw-prose-headings)',
               fontWeight: '500',
             },
             h4: {
-              color: '#fff',
+              color: 'var(--tw-prose-headings)',
               fontWeight: '500',
             },
             strong: {
-              color: '#fff',
+              color: 'var(--tw-prose-bold)',
+              fontWeight: '600',
             },
             code: {
-              color: '#d1d5db',
-              backgroundColor: '#111',
-              padding: '0.25rem',
+              color: 'var(--tw-prose-code)',
+              backgroundColor: 'var(--tw-prose-pre-bg)',
+              fontWeight: '400',
               borderRadius: '0.25rem',
+              paddingTop: '0.125rem',
+              paddingRight: '0.25rem',
+              paddingBottom: '0.125rem',
+              paddingLeft: '0.25rem',
             },
             pre: {
-              backgroundColor: '#111',
-            },
-            hr: {
-              borderColor: '#333',
-            },
-            ol: {
-              li: {
-                '&::marker': {
-                  color: '#d1d5db',
-                },
-              },
-            },
-            ul: {
-              li: {
-                '&::marker': {
-                  color: '#d1d5db',
-                },
-              },
+              color: 'var(--tw-prose-pre-code)',
+              backgroundColor: 'var(--tw-prose-pre-bg)',
+              borderRadius: '0.375rem',
+              padding: '0.75rem 1rem',
             },
           },
         },

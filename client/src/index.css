@@ -48,7 +48,20 @@
 
 /* Markdown content styling */
 .prose {
-  @apply text-foreground leading-normal;
+  @apply text-white leading-normal;
+  color: white !important;
+}
+
+.prose * {
+  color: white !important;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  color: white !important;
+}
+
+.prose strong, .prose b {
+  color: white !important;
 }
 
 .prose h1, 
