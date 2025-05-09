@@ -16,6 +16,7 @@ export interface DocMeta {
   section?: string;
   slug: string;
   path: string;
+  authenticated?: boolean; // If true or undefined, the doc requires authentication
 }
 
 // Interface for full document

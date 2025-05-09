@@ -3,12 +3,26 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
 
-// User schema for authentication
+// User schema for authentication (matches Replit Auth requirements)
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  id: text("id").primaryKey().notNull(),
+  email: text("email").unique(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  profileImageUrl: text("profile_image_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// Session storage table for Replit Auth
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: text("sid").primaryKey(),
+    sess: text("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+);
 
 // Documentation content schema
 export const docs = pgTable("docs", {
@@ -44,10 +58,8 @@ export const sectionsRelations = relations(sections, ({ many }) => ({
 }));
 
 // Insert schemas
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
+export const upsertUserSchema = createInsertSchema(users);
+export type UpsertUser = typeof users.$inferInsert;
 
 export const insertDocSchema = createInsertSchema(docs).pick({
   title: true,
@@ -65,7 +77,6 @@ export const insertSectionSchema = createInsertSchema(sections).pick({
 });
 
 // Types
-export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
 export type InsertDoc = z.infer<typeof insertDocSchema>;
