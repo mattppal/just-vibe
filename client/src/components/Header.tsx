@@ -85,15 +85,42 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
           {isLoading ? (
             <div className="w-24 h-9 animate-pulse bg-[#111] rounded-md" />
           ) : isAuthenticated ? (
-            <Button
-              onClick={logout}
-              variant="outline"
-              size="sm"
-              className="gap-1.5 bg-transparent border-[#333] text-white hover:bg-[#111] hover:text-white"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Logout</span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-9 w-9 rounded-full bg-transparent p-0 hover:bg-[#111]">
+                  <Avatar className="h-9 w-9 border border-[#333]">
+                    {user?.profileImageUrl ? (
+                      <AvatarImage src={user.profileImageUrl} alt="Profile" />
+                    ) : (
+                      <AvatarFallback className="bg-[#111] text-white">
+                        <User className="h-5 w-5" />
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <span className="sr-only">User menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-black border border-[#333] p-1 text-white">
+                <div className="flex items-center justify-start gap-2 p-2">
+                  <div className="flex flex-col space-y-0.5">
+                    <p className="text-sm font-medium">
+                      {user?.firstName && user?.lastName 
+                        ? `${user.firstName} ${user.lastName}` 
+                        : 'Replit User'}
+                    </p>
+                    <p className="text-xs text-gray-400 truncate">User ID: {user?.id}</p>
+                  </div>
+                </div>
+                <DropdownMenuSeparator className="bg-[#333] my-1" />
+                <DropdownMenuItem 
+                  onClick={logout}
+                  className="cursor-pointer flex items-center gap-2 focus:bg-[#111] focus:text-white"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Button
               onClick={login}

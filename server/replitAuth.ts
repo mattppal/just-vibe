@@ -59,7 +59,21 @@ async function upsertUser(
 ) {
   await storage.upsertUser({
     id: claims["sub"],
+    firstName: claims["first_name"],
+    lastName: claims["last_name"],
+    profileImageUrl: claims["profile_image_url"],
   });
+  
+  // Log the claims for debugging
+  console.log("User claims from Replit Auth:", 
+    JSON.stringify({
+      sub: claims["sub"],
+      email: claims["email"],
+      first_name: claims["first_name"],
+      last_name: claims["last_name"],
+      profile_image_url: claims["profile_image_url"]
+    }, null, 2)
+  );
 }
 
 export async function setupAuth(app: Express) {
