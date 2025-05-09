@@ -33,12 +33,12 @@ export default function Home() {
           }
           
           // Fallback if no docs found
-          setLocation('/architecture');
+          setLocation('/introduction');
         }
       } catch (error) {
         console.error('Error redirecting to first doc:', error);
         // Fallback redirect to a known page
-        setLocation('/architecture');
+        setLocation('/introduction');
       } finally {
         setLoading(false);
       }

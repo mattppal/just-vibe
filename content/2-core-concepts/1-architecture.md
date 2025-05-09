@@ -1,55 +1,66 @@
 ---
 title: Architecture Overview
 sidebarTitle: Architecture
-description: Learn about the architecture of our platform.
+description: Learn about the system architecture. This is a protected page that requires authentication.
 ---
 
 # Architecture Overview
 
-This page explains the high-level architecture of our platform and how the different pieces fit together.
+This is a protected documentation page that requires authentication to view.
 
-## Core Components
+## Protected Content
 
-Our platform consists of several core components that work together to provide a seamless development experience:
+This page demonstrates a protected section of the documentation. Users must be logged in to view this content.
 
-1. **Core Engine** - Handles the core functionality and orchestrates all other components
-2. **Routing System** - Manages URL routing and navigation
-3. **State Management** - Provides utilities for managing application state
-4. **Rendering Layer** - Efficiently renders components to the DOM
-5. **Build System** - Compiles and optimizes your code for production
+## System Components
 
-## System Design
+Our system architecture consists of several key components:
 
-The following diagram shows how these components interact:
+1. **Frontend Application** - React-based SPA
+2. **Backend API** - Express.js server
+3. **Database** - PostgreSQL database
+4. **Authentication** - Replit Auth (OpenID Connect)
 
+## Authentication Flow
+
+The authentication flow used in this application follows the standard OpenID Connect protocol:
+
+1. User clicks the login button
+2. Application redirects to the Replit identity provider
+3. User authenticates with Replit
+4. User is redirected back to the application with auth tokens
+5. Application verifies tokens and creates a session
+
+## Secure Content Access
+
+Protected content (like this page) is secured through several layers:
+
+- Server-side route protection
+- Client-side redirection
+- Visual indication in the UI (greyed out with lock icon)
+
+## Advanced Code Sample
+
+```typescript
+// Authentication middleware
+export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  if (!req.isAuthenticated() || !user?.expires_at) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  if (now <= user.expires_at) {
+    return next();
+  }
+
+  // Token expired, try to refresh
+  try {
+    const config = await getOidcConfig();
+    const tokenResponse = await client.refreshTokenGrant(config, user.refresh_token);
+    updateUserSession(user, tokenResponse);
+    return next();
+  } catch (error) {
+    return res.redirect("/api/login");
+  }
+};
 ```
-┌─────────────────────────────────────────────────┐
-│                   Application                    │
-└───────────────────────┬─────────────────────────┘
-                        │
-        ┌───────────────┼───────────────┐
-        │               │               │
-┌───────▼──────┐ ┌─────▼─────┐ ┌───────▼──────┐
-│  Core Engine  │ │   Router  │ │ State Manager │
-└───────┬──────┘ └─────┬─────┘ └───────┬──────┘
-        │               │               │
-        └───────────────┼───────────────┘
-                        │
-           ┌────────────┴────────────┐
-           │                         │
-     ┌─────▼─────┐           ┌──────▼──────┐
-     │  Renderer  │           │ Build System │
-     └───────────┘           └─────────────┘
-```
-
-## Data Flow
-
-Data flows through the application in a predictable way:
-
-1. User actions (clicks, inputs, etc.) generate events
-2. Events are handled by event listeners
-3. Event handlers update the application state
-4. State changes trigger rerenders of affected components
-5. The renderer efficiently updates the DOM
-
-This unidirectional data flow makes applications easier to understand, debug, and test.
