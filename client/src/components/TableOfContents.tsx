@@ -29,7 +29,6 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
   }, [items]);
 
   useEffect(() => {
-    // Create an observer to track which heading is currently visible
     // Create a debounce function to avoid too many state updates
     const debounce = (func: Function, wait: number) => {
       let timeout: NodeJS.Timeout;
@@ -39,55 +38,69 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
       };
     };
     
-    // Debounced version of setActiveId to reduce jumpiness
-    const debouncedSetActiveId = debounce((id: string) => {
-      setActiveId(id);
-    }, 100); // 100ms debounce time
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // Get all entries that are currently visible
-        const visibleEntries = entries
-          .filter(entry => entry.isIntersecting)
-          .sort((a, b) => {
-            // First sort by y-position (closer to top gets priority)
-            const aRect = a.boundingClientRect;
-            const bRect = b.boundingClientRect;
-            
-            // If elements are very close in position, use intersection ratio as tiebreaker
-            if (Math.abs(aRect.top - bRect.top) < 50) {
-              return b.intersectionRatio - a.intersectionRatio;
-            }
-            
-            // Otherwise, sort by position (closer to the top of viewport gets priority)
-            return aRect.top - bRect.top;
-          });
+    // Function to determine which heading is currently at the top of the viewport
+    const determineActiveHeading = () => {
+      // Get all heading elements
+      const headingElements = items.map(item => document.getElementById(item.id))
+        .filter(el => el !== null) as HTMLElement[];
+      
+      if (headingElements.length === 0) return;
+      
+      // Define the top threshold - we consider a heading "at the top" when it's within this range from the top
+      const topThreshold = 120; // pixels from the top of the viewport
+      
+      // Sort headings by their position - we want the one closest to but still below our threshold
+      let activeHeading = null;
+      let minDistance = Infinity;
+      
+      for (const heading of headingElements) {
+        const rect = heading.getBoundingClientRect();
+        // We only consider headings above the threshold (negative position means it's scrolled up)
+        // but we want the one that just crossed the threshold, not ones far above
+        if (rect.top <= topThreshold) {
+          // Calculate how far this heading is from our threshold
+          const distance = Math.abs(rect.top - topThreshold);
+          if (distance < minDistance) {
+            minDistance = distance;
+            activeHeading = heading;
+          }
+        }
+      }
+      
+      // If no heading is found above the threshold (very top of the page)
+      // use the first visible heading
+      if (!activeHeading && headingElements.length > 0) {
+        // Find the first visible heading
+        for (const heading of headingElements) {
+          const rect = heading.getBoundingClientRect();
+          if (rect.top > 0 && rect.bottom < window.innerHeight) {
+            activeHeading = heading;
+            break;
+          }
+        }
         
-        if (visibleEntries.length > 0) {
-          debouncedSetActiveId(visibleEntries[0].target.id);
+        // If still no heading is visible, use the first one
+        if (!activeHeading) {
+          activeHeading = headingElements[0];
         }
-      },
-      {
-        // Adjust rootMargin to consider elements close to viewport top
-        rootMargin: "-80px 0px -80% 0px",
-        threshold: [0.1, 0.5], // Fewer thresholds for more stable detection
       }
-    );
-
-    items.forEach((item) => {
-      const element = document.getElementById(item.id);
-      if (element) {
-        observer.observe(element);
+      
+      if (activeHeading) {
+        setActiveId(activeHeading.id);
       }
-    });
-
+    };
+    
+    // Debounced version to reduce performance impact
+    const debouncedHandleScroll = debounce(determineActiveHeading, 100);
+    
+    // Initial check
+    determineActiveHeading();
+    
+    // Add scroll event listener
+    window.addEventListener('scroll', debouncedHandleScroll);
+    
     return () => {
-      items.forEach((item) => {
-        const element = document.getElementById(item.id);
-        if (element) {
-          observer.unobserve(element);
-        }
-      });
+      window.removeEventListener('scroll', debouncedHandleScroll);
     };
   }, [items]);
 
