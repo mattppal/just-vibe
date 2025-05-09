@@ -3,7 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ChevronRight, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getAllDocs } from "@/lib/docs";
+import { DocPage, getAllDocs } from "@/lib/docs";
+import { useEffect, useState } from "react";
 
 interface SidebarProps {
   open: boolean;
@@ -12,7 +13,23 @@ interface SidebarProps {
 
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const [location] = useLocation();
-  const docs = getAllDocs();
+  const [docs, setDocs] = useState<DocPage[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    async function fetchDocs() {
+      try {
+        const result = await getAllDocs();
+        setDocs(result);
+      } catch (error) {
+        console.error("Error fetching docs:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchDocs();
+  }, []);
   
   return (
     <aside 

@@ -1,35 +1,66 @@
-interface DocPage {
+import { apiRequest } from "./queryClient";
+
+export interface DocPage {
+  id: number;
   title: string;
-  path: string;
+  path?: string;
+  slug: string;
   section?: string;
   content: string;
+  order: number;
+  published: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
-const docs: DocPage[] = [
-  {
-    title: "Introduction",
-    path: "/",
-    section: "Getting Started",
-    content: "This documentation covers everything you need to know to use our platform efficiently. Whether you're a beginner or an advanced user, you'll find all the information you need to get started and make the most of our features. Our platform is designed to be intuitive and powerful, allowing you to build complex applications without the complexity typically associated with such tasks."
-  },
-  {
-    title: "Installation",
-    path: "/installation",
-    section: "Getting Started",
-    content: "Learn how to install and set up the platform on your system. Before installing the platform, make sure your system meets the following requirements: Node.js version 14.0.0 or higher, npm version 6.0.0 or higher (or yarn/pnpm), at least 1GB of free disk space, and internet connection for downloading dependencies."
-  },
-  {
-    title: "Quick Start",
-    path: "/quick-start",
-    section: "Getting Started",
-    content: "Get started with the platform in just a few minutes. The easiest way to get started is to create a new project using the CLI. This will create a new directory with the project name and set up all the necessary files and dependencies."
+// This cache improves performance by storing retrieved docs
+let docsCache: DocPage[] | null = null;
+
+export async function getAllDocs(): Promise<DocPage[]> {
+  if (docsCache) return docsCache;
+  
+  try {
+    const response = await apiRequest("/api/docs");
+    const docs = await response.json();
+    
+    // Transform data to match our DocPage interface
+    const transformedDocs = docs.map((doc: any) => ({
+      ...doc,
+      path: getPathFromSlug(doc.slug),
+      section: doc.section?.name
+    }));
+    
+    docsCache = transformedDocs;
+    return transformedDocs;
+  } catch (error) {
+    console.error("Error fetching docs:", error);
+    return [];
   }
-];
-
-export function getAllDocs(): DocPage[] {
-  return docs;
 }
 
-export function getDocByPath(path: string): DocPage | undefined {
+export async function getDocByPath(path: string): Promise<DocPage | undefined> {
+  const docs = await getAllDocs();
   return docs.find((doc) => doc.path === path);
+}
+
+export async function getDocBySlug(slug: string): Promise<DocPage | undefined> {
+  try {
+    const response = await apiRequest(`/api/docs/${slug}`);
+    const doc = await response.json();
+    
+    return {
+      ...doc,
+      path: getPathFromSlug(doc.slug),
+      section: doc.section?.name
+    };
+  } catch (error) {
+    console.error(`Error fetching doc with slug ${slug}:`, error);
+    return undefined;
+  }
+}
+
+// Helper function to convert slug to path
+function getPathFromSlug(slug: string): string {
+  if (slug === "introduction") return "/";
+  return `/${slug}`;
 }
