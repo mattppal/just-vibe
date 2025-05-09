@@ -152,21 +152,38 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                         <ul className="pl-4 space-y-2">
                           {sectionDocs.map(doc => (
                             <li key={doc.slug}>
-                              <Link
-                                href={doc.path}
-                                className={cn(
-                                  "block px-3 py-2 rounded-md text-sm",
-                                  location === doc.path ? "text-foreground bg-[hsl(var(--code))]" : "text-secondary hover:bg-[hsl(var(--code))]",
-                                  doc.requiresAuth && !isAuthenticated && "opacity-50"
-                                )}
-                              >
-                                <div className="flex items-center gap-2">
-                                  {doc.requiresAuth && !isAuthenticated && (
-                                    <Lock className="w-3 h-3 text-secondary" aria-hidden="true" />
+                              {doc.requiresAuth && !isAuthenticated ? (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div
+                                      className={cn(
+                                        "block px-3 py-2 rounded-md text-sm opacity-50 cursor-not-allowed",
+                                        location === doc.path ? "text-foreground bg-[hsl(var(--code))]" : "text-secondary"
+                                      )}
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <Lock className="w-3 h-3 text-secondary" aria-hidden="true" />
+                                        <span>{doc.sidebarTitle}</span>
+                                      </div>
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <span>Login required to view this content</span>
+                                  </TooltipContent>
+                                </Tooltip>
+                              ) : (
+                                <Link
+                                  href={doc.path}
+                                  className={cn(
+                                    "block px-3 py-2 rounded-md text-sm",
+                                    location === doc.path ? "text-foreground bg-[hsl(var(--code))]" : "text-secondary hover:bg-[hsl(var(--code))]"
                                   )}
-                                  <span>{doc.sidebarTitle}</span>
-                                </div>
-                              </Link>
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <span>{doc.sidebarTitle}</span>
+                                  </div>
+                                </Link>
+                              )}
                             </li>
                           ))}
                         </ul>

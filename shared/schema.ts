@@ -6,10 +6,6 @@ import { relations } from "drizzle-orm";
 // User schema for authentication (matches Replit Auth requirements)
 export const users = pgTable("users", {
   id: text("id").primaryKey().notNull(),
-  email: text("email").unique(),
-  firstName: text("first_name"),
-  lastName: text("last_name"),
-  profileImageUrl: text("profile_image_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
