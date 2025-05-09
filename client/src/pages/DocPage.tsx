@@ -9,6 +9,20 @@ import { Lock, LogIn, Home, AlertTriangle } from "lucide-react";
 import { Link } from "wouter";
 import { queryClient } from "@/lib/queryClient";
 
+// For TypeScript interface for requestIdleCallback
+interface RequestIdleCallbackOptions {
+  timeout: number;
+}
+interface RequestIdleCallbackDeadline {
+  didTimeout: boolean;
+  timeRemaining: () => number;
+}
+declare global {
+  interface Window {
+    requestIdleCallback: (callback: (deadline: RequestIdleCallbackDeadline) => void, opts?: RequestIdleCallbackOptions) => number;
+  }
+}
+
 export default function DocPage() {
   const [location, setLocation] = useLocation();
   const [doc, setDoc] = useState<DocPageType | null>(null);
@@ -30,59 +44,95 @@ export default function DocPage() {
         setError(null);
         setAuthRequired(false);
         
-        const docData = await getDocByPath(path);
+        // Fetch document with optimization for repeated loads
+        const cachedDoc = queryClient.getQueryData<DocPageType>([`/api/docs/path${path}`]);
+        let docData: DocPageType | null = null;
+        
+        if (cachedDoc) {
+          // Use cached data if available to speed up initial render
+          docData = cachedDoc;
+          // Also refresh in background if it's stale
+          setTimeout(() => {
+            queryClient.refetchQueries({ queryKey: [`/api/docs/path${path}`], type: 'inactive' });
+          }, 2000); // Delay refetch to prioritize UI responsiveness
+        } else {
+          docData = await getDocByPath(path);
+        }
         
         if (docData) {
           setDoc(docData);
+          document.title = `${docData.title} | Just Vibe Docs`;
           
-          // Preload adjacent documents (next and previous) based on section if possible
-          if (docData.section && isAuthenticated) { // Only preload for authenticated users
-            // Get preloading function from docs module using direct import to avoid circular dependencies
-            import('@/lib/docs').then(async ({ getDocsBySection }) => {
-              try {
-                const sectionsData = await getDocsBySection();
-                const currentSection = sectionsData[docData.section];
-                
-                if (currentSection) {
-                  // Find current document index
-                  const currentIndex = currentSection.findIndex(d => d.slug === docData.slug);
+          // Use requestIdleCallback to prefetch adjacent docs when browser is idle
+          const prefetchAdjacentDocs = () => {
+            if (docData && docData.section) {
+              // Get preloading function from docs module
+              import('@/lib/docs').then(async ({ getDocsBySection }) => {
+                try {
+                  const sectionsData = await getDocsBySection();
+                  const currentSection = sectionsData[docData.section];
                   
-                  if (currentIndex !== -1) {
-                    // Preload next document if available and not requiring auth
-                    // or if the user is authenticated
-                    if (currentIndex < currentSection.length - 1) {
-                      const nextDoc = currentSection[currentIndex + 1];
-                      // Only prefetch if we have access (public docs or user is authenticated)
-                      if (!nextDoc.requiresAuth || isAuthenticated) {
-                        import('@/lib/queryClient').then(({ queryClient }) => {
-                          queryClient.prefetchQuery({
-                            queryKey: [`/api/docs/path${nextDoc.path}`],
-                            queryFn: () => getDocByPath(nextDoc.path)
-                          });
-                        });
-                      }
-                    }
+                  if (currentSection) {
+                    const currentIndex = currentSection.findIndex(d => d.slug === docData.slug);
                     
-                    // Preload previous document if available with same auth check
-                    if (currentIndex > 0) {
-                      const prevDoc = currentSection[currentIndex - 1];
-                      // Only prefetch if we have access (public docs or user is authenticated)
-                      if (!prevDoc.requiresAuth || isAuthenticated) {
-                        import('@/lib/queryClient').then(({ queryClient }) => {
-                          queryClient.prefetchQuery({
-                            queryKey: [`/api/docs/path${prevDoc.path}`],
-                            queryFn: () => getDocByPath(prevDoc.path)
-                          });
-                        });
+                    if (currentIndex !== -1) {
+                      // Create a queue of documents to prefetch, prioritizing adjacent ones
+                      const prefetchQueue: DocPageType[] = [];
+                      
+                      // Next document has higher priority
+                      if (currentIndex < currentSection.length - 1) {
+                        const nextDoc = currentSection[currentIndex + 1];
+                        if (!nextDoc.requiresAuth || isAuthenticated) {
+                          prefetchQueue.push(nextDoc);
+                        }
                       }
+                      
+                      // Previous document second priority
+                      if (currentIndex > 0) {
+                        const prevDoc = currentSection[currentIndex - 1];
+                        if (!prevDoc.requiresAuth || isAuthenticated) {
+                          prefetchQueue.push(prevDoc);
+                        }
+                      }
+                      
+                      // Add remaining docs in current section to queue
+                      currentSection.forEach((doc, index) => {
+                        if (index !== currentIndex && !prefetchQueue.includes(doc)) {
+                          if (!doc.requiresAuth || isAuthenticated) {
+                            prefetchQueue.push(doc);
+                          }
+                        }
+                      });
+                      
+                      // Prefetch in sequence using a delay to avoid network congestion
+                      let delay = 0;
+                      prefetchQueue.forEach((doc) => {
+                        setTimeout(() => {
+                          if (doc.path) {
+                            queryClient.prefetchQuery({
+                              queryKey: [`/api/docs/path${doc.path}`],
+                              queryFn: () => getDocByPath(doc.path),
+                              staleTime: 24 * 60 * 60 * 1000 // 24 hours
+                            });
+                          }
+                        }, delay);
+                        delay += 300; // Stagger prefetches
+                      });
                     }
                   }
+                } catch (e) {
+                  // Silently fail for preloading
+                  console.log('Preloading adjacent docs failed:', e);
                 }
-              } catch (e) {
-                // Silently fail for preloading
-                console.log('Preloading adjacent docs failed:', e);
-              }
-            });
+              });
+            }
+          };
+          
+          // Use requestIdleCallback for modern browsers or setTimeout as fallback
+          if (typeof window.requestIdleCallback === 'function') {
+            window.requestIdleCallback(prefetchAdjacentDocs, { timeout: 2000 });
+          } else {
+            setTimeout(prefetchAdjacentDocs, 1000);
           }
         } else {
           setError("Document not found");
@@ -103,7 +153,7 @@ export default function DocPage() {
     }
     
     fetchDoc();
-  }, [path]);
+  }, [path, isAuthenticated]); // Added isAuthenticated to the dependencies
   
   // No longer need to process HTML content as rehype-highlight handles code blocks
   
