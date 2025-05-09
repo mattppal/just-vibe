@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ChevronRight, Lock, Search, X } from "lucide-react";
+import { ChevronRight, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DocPage, getAllDocs, getDocsBySection } from "@/lib/docs";
 import { useEffect, useState } from "react";
@@ -18,29 +18,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const [location] = useLocation();
   const [sections, setSections] = useState<SectionData>({});
   const [loading, setLoading] = useState(true);
-  const [expandedSections, setExpandedSections] = useState<string[]>([]);
   const { isAuthenticated } = useAuth();
-  
-  // Determine which section to expand based on the current location
-  useEffect(() => {
-    if (Object.keys(sections).length > 0) {
-      // Find which section contains the current page
-      for (const [sectionName, sectionDocs] of Object.entries(sections)) {
-        const isActiveSection = sectionDocs.some(doc => doc.path === location);
-        const sectionId = getSectionId(sectionName);
-        
-        if (isActiveSection) {
-          // Expand the section containing the current page
-          setExpandedSections(prev => {
-            if (!prev.includes(sectionId)) {
-              return [...prev, sectionId];
-            }
-            return prev;
-          });
-        }
-      }
-    }
-  }, [sections, location]);
   
   useEffect(() => {
     async function fetchDocs() {
@@ -56,11 +34,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     
     fetchDocs();
   }, []);
-  
-  // Generate unique IDs for accordion items
-  const getSectionId = (section: string) => {
-    return section.toLowerCase().replace(/[^\w]+/g, '-');
-  };
   
   // Format section names for display
   const formatSectionName = (section: string) => {
@@ -121,89 +94,42 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           ) : (
             Object.entries(sections).map(([sectionName, sectionDocs]) => (
               <div key={sectionName} className="mb-6">
-                <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                  {formatSectionName(sectionName)}
+                <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-300">
+                  {formatSectionName(sectionName).toUpperCase()}
                 </div>
                 
-                {/* Simple list if section has few documents */}
-                {sectionDocs.length <= 3 ? (
-                  <ul className="space-y-2">
-                    {sectionDocs.map(doc => (
-                      <li key={doc.slug}>
-                        {doc.requiresAuth && !isAuthenticated ? (
-                          <div
-                            title="Login required to view this content"
-                            className={cn(
-                              "block px-3 py-2 rounded-md text-sm opacity-50 cursor-not-allowed",
-                              location === doc.path ? "text-foreground bg-[hsl(var(--code))]" : "text-secondary"
-                            )}
-                          >
-                            <div className="flex items-center gap-2">
-                              <Lock className="w-3 h-3 text-secondary" aria-hidden="true" />
-                              <span>{doc.sidebarTitle}</span>
-                            </div>
+                <ul className="space-y-2">
+                  {sectionDocs.map(doc => (
+                    <li key={doc.slug}>
+                      {doc.requiresAuth && !isAuthenticated ? (
+                        <div
+                          title="Login required to view this content"
+                          className={cn(
+                            "block px-3 py-2 rounded-md text-sm opacity-50 cursor-not-allowed",
+                            location === doc.path ? "text-white bg-[#111]" : "text-gray-500"
+                          )}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span role="img" aria-label="lock">🔒</span>
+                            <span>{doc.sidebarTitle}</span>
                           </div>
-                        ) : (
-                          <Link 
-                            href={doc.path}
-                            className={cn(
-                              "nav-link block relative px-3 py-2 rounded-md hover:bg-[#111] text-sm",
-                              location === doc.path ? "active text-white bg-[#111]" : "text-gray-400 hover:text-white"
-                            )}
-                          >
-                            <div className="flex items-center gap-2">
-                              <span>{doc.sidebarTitle}</span>
-                            </div>
-                          </Link>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  /* Accordion for sections with more documents */
-                  <Accordion type="multiple" value={expandedSections} onValueChange={setExpandedSections} className="w-full">
-                    {/* Group by first 2 characters of slug or some other criterion */}
-                    <AccordionItem value={getSectionId(sectionName)} className="border-none">
-                      <AccordionTrigger className="py-2 px-3 hover:bg-[hsl(var(--code))] rounded-md text-sm text-secondary hover:text-foreground">
-                        <span>{formatSectionName(sectionName)}</span>
-                      </AccordionTrigger>
-                      <AccordionContent className="pt-1 pb-0">
-                        <ul className="pl-4 space-y-2">
-                          {sectionDocs.map(doc => (
-                            <li key={doc.slug}>
-                              {doc.requiresAuth && !isAuthenticated ? (
-                                <div
-                                  title="Login required to view this content"
-                                  className={cn(
-                                    "block px-3 py-2 rounded-md text-sm opacity-50 cursor-not-allowed",
-                                    location === doc.path ? "text-foreground bg-[hsl(var(--code))]" : "text-secondary"
-                                  )}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <Lock className="w-3 h-3 text-secondary" aria-hidden="true" />
-                                    <span>{doc.sidebarTitle}</span>
-                                  </div>
-                                </div>
-                              ) : (
-                                <Link
-                                  href={doc.path}
-                                  className={cn(
-                                    "block px-3 py-2 rounded-md text-sm",
-                                    location === doc.path ? "text-white bg-[#111]" : "text-gray-400 hover:text-white hover:bg-[#111]"
-                                  )}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <span>{doc.sidebarTitle}</span>
-                                  </div>
-                                </Link>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                )}
+                        </div>
+                      ) : (
+                        <Link 
+                          href={doc.path}
+                          className={cn(
+                            "nav-link block relative px-3 py-2 rounded-md hover:bg-[#111] text-sm",
+                            location === doc.path ? "active text-white bg-[#111]" : "text-gray-400 hover:text-white"
+                          )}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span>{doc.sidebarTitle}</span>
+                          </div>
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))
           )}

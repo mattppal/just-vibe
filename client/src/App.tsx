@@ -11,6 +11,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/introduction" component={DocPage} />
       <Route path="/:slug" component={DocPage} />
       <Route component={NotFound} />
     </Switch>

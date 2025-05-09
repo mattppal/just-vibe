@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
+import { getDocByPath } from '@/lib/docs';
 
 export default function Home() {
   const [, setLocation] = useLocation();
