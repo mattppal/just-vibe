@@ -91,7 +91,7 @@ export default function DocPage() {
         
         {/* Render the HTML content with prose class */}
         <div 
-          className="prose prose-invert dark:prose-invert max-w-none"
+          className="prose dark:prose-invert prose-headings:font-medium prose-headings:text-white prose-a:text-primary prose-code:font-mono prose-pre:bg-[#111] max-w-none"
           dangerouslySetInnerHTML={{ __html: doc.html }} 
         />
       </article>

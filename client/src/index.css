@@ -38,6 +38,11 @@
 @layer base {
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Geist Sans', system-ui, sans-serif;
+  }
+  
+  code, pre, kbd {
+    font-family: 'Geist Mono', monospace;
   }
 }
 

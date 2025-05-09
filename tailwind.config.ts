@@ -5,7 +5,7 @@ export default {
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     fontFamily: {
-      sans: ["Geist", "system-ui", "sans-serif"],
+      sans: ["Geist Sans", "system-ui", "sans-serif"],
       mono: ["Geist Mono", "monospace"],
     },
     extend: {
