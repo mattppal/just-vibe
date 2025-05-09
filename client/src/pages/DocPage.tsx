@@ -36,8 +36,8 @@ export default function DocPage() {
           setDoc(docData);
           
           // Preload adjacent documents (next and previous) based on section if possible
-          if (docData.section) {
-            // Import here to avoid circular dependencies
+          if (docData.section && isAuthenticated) { // Only preload for authenticated users
+            // Get preloading function from docs module using direct import to avoid circular dependencies
             import('@/lib/docs').then(async ({ getDocsBySection }) => {
               try {
                 const sectionsData = await getDocsBySection();
@@ -48,22 +48,33 @@ export default function DocPage() {
                   const currentIndex = currentSection.findIndex(d => d.slug === docData.slug);
                   
                   if (currentIndex !== -1) {
-                    // Preload next document if available
+                    // Preload next document if available and not requiring auth
+                    // or if the user is authenticated
                     if (currentIndex < currentSection.length - 1) {
                       const nextDoc = currentSection[currentIndex + 1];
-                      queryClient.prefetchQuery({
-                        queryKey: [`/api/docs/path${nextDoc.path}`],
-                        queryFn: () => getDocByPath(nextDoc.path)
-                      });
+                      // Only prefetch if we have access (public docs or user is authenticated)
+                      if (!nextDoc.requiresAuth || isAuthenticated) {
+                        import('@/lib/queryClient').then(({ queryClient }) => {
+                          queryClient.prefetchQuery({
+                            queryKey: [`/api/docs/path${nextDoc.path}`],
+                            queryFn: () => getDocByPath(nextDoc.path)
+                          });
+                        });
+                      }
                     }
                     
-                    // Preload previous document if available
+                    // Preload previous document if available with same auth check
                     if (currentIndex > 0) {
                       const prevDoc = currentSection[currentIndex - 1];
-                      queryClient.prefetchQuery({
-                        queryKey: [`/api/docs/path${prevDoc.path}`],
-                        queryFn: () => getDocByPath(prevDoc.path)
-                      });
+                      // Only prefetch if we have access (public docs or user is authenticated)
+                      if (!prevDoc.requiresAuth || isAuthenticated) {
+                        import('@/lib/queryClient').then(({ queryClient }) => {
+                          queryClient.prefetchQuery({
+                            queryKey: [`/api/docs/path${prevDoc.path}`],
+                            queryFn: () => getDocByPath(prevDoc.path)
+                          });
+                        });
+                      }
                     }
                   }
                 }

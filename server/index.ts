@@ -13,13 +13,11 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: isDevelopment 
-        ? ["'self'", "'unsafe-inline'", "'unsafe-eval'", "'wasm-unsafe-eval'"] // Needed for dev tools
-        : ["'self'", "'unsafe-inline'"], // More strict in production
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "'wasm-unsafe-eval'", "https://replit.com"],
       connectSrc: isDevelopment
         ? ["'self'", "ws:", "wss:"] // Allow WebSockets for HMR
         : ["'self'"],
-      imgSrc: ["'self'", "data:", "https://replit.com", "https://*.replit.com"],
+      imgSrc: ["'self'", "data:", "https://replit.com", "https://*.replit.com", "https://storage.googleapis.com"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       fontSrc: ["'self'", "data:"],
       objectSrc: ["'none'"],

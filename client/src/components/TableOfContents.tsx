@@ -11,7 +11,22 @@ interface TableOfContentsProps {
 }
 
 export default function TableOfContents({ items }: TableOfContentsProps) {
-  const [activeId, setActiveId] = useState<string>("");
+  // Initialize with first item ID so it's highlighted on initial page load
+  const [activeId, setActiveId] = useState<string>(items[0]?.id || "");
+
+  useEffect(() => {
+    // Update active ID if items change
+    if (items.length > 0) {
+      // Check for hash in URL and use it if it exists and matches an item
+      const hash = window.location.hash.replace('#', '');
+      if (hash && items.some(item => item.id === hash)) {
+        setActiveId(hash);
+      } else {
+        // Otherwise default to first item
+        setActiveId(items[0].id);
+      }
+    }
+  }, [items]);
 
   useEffect(() => {
     // Create an observer to track which heading is currently visible
