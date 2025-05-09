@@ -48,9 +48,9 @@ export default function Home() {
   }, [setLocation]);
 
   return (
-    <div className="py-20 animate-pulse text-center">
-      <h1 className="text-2xl font-bold mb-4">Loading Documentation...</h1>
-      <p className="text-muted-foreground">Please wait while we find the right starting page for you.</p>
+    <div className="py-20 animate-pulse text-center bg-black text-white">
+      <h1 className="text-2xl font-bold mb-4 text-white">Loading Documentation...</h1>
+      <p className="text-gray-400">Please wait while we find the right starting page for you.</p>
     </div>
   );
 }
