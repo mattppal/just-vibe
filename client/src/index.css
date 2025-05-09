@@ -4,34 +4,44 @@
 
 @layer base {
   :root {
-    --background: 0 0% 7%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 0%; /* Pure black background */
+    --foreground: 0 0% 100%; /* Pure white text */
 
-    --card: 0 0% 12%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 5%; /* Slightly lighter than black for cards */
+    --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 7%; /* Dark background for popovers */
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%; /* Keep primary color */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 15%; /* Dark secondary */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 70%; /* Slightly dimmed white */
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --code: 240 7% 22%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --code: 0 0% 10%; /* Dark code background */
+    --border: 0 0% 20%; /* Dark border */
+    --input: 0 0% 15%;
+    --ring: 217.2 91.2% 59.8%; /* Match primary color */
+
+    /* Sidebar-specific colors */
+    --sidebar-background: 0 0% 5%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 217.2 91.2% 59.8%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 

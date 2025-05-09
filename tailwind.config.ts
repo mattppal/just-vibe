@@ -91,40 +91,40 @@ export default {
       typography: {
         DEFAULT: {
           css: {
-            '--tw-prose-body': '#fff',
-            '--tw-prose-headings': '#fff',
-            '--tw-prose-lead': '#d1d5db',
-            '--tw-prose-links': 'hsl(217.2, 91.2%, 59.8%)',
-            '--tw-prose-bold': '#fff',
-            '--tw-prose-counters': '#d1d5db',
-            '--tw-prose-bullets': '#d1d5db',
-            '--tw-prose-hr': '#333',
-            '--tw-prose-quotes': '#d1d5db',
-            '--tw-prose-quote-borders': '#333',
-            '--tw-prose-captions': '#d1d5db',
-            '--tw-prose-code': '#d1d5db',
-            '--tw-prose-pre-code': '#d1d5db',
-            '--tw-prose-pre-bg': '#111',
-            '--tw-prose-th-borders': '#333',
-            '--tw-prose-td-borders': '#333',
+            '--tw-prose-body': '#ffffff', /* Pure white */
+            '--tw-prose-headings': '#ffffff', /* Pure white */
+            '--tw-prose-lead': '#ffffff', /* Pure white */
+            '--tw-prose-links': 'hsl(217.2, 91.2%, 59.8%)', /* Blue links */
+            '--tw-prose-bold': '#ffffff', /* Pure white */
+            '--tw-prose-counters': '#ffffff', /* Pure white */
+            '--tw-prose-bullets': '#ffffff', /* Pure white */
+            '--tw-prose-hr': '#333333', /* Dark dividers */
+            '--tw-prose-quotes': '#ffffff', /* Pure white */
+            '--tw-prose-quote-borders': '#333333', /* Dark border */
+            '--tw-prose-captions': '#ffffff', /* Pure white */
+            '--tw-prose-code': '#ffffff', /* Pure white */
+            '--tw-prose-pre-code': '#ffffff', /* Pure white */
+            '--tw-prose-pre-bg': '#0a0a0a', /* Very dark, not pure black for contrast */
+            '--tw-prose-th-borders': '#333333',
+            '--tw-prose-td-borders': '#333333',
             
-            // Dark mode overwrites
-            '--tw-prose-invert-body': '#fff',
-            '--tw-prose-invert-headings': '#fff',
-            '--tw-prose-invert-lead': '#d1d5db',
+            // Dark mode overwrites (same as light mode since we want consistent black/white theme)
+            '--tw-prose-invert-body': '#ffffff',
+            '--tw-prose-invert-headings': '#ffffff',
+            '--tw-prose-invert-lead': '#ffffff',
             '--tw-prose-invert-links': 'hsl(217.2, 91.2%, 59.8%)',
-            '--tw-prose-invert-bold': '#fff',
-            '--tw-prose-invert-counters': '#d1d5db',
-            '--tw-prose-invert-bullets': '#d1d5db',
-            '--tw-prose-invert-hr': '#333',
-            '--tw-prose-invert-quotes': '#d1d5db',
-            '--tw-prose-invert-quote-borders': '#333',
-            '--tw-prose-invert-captions': '#d1d5db',
-            '--tw-prose-invert-code': '#d1d5db',
-            '--tw-prose-invert-pre-code': '#d1d5db',
-            '--tw-prose-invert-pre-bg': '#111',
-            '--tw-prose-invert-th-borders': '#333',
-            '--tw-prose-invert-td-borders': '#333',
+            '--tw-prose-invert-bold': '#ffffff',
+            '--tw-prose-invert-counters': '#ffffff',
+            '--tw-prose-invert-bullets': '#ffffff',
+            '--tw-prose-invert-hr': '#333333',
+            '--tw-prose-invert-quotes': '#ffffff',
+            '--tw-prose-invert-quote-borders': '#333333',
+            '--tw-prose-invert-captions': '#ffffff',
+            '--tw-prose-invert-code': '#ffffff', 
+            '--tw-prose-invert-pre-code': '#ffffff',
+            '--tw-prose-invert-pre-bg': '#0a0a0a',
+            '--tw-prose-invert-th-borders': '#333333',
+            '--tw-prose-invert-td-borders': '#333333',
             
             // Additional specific styling
             color: 'var(--tw-prose-body)',

@@ -19,7 +19,7 @@ export default function DocLayout({ children }: DocLayoutProps) {
   }
   
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-black text-white">
       <Header 
         onOpenSidebar={() => setSidebarOpen(true)}
       />
@@ -28,7 +28,7 @@ export default function DocLayout({ children }: DocLayoutProps) {
           open={sidebarOpen} 
           onClose={() => setSidebarOpen(false)}
         />
-        <main className="flex-1 pt-8 px-4 md:px-8 lg:px-10">
+        <main className="flex-1 pt-8 px-4 md:px-8 lg:px-10 bg-black text-white">
           {children}
         </main>
       </div>
