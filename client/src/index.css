@@ -52,16 +52,31 @@
   color: white !important;
 }
 
-.prose * {
+/* Force all text elements to be white */
+.prose p, 
+.prose li, 
+.prose h1, 
+.prose h2, 
+.prose h3, 
+.prose h4, 
+.prose h5, 
+.prose h6,
+.prose strong, 
+.prose em,
+.prose blockquote,
+.prose figcaption,
+.prose a:not(:hover) {
   color: white !important;
 }
 
-.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
-  color: white !important;
+/* Exception for links */
+.prose a {
+  @apply text-primary font-medium;
 }
 
-.prose strong, .prose b {
-  color: white !important;
+/* Exception for code highlighting */
+.prose code span {
+  color: inherit !important;
 }
 
 .prose h1, 

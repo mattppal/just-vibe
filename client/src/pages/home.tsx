@@ -1,27 +1,44 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
-import { getDocsBySection } from '@/lib/docs';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function Home() {
   const [, setLocation] = useLocation();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Direct fetch from API endpoint instead of using the docs library
     async function redirectToFirstDoc() {
       try {
-        // Get all sections
-        const sections = await getDocsBySection();
+        // Directly fetch from API for more reliable results
+        const sectionsResponse = await apiRequest('/api/sections');
         
-        // Find the first section with docs
-        const firstSectionKey = Object.keys(sections)[0];
-        if (firstSectionKey && sections[firstSectionKey]?.length > 0) {
-          // Get the first doc in the first section
-          const firstDoc = sections[firstSectionKey][0];
-          // Redirect to that doc's path
-          setLocation(firstDoc.path);
+        if (sectionsResponse && typeof sectionsResponse === 'object') {
+          // Find first section with docs
+          const sections = sectionsResponse as Record<string, any[]>;
+          const sectionKeys = Object.keys(sections);
+          
+          if (sectionKeys.length > 0) {
+            const firstSection = sections[sectionKeys[0]];
+            
+            if (firstSection && firstSection.length > 0) {
+              const firstDoc = firstSection[0];
+              // Check if path exists and redirect
+              if (firstDoc && firstDoc.path) {
+                console.log('Redirecting to:', firstDoc.path);
+                setLocation(firstDoc.path);
+                return;
+              }
+            }
+          }
+          
+          // Fallback if no docs found
+          setLocation('/architecture');
         }
       } catch (error) {
         console.error('Error redirecting to first doc:', error);
+        // Fallback redirect to a known page
+        setLocation('/architecture');
       } finally {
         setLoading(false);
       }
