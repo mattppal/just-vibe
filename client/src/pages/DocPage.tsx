@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import { useRoute } from "wouter";
+import { useLocation } from "wouter";
 import { getDocByPath, DocPage as DocPageType } from "@/lib/docs";
 import TableOfContents from "@/components/TableOfContents";
 import CodeBlock from "@/components/CodeBlock";
 
 export default function DocPage() {
-  const [match, params] = useRoute("/:path*");
+  const [location] = useLocation();
   const [doc, setDoc] = useState<DocPageType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   // Determine the path from the URL
-  const path = match ? `/${params.path || ""}` : "/";
+  const path = location;
   
   useEffect(() => {
     async function fetchDoc() {
