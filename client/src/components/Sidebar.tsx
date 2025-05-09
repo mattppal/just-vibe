@@ -17,6 +17,28 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const [location] = useLocation();
   const [sections, setSections] = useState<SectionData>({});
   const [loading, setLoading] = useState(true);
+  const [expandedSections, setExpandedSections] = useState<string[]>([]);
+  
+  // Determine which section to expand based on the current location
+  useEffect(() => {
+    if (Object.keys(sections).length > 0) {
+      // Find which section contains the current page
+      for (const [sectionName, sectionDocs] of Object.entries(sections)) {
+        const isActiveSection = sectionDocs.some(doc => doc.path === location);
+        const sectionId = getSectionId(sectionName);
+        
+        if (isActiveSection) {
+          // Expand the section containing the current page
+          setExpandedSections(prev => {
+            if (!prev.includes(sectionId)) {
+              return [...prev, sectionId];
+            }
+            return prev;
+          });
+        }
+      }
+    }
+  }, [sections, location]);
   
   useEffect(() => {
     async function fetchDocs() {
@@ -112,7 +134,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                   </ul>
                 ) : (
                   /* Accordion for sections with more documents */
-                  <Accordion type="multiple" defaultValue={[]} className="w-full">
+                  <Accordion type="multiple" value={expandedSections} onValueChange={setExpandedSections} className="w-full">
                     {/* Group by first 2 characters of slug or some other criterion */}
                     <AccordionItem value={getSectionId(sectionName)} className="border-none">
                       <AccordionTrigger className="py-2 px-3 hover:bg-[hsl(var(--code))] rounded-md text-sm text-secondary hover:text-foreground">

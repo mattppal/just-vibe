@@ -63,6 +63,27 @@ export default function DocPage() {
     return doc.body.innerHTML;
   };
   
+  // Set IDs for headings to support table of contents
+  useEffect(() => {
+    if (!doc) return;
+    
+    // Add IDs to all headings in the content
+    setTimeout(() => {
+      doc.headings.forEach(heading => {
+        const element = document.getElementById(heading.id);
+        if (!element) {
+          // Find headings by content if ID doesn't exist
+          const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+          headings.forEach(el => {
+            if (el.textContent === heading.title && !el.id) {
+              el.id = heading.id;
+            }
+          });
+        }
+      });
+    }, 0);
+  }, [doc]);
+  
   // Render code blocks after the HTML has been inserted into the DOM
   useEffect(() => {
     if (!doc) return;
@@ -113,8 +134,8 @@ export default function DocPage() {
   }
   
   return (
-    <div>
-      <article className="prose prose-invert max-w-none">
+    <div className="flex">
+      <article className="prose prose-invert max-w-none flex-1">
         <h1>{doc.title}</h1>
         <p className="text-secondary lead">{doc.description}</p>
         

@@ -63,12 +63,24 @@ export function parseMarkdownFile(filePath: string): Doc {
   const headings: { id: string; title: string; level: number }[] = [];
   let match;
   
+  // Keep track of used IDs to avoid duplicates
+  const usedIds = new Set<string>();
+  
   while ((match = headingRegex.exec(content)) !== null) {
     const level = match[1].length;
     const title = match[2].trim();
-    const id = title.toLowerCase().replace(/[^\w]+/g, '-');
+    let id = title.toLowerCase().replace(/[^\w]+/g, '-');
     
-    headings.push({ id, title, level });
+    // If the ID is already used, add a numeric suffix
+    let counter = 1;
+    let uniqueId = id;
+    while (usedIds.has(uniqueId)) {
+      uniqueId = `${id}-${counter}`;
+      counter++;
+    }
+    
+    usedIds.add(uniqueId);
+    headings.push({ id: uniqueId, title, level });
   }
   
   // Determine dir and filename
