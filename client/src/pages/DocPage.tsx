@@ -85,12 +85,15 @@ export default function DocPage() {
   
   return (
     <div className="flex">
-      <article className="prose prose-invert prose-a:text-primary prose-headings:scroll-m-20 prose-code:font-mono prose-pre:bg-[hsl(var(--code))] max-w-none flex-1">
-        <h1 className="text-3xl lg:text-4xl">{doc.title}</h1>
-        <p className="text-muted-foreground text-lg">{doc.description}</p>
+      <article className="max-w-none flex-1">
+        <h1 className="text-3xl lg:text-4xl font-medium mb-4">{doc.title}</h1>
+        <p className="text-muted-foreground text-lg mb-8">{doc.description}</p>
         
-        {/* Render the HTML content */}
-        <div dangerouslySetInnerHTML={{ __html: doc.html }} />
+        {/* Render the HTML content with prose class */}
+        <div 
+          className="prose prose-invert dark:prose-invert max-w-none"
+          dangerouslySetInnerHTML={{ __html: doc.html }} 
+        />
       </article>
       
       {doc.headings.length > 0 && (
