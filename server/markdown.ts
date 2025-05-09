@@ -38,7 +38,7 @@ function getSectionFromDir(dir: string): string {
 
 // Get order from directory name
 function getOrderFromDir(dir: string): number {
-  // Extract order from directory name if it follows pattern: "1-directory-name"
+  // Extract order from directory name if it follows any number prefix pattern: "1-directory-name"
   const match = dir.match(/^(\d+)-/);
   if (match) {
     return parseInt(match[1], 10);
@@ -57,6 +57,7 @@ function getOrderFromDir(dir: string): number {
 // Extract slug from filename by removing order prefix and extension
 function getSlugFromFilename(filename: string, dir: string): string {
   // Remove order prefix (e.g., "1-" from "1-introduction.md")
+  // This works with any number (non-zero-padded)
   const withoutOrder = filename.replace(/^\d+-/, '');
   // Remove extension
   const baseSlug = withoutOrder.replace(/\.md$/, '');
@@ -188,6 +189,7 @@ export async function getDocByPath(pagePath: string): Promise<Doc | undefined> {
 
 // Extract order prefix from filename
 function getOrderFromFilename(filename: string): number {
+  // Get order from filename with number prefix like "1-introduction.md"
   const match = filename.match(/^(\d+)-/);
   return match ? parseInt(match[1], 10) : 999; // Default to high number if no order found
 }
