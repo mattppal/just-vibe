@@ -1,0 +1,87 @@
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+
+interface TocItem {
+  id: string;
+  title: string;
+}
+
+interface TableOfContentsProps {
+  items: TocItem[];
+}
+
+export default function TableOfContents({ items }: TableOfContentsProps) {
+  const [activeId, setActiveId] = useState<string>("");
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveId(entry.target.id);
+          }
+        });
+      },
+      {
+        rootMargin: "0px 0px -80% 0px",
+        threshold: 0,
+      }
+    );
+
+    items.forEach((item) => {
+      const element = document.getElementById(item.id);
+      if (element) {
+        observer.observe(element);
+      }
+    });
+
+    return () => {
+      items.forEach((item) => {
+        const element = document.getElementById(item.id);
+        if (element) {
+          observer.unobserve(element);
+        }
+      });
+    };
+  }, [items]);
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    const element = document.getElementById(id);
+    if (element) {
+      window.scrollTo({
+        top: element.offsetTop - 100,
+        behavior: "smooth",
+      });
+      
+      // Update URL without scrolling
+      history.pushState(null, "", `#${id}`);
+    }
+  };
+
+  return (
+    <div className="hidden lg:block w-64 shrink-0 sticky self-start top-24 h-[calc(100vh-6rem)] overflow-y-auto pb-10">
+      <div className="space-y-1 pt-10">
+        <h3 className="font-medium mb-2 text-foreground">On This Page</h3>
+        <ul className="text-sm space-y-1">
+          {items.map((item) => (
+            <li key={item.id}>
+              <a
+                href={`#${item.id}`}
+                onClick={(e) => handleClick(e, item.id)}
+                className={cn(
+                  "block px-2 py-1 rounded-md",
+                  activeId === item.id
+                    ? "text-primary"
+                    : "text-secondary hover:text-foreground"
+                )}
+              >
+                {item.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
