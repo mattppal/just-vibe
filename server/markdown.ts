@@ -28,13 +28,9 @@ export interface Doc extends DocMeta {
 
 // Get section by directory name
 function getSectionFromDir(dir: string): string {
-  const sectionMap: Record<string, string> = {
-    'getting-started': 'Getting Started',
-    'core-concepts': 'Core Concepts',
-    'api-reference': 'API Reference',
-  };
-  
-  return sectionMap[dir] || dir;
+  // Return the original directory name with number prefix intact
+  // The frontend will handle formatting the display
+  return dir;
 }
 
 // Get order from directory name
