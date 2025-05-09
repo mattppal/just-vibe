@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Menu, Github, ExternalLink, LogIn, LogOut, Lock, User, ChevronDown } from "lucide-react";
+import { Menu, LogIn, LogOut, Lock, User, ChevronDown } from "lucide-react";
 import { DocPage, getDocByPath } from "@/lib/docs";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -63,24 +63,7 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
         </nav>
         
         <div className="ml-auto flex items-center gap-2">
-          <a
-            href="https://github.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden md:inline-flex rounded-md p-1.5 text-gray-400 hover:text-white"
-          >
-            <Github className="w-5 h-5" />
-            <span className="sr-only">GitHub</span>
-          </a>
-          <a
-            href="https://example.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden md:inline-flex rounded-md p-1.5 text-gray-400 hover:text-white"
-          >
-            <ExternalLink className="w-5 h-5" />
-            <span className="sr-only">External Link</span>
-          </a>
+          <div className="text-white font-bold text-xl hidden md:flex items-center mr-6 tracking-tight">Just Vibe</div>
           
           {isLoading ? (
             <div className="w-24 h-9 animate-pulse bg-[#111] rounded-md" />
