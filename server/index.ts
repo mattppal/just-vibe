@@ -155,92 +155,107 @@ app.use('/api', (req, res, next) => {
     console.log(`API access from non-browser: ${clientIp} - ${userAgent} - ${req.method} ${req.path}`);
   }
   
-  // Additional security for API endpoints
-  // If there's no browser user agent, apply additional checks
-  // This helps prevent direct curl/script access
+  // ENHANCED SECURITY: Check for CSRF token or session cookie for ALL API requests
+  // including GET requests to ensure only users on our site can access content
+
+  // Check for valid session cookie as primary authentication method
+  const hasCookieAuth = req.cookies && Object.keys(req.cookies).some(key => 
+    key.toLowerCase().includes('session') || key.toLowerCase().includes('auth')
+  );
+  
+  // Check for API key as an alternative authentication method
+  const apiKey = req.get('X-API-Key');
+  const hasValidApiKey = apiKey === process.env.API_SECRET_KEY;
+  
+  // Check if the request is from our own application
+  const appInstanceId = process.env.REPL_ID || process.env.APP_INSTANCE_ID || '';
+  const secureAppToken = req.get('X-App-Token');
+  const hasValidAppToken = secureAppToken === APP_INSTANCE_TOKEN;
+  
+  // We'll rely on the session cookie for browser requests
+  // and API key or App Token for non-browser requests
+
+  // More strict origin verification - not just includes() but exact domain matching
+  // Build the allowed domains list
+  const allowedDomains = [
+    'localhost:5000',
+    req.headers.host || '',
+  ];
+  
+  if (process.env.REPLIT_DOMAINS) {
+    // Add all the replit domains
+    process.env.REPLIT_DOMAINS.split(',').forEach(domain => {
+      domain = domain.trim();
+      if (domain) allowedDomains.push(domain);
+    });
+  }
+  
+  if (isDevelopment && process.env.REPL_SLUG && process.env.REPL_OWNER) {
+    // Add the replit preview domains
+    allowedDomains.push(
+      `${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`,
+      `${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.replit.app`,
+      `${process.env.REPL_SLUG}-${process.env.REPL_OWNER}.repl.co`
+    );
+  }
+
+  // Extract domain from origin and referer for more precise matching
+  let originDomain = '';
+  let refererDomain = '';
+  
+  if (origin) {
+    try {
+      const originUrl = new URL(origin);
+      originDomain = originUrl.host;
+    } catch (e) {
+      // Invalid origin format
+      originDomain = '';
+    }
+  }
+  
+  if (referer) {
+    try {
+      const refererUrl = new URL(referer);
+      refererDomain = refererUrl.host;
+    } catch (e) {
+      // Invalid referer format
+      refererDomain = '';
+    }
+  }
+  
+  // Check for exact domain match (not just includes which can be bypassed)
+  const isValidOrigin = originDomain && allowedDomains.includes(originDomain);
+  const isValidReferer = refererDomain && allowedDomains.includes(refererDomain);
+  
+  // For direct API calls without a browser user agent
   if (!isBrowserRequest) {
-    // If this is not a browser and has no auth header, apply strict API key check
-    // Check for session cookies as secondary authentication method
-    const hasCookieAuth = req.cookies && Object.keys(req.cookies).some(key => 
-      key.toLowerCase().includes('session') || key.toLowerCase().includes('auth')
-    );
-    
-    // We'll use a combination of checks for better security
-    
-    // 1. Check for API key (not implemented by default but shown here for completeness)
-    const apiKey = req.get('X-API-Key');
-    const hasValidApiKey = apiKey === process.env.API_SECRET_KEY;
-    
-    // 2. Check if the X-Requested-With header is present (standard for AJAX requests)
-    const xRequestedWith = req.get('X-Requested-With');
-    const hasXRequestedWith = xRequestedWith === 'XMLHttpRequest';
-    
-    // 3. Check for authorization header
-    const authHeader = req.get('Authorization');
-    const hasAuthHeader = !!authHeader;
-    
-    // 4. Do a more secure local request check - verify if this is really from our application
-    // Note: This needs to be combined with other checks as IP can be spoofed
-    const isFromSecureOrigin = host && (
-      (process.env.REPLIT_DOMAINS && process.env.REPLIT_DOMAINS.includes(host)) ||
-      host.includes('localhost:5000') ||
-      host.includes('.replit.app') ||
-      host.includes('.replit.dev')
-    );
-    
-    // Generate a secure hash based on server instance for an additional security layer
-    // This ensures the request came from our own codebase running on the same instance
-    const appInstanceId = process.env.REPL_ID || process.env.APP_INSTANCE_ID || '';
-    const secureAppToken = req.get('X-App-Token');
-    const hasValidAppToken = secureAppToken === `app-${appInstanceId}`;
-    
-    // For direct API calls, one of these authentication methods must be present
-    if (!hasCookieAuth && !hasValidApiKey && !hasXRequestedWith && !hasAuthHeader && !hasValidAppToken) {
+    // Strict check: require API key or App Token for non-browser requests
+    if (!hasValidApiKey && !hasValidAppToken) {
       // Log attempted access for security monitoring
-      console.warn(`Unauthorized API access attempt: ${req.method} ${req.path} from IP: ${req.ip}, UA: ${userAgent}`);
+      console.warn(`Unauthorized API access attempt (non-browser): ${req.method} ${req.path} from IP: ${clientIp}, UA: ${userAgent}`);
+      return res.status(403).json({ message: 'Access denied. API key or token required for non-browser access.' });
+    }
+  } else {
+    // For browser requests: Must have valid origin/referer AND either cookie auth or valid CSRF
+    if (!isValidOrigin && !isValidReferer) {
+      console.warn(`Invalid origin/referer: ${originDomain || refererDomain}, Expected one of: ${allowedDomains.join(', ')}`);
+      return res.status(403).json({ message: 'Forbidden - Origin/Referer not allowed' });
+    }
+    
+    // Require session cookie for browser requests
+    if (!hasCookieAuth) {
+      console.warn(`Missing auth for browser request: ${req.method} ${req.path} from IP: ${clientIp}`);
       return res.status(403).json({ message: 'Access denied. Authentication required.' });
     }
   }
   
-  // Browser requests must have a valid origin or referer
-  if (isBrowserRequest) {
-    if (!origin && !referer) {
-      return res.status(403).json({ message: 'Origin or Referer required for browser requests' });
-    }
-    
-    // Check if the Origin/Referer is from our site
-    const allowedDomains = [
-      'localhost:5000',
-      req.headers.host || '',
-    ];
-    
-    if (isDevelopment && process.env.REPL_SLUG && process.env.REPL_OWNER) {
-      // Add the Replit domains in development
-      allowedDomains.push(
-        `${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`,
-        `${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.replit.app`
-      );
-    }
-    
-    // Check both Origin and Referer
-    const isValidOrigin = origin && allowedDomains.some(domain => origin.includes(domain));
-    const isValidReferer = referer && allowedDomains.some(domain => referer.includes(domain));
-    
-    if (!isValidOrigin && !isValidReferer) {
-      return res.status(403).json({ message: 'Forbidden - Origin/Referer not allowed' });
-    }
+  // Apply CSRF protection to all non-GET requests (traditional approach)
+  // For GET requests, we've already validated origin + cookie auth above
+  if (req.method !== 'GET') {
+    return csrfProtection(req, res, next);
   }
   
-  // Call CSRF protection for all API routes except for read-only GET requests
-  // We want to apply stricter security to any endpoints that might modify data
-  if (req.method === 'GET') {
-    // Public GET endpoints don't need CSRF protection
-    // But we still want to authenticate the request origin above
-    return next();
-  }
-  
-  // Apply CSRF protection to non-public API endpoints
-  return csrfProtection(req, res, next);
+  return next();
 });
 
 // Generate CSRF token endpoint

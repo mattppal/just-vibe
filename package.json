@@ -93,6 +93,7 @@
     "remark-rehype": "^11.1.2",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
+    "tokens": "^0.0.8",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
     "vaul": "^1.1.0",
