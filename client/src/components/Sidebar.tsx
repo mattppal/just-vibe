@@ -34,19 +34,8 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   useEffect(() => {
     async function fetchAllDocs() {
       try {
-        console.log("Fetching all docs for search functionality");
+        // Fetch all docs for search functionality
         const docs = await getAllDocs();
-        console.log(`Retrieved ${docs.length} documents for search`);
-
-        // Log a sample doc to see what's available for search
-        if (docs.length > 0) {
-          console.log("Sample document for search:", {
-            title: docs[0].title,
-            hasContent: !!docs[0].content,
-            contentLength: docs[0].content?.length || 0,
-            description: docs[0].description,
-          });
-        }
 
         setAllDocs(docs);
       } catch (error) {
@@ -60,7 +49,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   // Reset search results when allDocs gets updated
   useEffect(() => {
     if (searchQuery && allDocs.length > 0) {
-      console.log(`Refreshing search with ${allDocs.length} docs available`);
       performSearch(searchQuery);
     }
   }, [allDocs, searchQuery]);
@@ -92,8 +80,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     setIsSearching(true);
     const normalizedQuery = query.toLowerCase().trim();
 
-    console.log("Search query:", normalizedQuery);
-    console.log("Available docs for search:", allDocs.length);
+    // Perform search on all available docs
 
     // Search in title, description, and content
     const results = allDocs.filter((doc) => {
@@ -106,7 +93,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       return titleMatch || descMatch || contentMatch;
     });
 
-    console.log("Search results:", results.length);
     setSearchResults(results);
   }
 
