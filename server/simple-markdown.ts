@@ -1,38 +1,56 @@
 /**
  * A simplified markdown processor without TypeScript errors.
  * This is a temporary solution to get MDX working without advanced unified/rehype features.
+ * Now enhanced with Shiki code highlighting.
  */
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import remarkGfm from 'remark-gfm';
+import rehypeStringify from 'rehype-stringify';
+import rehypeShiki from '@shikijs/rehype';
+import remarkMdx from 'remark-mdx';
+import { transformerNotationHighlight } from '@shikijs/transformers';
 
+/**
+ * Process markdown content with Shiki syntax highlighting
+ * 
+ * @param content The markdown or MDX content to process
+ * @param isMdx Whether the content is MDX
+ * @returns Processed HTML string with syntax highlighting
+ */
 export async function processMarkdown(content: string, isMdx: boolean = false): Promise<string> {
-  // For our MVP version, we'll just render the markdown as-is
-  // We'll add proper MDX processing in a later version
-  
   try {
-    // Just return the content as regular HTML for now
-    // A more robust solution would process markdown and handle MDX components properly
+    // Create the processor pipeline
+    let processor = unified()
+      .use(remarkParse)  // Parse markdown into mdast
+      .use(remarkGfm);   // Support GFM (tables, autolinks, etc)
     
-    // Convert markdown headings (# Title) to HTML <h1>, <h2>, etc.
-    let html = content
-      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-      .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
-      .replace(/^##### (.+)$/gm, '<h5>$1</h5>')
-      .replace(/^###### (.+)$/gm, '<h6>$1</h6>');
+    // Add MDX support if needed
+    if (isMdx) {
+      processor = processor.use(remarkMdx);
+    }
     
-    // Convert paragraphs - lines that aren't headings, code blocks, lists, etc.
-    html = html.replace(/^([^<\s][^\n]+)$/gm, '<p>$1</p>');
+    // Convert to HTML and add Shiki syntax highlighting
+    processor = processor
+      .use(remarkRehype, { allowDangerousHtml: true })
+      .use(rehypeShiki, {
+        // Configure Shiki themes
+        theme: 'github-dark',
+        
+        // Enable line highlighting using the {1,3-4} syntax after language name
+        transformers: [transformerNotationHighlight()],
+        
+        // Optionally enable inline code highlighting
+        inline: 'tailing-curly-colon'
+      })
+      .use(rehypeStringify, { allowDangerousHtml: true });
     
-    // Handle code blocks with syntax highlighting
-    html = html.replace(/```([a-z]*)\n([\s\S]*?)```/g, (_, lang, code) => {
-      return `<pre><code class="language-${lang || 'text'}">${code}</code></pre>`;
-    });
-    
-    // For MDX, we would also need to handle JSX components, but we'll ignore them for now
-    
-    return html;
+    // Process the content
+    const result = await processor.process(content);
+    return String(result);
   } catch (error) {
-    console.error('Error processing markdown content:', error);
+    console.error('Error processing markdown with Shiki:', error);
     return `<div class="markdown-error">Error processing content: ${error instanceof Error ? error.message : String(error)}</div>`;
   }
 }
