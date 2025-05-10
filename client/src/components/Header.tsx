@@ -20,7 +20,6 @@ interface HeaderProps {
 export default function Header({ onOpenSidebar }: HeaderProps) {
   const [location] = useLocation();
   const [currentDoc, setCurrentDoc] = useState<DocPage | undefined>(undefined);
-  const [menuOpen, setMenuOpen] = useState(false);
   const { isAuthenticated, isLoading, user, login, logout } = useAuth();
 
   // We don't need to fetch doc metadata in the header - this duplicates requests
@@ -42,7 +41,7 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
           {isLoading ? (
             <div className="w-24 h-9 animate-pulse bg-[#111] rounded-md" />
           ) : isAuthenticated ? (
-            <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
@@ -63,7 +62,7 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
               <DropdownMenuContent
                 align="end"
                 sideOffset={8}
-                className="w-56 bg-black border border-[#333] p-1 text-white z-50 fixed"
+                className="w-56 bg-black border border-[#333] p-1 text-white z-50"
               >
                 <div className="flex items-center justify-start gap-3 p-2">
                   <Avatar className="h-9 w-9 border border-[#333]">
