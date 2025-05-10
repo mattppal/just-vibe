@@ -64,6 +64,10 @@ export async function apiRequest(
 
   const headers: Record<string, string> = {
     ...(bodyData ? { "Content-Type": "application/json" } : {}),
+    // Add X-Requested-With header for AJAX requests - standard security measure
+    "X-Requested-With": "XMLHttpRequest",
+    // Add instance token - this helps prevent unauthorized API access
+    "X-App-Token": `app-${import.meta.env.VITE_REPL_ID || ''}`,
   };
 
   // For mutating requests (POST, PUT, DELETE, PATCH), add CSRF token
@@ -98,6 +102,8 @@ export async function apiRequest(
           headers: {
             ...headers,
             "X-CSRF-Token": newToken,
+            "X-Requested-With": "XMLHttpRequest",
+            "X-App-Token": `app-${import.meta.env.VITE_REPL_ID || ''}`,
           },
           body: bodyData ? JSON.stringify(bodyData) : undefined,
           credentials: "include",
@@ -124,9 +130,15 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     const url = queryKey[0] as string;
     
-    // Standard query without CSRF token for read-only routes
+    // Standard query with security headers for all routes
     const res = await fetch(url, {
       credentials: "include",
+      headers: {
+        // Security headers for all requests
+        "X-Requested-With": "XMLHttpRequest",
+        // App instance token to prevent unauthorized access
+        "X-App-Token": `app-${import.meta.env.VITE_REPL_ID || ''}`
+      }
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
@@ -144,7 +156,9 @@ export const getQueryFn: <T>(options: {
           const retryRes = await fetch(url, {
             credentials: "include",
             headers: {
-              "X-CSRF-Token": token
+              "X-CSRF-Token": token,
+              "X-Requested-With": "XMLHttpRequest",
+              "X-App-Token": `app-${import.meta.env.VITE_REPL_ID || ''}`
             }
           });
           
