@@ -144,11 +144,18 @@
 
 /* Code blocks */
 .prose pre {
-  @apply p-4 rounded-md bg-[hsl(var(--code))] overflow-x-auto text-sm my-6;
+  @apply p-4 rounded-md bg-[hsl(var(--code))] text-sm my-6;
+  /* Enable soft wrap with scrolling if needed */
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .prose code {
   @apply font-mono text-[15px];
+  /* Enable soft wrap */
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 .prose :not(pre) > code {

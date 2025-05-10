@@ -41,8 +41,8 @@ export default function CodeBlock({ code, language = "javascript", className }: 
   }, [code]);
 
   return (
-    <div className={cn("relative rounded-md bg-[hsl(var(--code))] p-4 overflow-x-auto", className)}>
-      <pre className="text-sm font-mono text-foreground">
+    <div className={cn("relative rounded-md bg-[hsl(var(--code))] p-4", className)}>
+      <pre className="text-sm font-mono text-foreground whitespace-pre-wrap break-words">
         <code dangerouslySetInnerHTML={{ __html: highlightedCode }} />
       </pre>
     </div>

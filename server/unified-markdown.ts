@@ -85,8 +85,9 @@ function rehypeEnhanceCodeBlocks() {
             'bg-[#111]',
             'p-4',
             'my-6',
-            'overflow-x-auto',
-            'relative' // For positioning the copy button
+            'relative', // For positioning the copy button
+            'whitespace-pre-wrap', // Enable soft wrapping
+            'break-words' // Break long words to prevent overflow
           );
 
           // Get language from the code element and code content
