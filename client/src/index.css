@@ -203,6 +203,14 @@
   background-color: #000;
   border-radius: 0.375rem;
   overflow: hidden;
+  /* This ensures it doesn't extend beyond the parent prose container */
+  box-sizing: border-box;
+}
+
+/* Force prose content to have reasonable reading width */
+.prose-content {
+  max-width: 80ch !important;
+  width: 100%;
 }
 
 /* Highlighting theme for code blocks */

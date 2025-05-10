@@ -380,9 +380,10 @@ export default function DocPage() {
         <h1 className="text-3xl lg:text-4xl font-medium mb-4">{doc.title}</h1>
         <p className="text-muted-foreground text-lg mb-8">{doc.description}</p>
         
-        {/* Render the HTML content with prose class */}
+        {/* Render the HTML content with prose class - constraining width for better readability */}
         <div 
-          className="prose prose-invert max-w-none font-sans text-white prose-headings:text-white prose-p:text-white prose-a:text-primary prose-pre:bg-[#111]" 
+          id="doc-content"
+          className="prose prose-invert prose-content font-sans text-white prose-headings:text-white prose-p:text-white prose-a:text-primary prose-pre:bg-[#111]" 
           dangerouslySetInnerHTML={{ __html: doc.html }} 
         />
       </article>
