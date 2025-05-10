@@ -112,7 +112,18 @@ export async function parseMarkdownFile(filePath: string): Promise<Doc> {
   
   // Determine dir and filename
   const relativePath = path.relative(CONTENT_DIR, filePath);
-  const [dir] = relativePath.split(path.sep);
+  // Handle files in root directory vs. subdirectories
+  let dir = '';
+  const parts = relativePath.split(path.sep);
+  
+  if (parts.length > 1) {
+    // File is in a subdirectory
+    dir = parts[0];
+  } else {
+    // File is directly in the content root
+    dir = '';
+  }
+  
   const filename = path.basename(filePath);
   
   // Extract slug from filename
@@ -153,7 +164,18 @@ export async function getAllDocs(): Promise<Doc[]> {
     
     // Store original path information for sorting
     const relativePath = path.relative(CONTENT_DIR, file);
-    const [dir] = relativePath.split(path.sep);
+    // Handle files in root directory vs. subdirectories
+    let dir = '';
+    const parts = relativePath.split(path.sep);
+    
+    if (parts.length > 1) {
+      // File is in a subdirectory
+      dir = parts[0];
+    } else {
+      // File is directly in the content root
+      dir = '';
+    }
+    
     const filename = path.basename(file);
     
     // Add metadata for sorting

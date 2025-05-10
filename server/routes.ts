@@ -103,8 +103,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Special case for root path - req.params.path will be empty string for '/'
       if (req.params.path === "" || req.params.path === "root") {
+        console.log('Handling root path request, params:', req.params);
+        
+        // Get all docs to see if our root doc is there
+        const allDocs = await getAllDocs();
+        console.log('Available docs paths:', allDocs.map(d => d.path));
+        
         // Try to find a document specifically for the root path
         const rootDoc = await getDocByPath("/");
+        console.log('Root doc fetch result:', rootDoc ? `Found: ${rootDoc.title}` : 'Not found');
         
         // If found, serve the root document
         if (rootDoc) {
