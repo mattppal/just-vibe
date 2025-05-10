@@ -14,6 +14,7 @@ interface TabItemProps {
 type TabsContextType = {
   activeValue: string;
   setActiveValue: (value: string) => void;
+  children?: React.ReactNode;
 };
 
 const TabsContext = React.createContext<TabsContextType | undefined>(undefined);
@@ -26,7 +27,7 @@ export function Tabs({ children }: TabsProps) {
   const [activeValue, setActiveValue] = useState<string>(firstTabValue);
   
   return (
-    <TabsContext.Provider value={{ activeValue, setActiveValue }}>
+    <TabsContext.Provider value={{ activeValue, setActiveValue, children }}>
       <div className="my-6">
         {children}
       </div>

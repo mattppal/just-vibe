@@ -38,15 +38,19 @@ export default function MDXProvider({ children }: MDXProviderProps) {
       const [fullMatch, componentName, propsString, children] = match;
       
       // Parse props from string (simple regex approach)
-      const props = {};
-      const propsMatches = propsString.matchAll(/\s+([\w-]+)="([^"]*)"/g);
-      for (const propMatch of propsMatches) {
-        const [, propName, propValue] = propMatch;
+      const props: Record<string, string> = {};
+      const propsRegex = /\s+([\w-]+)="([^"]*)"/g;
+      let propMatch;
+      while ((propMatch = propsRegex.exec(propsString)) !== null) {
+        const propName = propMatch[1];
+        const propValue = propMatch[2];
         props[propName] = propValue;
       }
       
       // Get the actual component from our MDX components
-      const Component = (MDXComponents as any)[componentName];
+      const Component = componentName in MDXComponents 
+        ? (MDXComponents as Record<string, React.ComponentType<any>>)[componentName]
+        : undefined;
       
       if (Component) {
         // Create the React component

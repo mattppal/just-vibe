@@ -390,8 +390,14 @@ export default function DocPage() {
         <div 
           id="doc-content"
           className="prose prose-invert prose-content font-sans text-white prose-headings:text-white prose-p:text-white prose-a:text-primary prose-pre:bg-[#111]" 
-          dangerouslySetInnerHTML={{ __html: doc.html }} 
-        />
+        >
+          {/* Use MDXProvider for MDX content, fall back to dangerouslySetInnerHTML for regular markdown */}
+          {doc.path.endsWith('.mdx') ? (
+            <MDXProvider>{doc.html}</MDXProvider>
+          ) : (
+            <div dangerouslySetInnerHTML={{ __html: doc.html }} />
+          )}
+        </div>
       </article>
       
       {/* TOC is now positioned with fixed positioning in the TableOfContents component */}
