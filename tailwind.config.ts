@@ -1,88 +1,8 @@
 import type { Config } from "tailwindcss";
-import daisyui, { type Config as DaisyUIConfig } from "daisyui";
+import { type Config as DaisyUIConfig } from "daisyui";
 
-type DaisyuiThemeExtend = {
-  borderRadius: {
-    badge: string;
-    btn: string;
-    box: string;
-  };
-  colors: {
-    "base-100": string;
-    "base-200": string;
-    "base-300": string;
-    "base-content": string;
-    primary: string;
-    "primary-content": string;
-    secondary: string;
-    "secondary-content": string;
-    accent: string;
-    "accent-content": string;
-    neutral: string;
-    "neutral-content": string;
-    info: string;
-    "info-content": string;
-    success: string;
-    "success-content": string;
-    warning: string;
-    "warning-content": string;
-    error: string;
-    "error-content": string;
-  };
-};
-const daisyuiThemeExtend = daisyui.config!.theme!.extend as DaisyuiThemeExtend;
-
-const shadcnThemeExtend = {
-  borderRadius: {
-    lg: daisyuiThemeExtend.borderRadius.badge,
-    md: daisyuiThemeExtend.borderRadius.btn,
-    sm: daisyuiThemeExtend.borderRadius.box,
-  },
-  colors: {
-    background: daisyuiThemeExtend.colors["base-100"],
-    foreground: daisyuiThemeExtend.colors["base-content"],
-    card: {
-      DEFAULT: daisyuiThemeExtend.colors["base-100"],
-      foreground: daisyuiThemeExtend.colors["base-content"],
-    },
-    popover: {
-      DEFAULT: daisyuiThemeExtend.colors["base-100"],
-      foreground: daisyuiThemeExtend.colors["base-content"],
-    },
-    primary: {
-      DEFAULT: daisyuiThemeExtend.colors.primary,
-      foreground: daisyuiThemeExtend.colors["primary-content"],
-    },
-    secondary: {
-      DEFAULT: daisyuiThemeExtend.colors.secondary,
-      foreground: daisyuiThemeExtend.colors["secondary-content"],
-    },
-    muted: {
-      DEFAULT: daisyuiThemeExtend.colors["base-300"],
-      foreground: daisyuiThemeExtend.colors["base-content"],
-    },
-    accent: {
-      DEFAULT: daisyuiThemeExtend.colors.accent,
-      foreground: daisyuiThemeExtend.colors["accent-content"],
-    },
-    destructive: {
-      DEFAULT: daisyuiThemeExtend.colors.error,
-      foreground: daisyuiThemeExtend.colors["error-content"],
-    },
-    border: daisyuiThemeExtend.colors["base-300"],
-    input: daisyuiThemeExtend.colors["base-300"],
-    ring: daisyuiThemeExtend.colors.primary,
-    chart: {
-      "1": "hsl(var(--chart-1))",
-      "2": "hsl(var(--chart-2))",
-      "3": "hsl(var(--chart-3))",
-      "4": "hsl(var(--chart-4))",
-      "5": "hsl(var(--chart-5))",
-    },
-  },
-};
-
-export default {
+// Define the theme extensions directly instead of trying to access daisyui config
+const config: Config = {
   darkMode: ["class"],
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
@@ -91,7 +11,6 @@ export default {
       mono: ["'Geist Mono'", "monospace"],
     },
     extend: {
-      // ...shadcnThemeExtend,
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -188,30 +107,28 @@ export default {
       typography: {
         DEFAULT: {
           css: {
-            "--tw-prose-body": "#ffffff" /* Pure white */,
-            "--tw-prose-headings": "#ffffff" /* Pure white */,
-            "--tw-prose-lead": "#ffffff" /* Pure white */,
-            "--tw-prose-links": "#F26208" /* Orange links */,
-            "--tw-prose-bold": "#ffffff" /* Pure white */,
-            "--tw-prose-counters": "#ffffff" /* Pure white */,
-            "--tw-prose-bullets": "#ffffff" /* Pure white */,
-            "--tw-prose-hr": "#333333" /* Dark dividers */,
-            "--tw-prose-quotes": "#ffffff" /* Pure white */,
-            "--tw-prose-quote-borders": "#333333" /* Dark border */,
-            "--tw-prose-captions": "#ffffff" /* Pure white */,
-            "--tw-prose-code": "#ffffff" /* Pure white */,
-            "--tw-prose-pre-code": "#ffffff" /* Pure white */,
-            "--tw-prose-pre-bg":
-              "#0a0a0a" /* Very dark, not pure black for contrast */,
+            "--tw-prose-body": "#ffffff",
+            "--tw-prose-headings": "#ffffff",
+            "--tw-prose-lead": "#ffffff",
+            "--tw-prose-links": "#F26208", // Orange links
+            "--tw-prose-bold": "#ffffff",
+            "--tw-prose-counters": "#ffffff",
+            "--tw-prose-bullets": "#ffffff",
+            "--tw-prose-hr": "#333333",
+            "--tw-prose-quotes": "#ffffff",
+            "--tw-prose-quote-borders": "#333333",
+            "--tw-prose-captions": "#ffffff",
+            "--tw-prose-code": "#ffffff",
+            "--tw-prose-pre-code": "#ffffff",
+            "--tw-prose-pre-bg": "#0a0a0a",
             "--tw-prose-th-borders": "#333333",
             "--tw-prose-td-borders": "#333333",
 
-            // Dark mode overwrites (same as light mode since we want consistent black/white theme)
+            // Dark mode overwrites
             "--tw-prose-invert-body": "#ffffff",
             "--tw-prose-invert-headings": "#ffffff",
             "--tw-prose-invert-lead": "#ffffff",
-            "--tw-prose-invert-links":
-              "#F26208" /* Orange links in dark mode */,
+            "--tw-prose-invert-links": "#F26208",
             "--tw-prose-invert-bold": "#ffffff",
             "--tw-prose-invert-counters": "#ffffff",
             "--tw-prose-invert-bullets": "#ffffff",
@@ -280,4 +197,6 @@ export default {
     require("@tailwindcss/typography"),
     require("daisyui"),
   ],
-} satisfies Config;
+};
+
+export default config;
