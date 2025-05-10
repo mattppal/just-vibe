@@ -30,44 +30,49 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const [allDocs, setAllDocs] = useState<DocPage[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Get all docs for searching
+  // Combined data fetching with optimizations
   useEffect(() => {
-    async function fetchAllDocs() {
+    let isMounted = true;
+    
+    async function fetchData() {
       try {
-        // Fetch all docs for search functionality
-        const docs = await getAllDocs();
-
-        setAllDocs(docs);
+        // First fetch sections - this is critical for navigation
+        const sectionsData = await getDocsBySection();
+        
+        if (isMounted) {
+          setSections(sectionsData);
+          setLoading(false);
+          
+          // Build allDocs from sections - avoid a separate network request
+          const allDocsArray: DocPage[] = [];
+          Object.values(sectionsData).forEach(section => {
+            allDocsArray.push(...section);
+          });
+          
+          setAllDocs(allDocsArray);
+        }
       } catch (error) {
-        console.error("Error fetching all docs:", error);
+        // Silent fail on errors
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
 
-    fetchAllDocs();
+    fetchData();
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
   }, []);
-
+  
   // Reset search results when allDocs gets updated
   useEffect(() => {
     if (searchQuery && allDocs.length > 0) {
       performSearch(searchQuery);
     }
   }, [allDocs, searchQuery]);
-
-  // Get docs organized by section for normal navigation
-  useEffect(() => {
-    async function fetchDocs() {
-      try {
-        const sectionsData = await getDocsBySection();
-        setSections(sectionsData);
-      } catch (error) {
-        console.error("Error fetching docs:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchDocs();
-  }, []);
 
   // Handle search query directly
   function performSearch(query: string) {
@@ -277,13 +282,11 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                               ? "active text-orange-500 bg-[#111] font-medium"
                               : "text-gray-400 hover:text-orange-500",
                           )}
-                          onMouseEnter={() => {
-                            // Prefetch the document content when hovering over the link
-                            // This will make navigation feel instant once the user clicks
-                            queryClient.prefetchQuery({
-                              queryKey: [`/api/docs/path${doc.path}`],
-                              queryFn: () => getDocByPath(doc.path),
-                            });
+                          onClick={() => {
+                            // Close sidebar on mobile after user clicks a link
+                            if (window.innerWidth < 1024) {
+                              onClose();
+                            }
                           }}
                         >
                           <div className="flex items-center gap-2">

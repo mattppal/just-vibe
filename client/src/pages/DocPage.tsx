@@ -59,7 +59,7 @@ export default function DocPage() {
           setDoc(docData);
           document.title = `${docData.title} | Just Vibe Docs`;
           
-          // Use requestIdleCallback to prefetch adjacent docs when browser is idle
+          // Use requestIdleCallback to prefetch only immediately adjacent docs when browser is idle
           const prefetchAdjacentDocs = () => {
             if (docData && docData.section) {
               // Get preloading function from docs module
@@ -72,9 +72,10 @@ export default function DocPage() {
                     const currentIndex = currentSection.findIndex(d => d.slug === docData.slug);
                     
                     if (currentIndex !== -1) {
-                      // Create a queue of documents to prefetch, prioritizing adjacent ones
+                      // Create a small queue of only adjacent documents to prefetch
                       const prefetchQueue: DocPageType[] = [];
                       
+                      // Only prefetch next and previous document, not all documents
                       // Next document has higher priority
                       if (currentIndex < currentSection.length - 1) {
                         const nextDoc = currentSection[currentIndex + 1];
@@ -91,17 +92,8 @@ export default function DocPage() {
                         }
                       }
                       
-                      // Add remaining docs in current section to queue
-                      currentSection.forEach((doc, index) => {
-                        if (index !== currentIndex && !prefetchQueue.includes(doc)) {
-                          if (!doc.requiresAuth || isAuthenticated) {
-                            prefetchQueue.push(doc);
-                          }
-                        }
-                      });
-                      
-                      // Prefetch in sequence using a delay to avoid network congestion
-                      let delay = 0;
+                      // Prefetch only the adjacent pages with a longer delay
+                      let delay = 1000; // Start with a 1 second delay
                       prefetchQueue.forEach((doc) => {
                         setTimeout(() => {
                           if (doc.path) {
@@ -112,7 +104,7 @@ export default function DocPage() {
                             });
                           }
                         }, delay);
-                        delay += 300; // Stagger prefetches
+                        delay += 1000; // Longer stagger between prefetches
                       });
                     }
                   }
@@ -123,11 +115,11 @@ export default function DocPage() {
             }
           };
           
-          // Use requestIdleCallback for modern browsers or setTimeout as fallback
+          // Use requestIdleCallback with a longer timeout
           if (typeof window.requestIdleCallback === 'function') {
-            window.requestIdleCallback(prefetchAdjacentDocs, { timeout: 2000 });
+            window.requestIdleCallback(prefetchAdjacentDocs, { timeout: 5000 });
           } else {
-            setTimeout(prefetchAdjacentDocs, 1000);
+            setTimeout(prefetchAdjacentDocs, 2000);
           }
         } else {
           setError("Document not found");
