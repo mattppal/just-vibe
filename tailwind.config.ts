@@ -3,6 +3,16 @@ import type { Config } from "tailwindcss";
 export default {
   darkMode: ["class"],
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
+  daisyui: {
+    themes: false, // false: only light + dark | true: all themes | array: specific themes like this ["light", "dark", "cupcake"]
+    darkTheme: "dark", // name of one of the included themes for dark mode
+    base: true, // applies background color and foreground color for root element by default
+    styled: true, // include daisyUI colors and design decisions for all components
+    utils: true, // adds responsive and modifier utility classes
+    prefix: "", // prefix for daisyUI classnames (components, modifiers and responsive class names. Not colors)
+    logs: true, // Shows info about daisyUI version and used config in the console when building your CSS
+    themeRoot: ":root", // The element that receives theme color CSS variables
+  },
   theme: {
     fontFamily: {
       sans: ["'Geist Sans'", "system-ui", "sans-serif"],
@@ -17,17 +27,17 @@ export default {
       colors: {
         // Custom orange color with different shades
         orange: {
-          50: '#FEF4ED',
-          100: '#FEEADB',
-          200: '#FCD5B7',
-          300: '#FABC8A',
-          400: '#F7945D',
-          500: '#F26208', // Main orange color
-          600: '#C64E06',
-          700: '#993D05',
-          800: '#6D2C04',
-          900: '#401A02',
-          950: '#250F01',
+          50: "#FEF4ED",
+          100: "#FEEADB",
+          200: "#FCD5B7",
+          300: "#FABC8A",
+          400: "#F7945D",
+          500: "#F26208", // Main orange color
+          600: "#C64E06",
+          700: "#993D05",
+          800: "#6D2C04",
+          900: "#401A02",
+          950: "#250F01",
         },
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -105,90 +115,96 @@ export default {
       typography: {
         DEFAULT: {
           css: {
-            '--tw-prose-body': '#ffffff', /* Pure white */
-            '--tw-prose-headings': '#ffffff', /* Pure white */
-            '--tw-prose-lead': '#ffffff', /* Pure white */
-            '--tw-prose-links': '#F26208', /* Orange links */
-            '--tw-prose-bold': '#ffffff', /* Pure white */
-            '--tw-prose-counters': '#ffffff', /* Pure white */
-            '--tw-prose-bullets': '#ffffff', /* Pure white */
-            '--tw-prose-hr': '#333333', /* Dark dividers */
-            '--tw-prose-quotes': '#ffffff', /* Pure white */
-            '--tw-prose-quote-borders': '#333333', /* Dark border */
-            '--tw-prose-captions': '#ffffff', /* Pure white */
-            '--tw-prose-code': '#ffffff', /* Pure white */
-            '--tw-prose-pre-code': '#ffffff', /* Pure white */
-            '--tw-prose-pre-bg': '#0a0a0a', /* Very dark, not pure black for contrast */
-            '--tw-prose-th-borders': '#333333',
-            '--tw-prose-td-borders': '#333333',
-            
+            "--tw-prose-body": "#ffffff" /* Pure white */,
+            "--tw-prose-headings": "#ffffff" /* Pure white */,
+            "--tw-prose-lead": "#ffffff" /* Pure white */,
+            "--tw-prose-links": "#F26208" /* Orange links */,
+            "--tw-prose-bold": "#ffffff" /* Pure white */,
+            "--tw-prose-counters": "#ffffff" /* Pure white */,
+            "--tw-prose-bullets": "#ffffff" /* Pure white */,
+            "--tw-prose-hr": "#333333" /* Dark dividers */,
+            "--tw-prose-quotes": "#ffffff" /* Pure white */,
+            "--tw-prose-quote-borders": "#333333" /* Dark border */,
+            "--tw-prose-captions": "#ffffff" /* Pure white */,
+            "--tw-prose-code": "#ffffff" /* Pure white */,
+            "--tw-prose-pre-code": "#ffffff" /* Pure white */,
+            "--tw-prose-pre-bg":
+              "#0a0a0a" /* Very dark, not pure black for contrast */,
+            "--tw-prose-th-borders": "#333333",
+            "--tw-prose-td-borders": "#333333",
+
             // Dark mode overwrites (same as light mode since we want consistent black/white theme)
-            '--tw-prose-invert-body': '#ffffff',
-            '--tw-prose-invert-headings': '#ffffff',
-            '--tw-prose-invert-lead': '#ffffff',
-            '--tw-prose-invert-links': '#F26208', /* Orange links in dark mode */
-            '--tw-prose-invert-bold': '#ffffff',
-            '--tw-prose-invert-counters': '#ffffff',
-            '--tw-prose-invert-bullets': '#ffffff',
-            '--tw-prose-invert-hr': '#333333',
-            '--tw-prose-invert-quotes': '#ffffff',
-            '--tw-prose-invert-quote-borders': '#333333',
-            '--tw-prose-invert-captions': '#ffffff',
-            '--tw-prose-invert-code': '#ffffff', 
-            '--tw-prose-invert-pre-code': '#ffffff',
-            '--tw-prose-invert-pre-bg': '#0a0a0a',
-            '--tw-prose-invert-th-borders': '#333333',
-            '--tw-prose-invert-td-borders': '#333333',
-            
+            "--tw-prose-invert-body": "#ffffff",
+            "--tw-prose-invert-headings": "#ffffff",
+            "--tw-prose-invert-lead": "#ffffff",
+            "--tw-prose-invert-links":
+              "#F26208" /* Orange links in dark mode */,
+            "--tw-prose-invert-bold": "#ffffff",
+            "--tw-prose-invert-counters": "#ffffff",
+            "--tw-prose-invert-bullets": "#ffffff",
+            "--tw-prose-invert-hr": "#333333",
+            "--tw-prose-invert-quotes": "#ffffff",
+            "--tw-prose-invert-quote-borders": "#333333",
+            "--tw-prose-invert-captions": "#ffffff",
+            "--tw-prose-invert-code": "#ffffff",
+            "--tw-prose-invert-pre-code": "#ffffff",
+            "--tw-prose-invert-pre-bg": "#0a0a0a",
+            "--tw-prose-invert-th-borders": "#333333",
+            "--tw-prose-invert-td-borders": "#333333",
+
             // Additional specific styling
-            color: 'var(--tw-prose-body)',
+            color: "var(--tw-prose-body)",
             a: {
-              color: 'var(--tw-prose-links)',
-              '&:hover': {
-                color: 'var(--tw-prose-links)',
-                textDecoration: 'underline',
+              color: "var(--tw-prose-links)",
+              "&:hover": {
+                color: "var(--tw-prose-links)",
+                textDecoration: "underline",
               },
             },
             h1: {
-              color: 'var(--tw-prose-headings)',
-              fontWeight: '500',
+              color: "var(--tw-prose-headings)",
+              fontWeight: "500",
             },
             h2: {
-              color: 'var(--tw-prose-headings)',
-              fontWeight: '500',
+              color: "var(--tw-prose-headings)",
+              fontWeight: "500",
             },
             h3: {
-              color: 'var(--tw-prose-headings)',
-              fontWeight: '500',
+              color: "var(--tw-prose-headings)",
+              fontWeight: "500",
             },
             h4: {
-              color: 'var(--tw-prose-headings)',
-              fontWeight: '500',
+              color: "var(--tw-prose-headings)",
+              fontWeight: "500",
             },
             strong: {
-              color: 'var(--tw-prose-bold)',
-              fontWeight: '600',
+              color: "var(--tw-prose-bold)",
+              fontWeight: "600",
             },
             code: {
-              color: 'var(--tw-prose-code)',
-              backgroundColor: 'var(--tw-prose-pre-bg)',
-              fontWeight: '400',
-              borderRadius: '0.25rem',
-              paddingTop: '0.125rem',
-              paddingRight: '0.25rem',
-              paddingBottom: '0.125rem',
-              paddingLeft: '0.25rem',
+              color: "var(--tw-prose-code)",
+              backgroundColor: "var(--tw-prose-pre-bg)",
+              fontWeight: "400",
+              borderRadius: "0.25rem",
+              paddingTop: "0.125rem",
+              paddingRight: "0.25rem",
+              paddingBottom: "0.125rem",
+              paddingLeft: "0.25rem",
             },
             pre: {
-              color: 'var(--tw-prose-pre-code)',
-              backgroundColor: 'var(--tw-prose-pre-bg)',
-              borderRadius: '0.375rem',
-              padding: '0.75rem 1rem',
+              color: "var(--tw-prose-pre-code)",
+              backgroundColor: "var(--tw-prose-pre-bg)",
+              borderRadius: "0.375rem",
+              padding: "0.75rem 1rem",
             },
           },
         },
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require("@tailwindcss/typography"),
+    require("daisyui"),
+  ],
 } satisfies Config;

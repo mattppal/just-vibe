@@ -1,12 +1,14 @@
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
+import remarkMdx from 'remark-mdx';
 import remarkRehype from 'remark-rehype';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeSlug from 'rehype-slug';
 import rehypeStringify from 'rehype-stringify';
+import { compile } from '@mdx-js/mdx';
 import { visit } from 'unist-util-visit';
 import { Node } from 'unist';
 
@@ -155,18 +157,23 @@ function rehypeEnhanceCodeBlocks() {
  * @param content The markdown content to process
  * @returns Processed HTML with syntax highlighting and proper structure
  */
-export async function processMarkdown(content: string): Promise<string> {
+// Forward declaration to resolve TypeScript error
+async function processMdxContent(content: string): Promise<string>;
+
+export async function processMarkdown(content: string, isMdx: boolean = false): Promise<string> {
+  // If this is MDX content, we need a different processing pipeline
+  if (isMdx) {
+    return await processMdxContent(content);
+  }
+  
+  // Standard markdown processing for .md files
   const result = await unified()
-    // Parse markdown into mdast
     .use(remarkParse)
-    // Support GitHub Flavored Markdown features
     .use(remarkGfm)
-    // Turn mdast into hast (HTML Abstract Syntax Tree)
     .use(remarkRehype, { 
-      allowDangerousHtml: true, // Allow raw HTML in markdown
-      // Custom footnote labels for accessibility
+      allowDangerousHtml: true,
       footnoteLabel: 'Footnotes',
-      footnoteBackLabel: 'Back to content',
+      footnoteBackLabel: 'Back to content'
     })
     // Handle raw HTML in markdown
     .use(rehypeRaw)
@@ -175,13 +182,30 @@ export async function processMarkdown(content: string): Promise<string> {
       tagNames: [
         'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'ul', 'ol', 'li', 'blockquote',
         'table', 'thead', 'tbody', 'tr', 'th', 'td', 'pre', 'code', 'a', 'strong',
-        'em', 'del', 'br', 'hr', 'div', 'span', 'img', 'iframe' // Add iframe to allowed tags
+        'em', 'del', 'br', 'hr', 'div', 'span', 'img', 'iframe', 
+        // Allow custom components for MDX
+        ...(isMdx ? [
+          // Common component names
+          'Button', 'Card', 'Alert', 'Info', 'Warning', 'Note', 'CodeBlock',
+          'Tabs', 'TabItem', 'YouTube', 'Callout', 'Details', 'Image',
+          // Allow custom components with namespace
+          'ui:button', 'ui:card', 'ui:alert'
+        ] : [])
       ],
       attributes: {
         // Allow data attributes for custom functionality
-        '*': ['className', 'data-*', 'id'],
+        '*': ['className', 'data-*', 'id', 'style', 'onClick'],
         // Allow YouTube iframes with all required attributes
-        iframe: ['src', 'allowFullScreen', 'allow', 'loading', 'title', 'width', 'height', 'frameBorder']
+        iframe: ['src', 'allowFullScreen', 'allow', 'loading', 'title', 'width', 'height', 'frameBorder'],
+        // Props for MDX components
+        ...(isMdx ? {
+          'Button': ['variant', 'size', 'disabled', 'type', 'onClick'],
+          'Card': ['title', 'image', 'footer', 'bordered'],
+          'Alert': ['type', 'title', 'closable'],
+          'YouTube': ['id', 'title', 'start', 'width', 'height'],
+          'Tabs': ['defaultValue', 'variant', 'orientation'],
+          'TabItem': ['value', 'title', 'disabled']
+        } : {})
       }
     })
     // Add IDs to headings for table of contents
@@ -200,6 +224,47 @@ export async function processMarkdown(content: string): Promise<string> {
     .process(content);
 
   return String(result);
+}
+
+/**
+ * Process MDX content using the MDX compiler
+ * This function specifically handles MDX syntax including JSX, imports/exports, and expressions
+ * 
+ * @param content The MDX content to process
+ * @returns Processed HTML string with MDX components intact
+ */
+async function processMdxContent(content: string): Promise<string> {
+  try {
+    // Step 1: Use the MDX compiler to transform MDX to JavaScript
+    // We'll use the serializable output format which gives us JSX output instead of JS
+    const result = await compile(content, {
+      outputFormat: 'function-body',
+      development: true,
+      jsx: true,
+      // We'll use remark and rehype plugins for consistent styling
+      remarkPlugins: [remarkGfm],
+      rehypePlugins: [
+        rehypeSlug,
+        [rehypeHighlight, { detect: true, ignoreMissing: true }],
+        rehypeEnhanceCodeBlocks
+      ]
+    });
+    
+    // For now, we can simply convert the compiled output to a string
+    // In a full implementation, this would be handled client-side to render components
+    // We'll mock this for now by adding special markers around the components
+    const jsxOutput = String(result)
+      // Add markers for custom components to be recognized client-side
+      .replace(/<([A-Z][A-Za-z0-9]+)/g, '<mdx-component name="$1"')
+      .replace(/<\/([A-Z][A-Za-z0-9]+)>/g, '</mdx-component>')
+      // Replace import statements with HTML comments
+      .replace(/import\s+.*?from\s+['"](.*?)['"];?/g, '<!-- Import: $1 -->');
+    
+    return jsxOutput;
+  } catch (error) {
+    console.error('Error processing MDX content:', error);
+    return `<div class="error">Error processing MDX content: ${error instanceof Error ? error.message : String(error)}</div>`;
+  }
 }
 
 /**
