@@ -269,7 +269,7 @@
 
 .hljs-symbol,
 .hljs-bullet {
-  @apply text-blue-400;
+  @apply text-orange-500;
 }
 
 .hljs-addition {
