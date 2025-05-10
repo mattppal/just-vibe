@@ -2,6 +2,9 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import helmet from "helmet";
+import csrf from "csurf";
+import cookieParser from "cookie-parser";
+import rateLimit from "express-rate-limit";
 
 const app = express();
 
@@ -40,8 +43,81 @@ app.use(helmet({
   referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 }));
 
+// Parse cookies before CSRF protection
+app.use(cookieParser());
+
+// Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Rate limiting - protect against brute force attacks
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again after 15 minutes',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply rate limiting to API routes
+app.use('/api/', apiLimiter);
+
+// Enable CSRF protection for all routes
+const csrfProtection = csrf({ cookie: { sameSite: 'strict', secure: !isDevelopment } });
+
+// Middleware to check Origin header for all API requests
+app.use('/api', (req, res, next) => {
+  const origin = req.get('Origin');
+  const host = req.get('Host');
+  
+  // Allow requests with no origin (like mobile apps, curl)
+  if (!origin) {
+    // For requests from the same host (server-side rendering)
+    if (host) {
+      return next();
+    }
+    
+    return res.status(403).json({ message: 'Origin required' });
+  }
+  
+  // Check if the Origin is from our site
+  const allowedOrigins = [
+    `http://localhost:5000`,
+    `https://localhost:5000`,
+    `http://${req.headers.host}`,
+    `https://${req.headers.host}`,
+  ];
+  
+  if (isDevelopment) {
+    // Add the Replit domain in development
+    allowedOrigins.push(
+      `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`,
+      `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.replit.app`
+    );
+  }
+  
+  if (!allowedOrigins.includes(origin)) {
+    return res.status(403).json({ message: 'Forbidden - Origin not allowed' });
+  }
+  
+  // Call CSRF protection for all API routes except for public endpoints
+  if (
+    // Example of public endpoints that don't need CSRF protection
+    req.path === '/api/auth/user' && req.method === 'GET' ||
+    req.path === '/api/docs/path/introduction' && req.method === 'GET' ||
+    req.path === '/api/sections' && req.method === 'GET'
+  ) {
+    return next();
+  }
+  
+  // Apply CSRF protection to non-public API endpoints
+  return csrfProtection(req, res, next);
+});
+
+// Generate CSRF token endpoint
+app.get('/api/csrf-token', csrfProtection, (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
 
 app.use((req, res, next) => {
   const start = Date.now();
