@@ -51,19 +51,33 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Generate a secure token on startup that would be required for all non-browser API requests
-// This makes it extremely difficult for external tools to access our API endpoints
+// Generate secure tokens for API access
+// In a production environment, these should ideally be set through environment variables
+// or a secure secrets management solution, not generated on startup
+
+// Get API key from environment or generate a new one
 const API_SECRET_KEY = process.env.API_SECRET_KEY || crypto.randomBytes(32).toString('hex');
 process.env.API_SECRET_KEY = API_SECRET_KEY;
 
 // Create a permanent token for the application instance
-const APP_INSTANCE_TOKEN = `app-${process.env.REPL_ID || crypto.randomBytes(8).toString('hex')}`;
+const APP_INSTANCE_TOKEN = process.env.APP_INSTANCE_TOKEN || 
+                         `app-${process.env.REPL_ID || crypto.randomBytes(8).toString('hex')}`;
 process.env.APP_INSTANCE_TOKEN = APP_INSTANCE_TOKEN;
 
-// Log the tokens to the console when starting the server (ONLY in development)
+// In development, only log a masked version of the tokens for security
 if (isDevelopment) {
-  console.log(`API_SECRET_KEY=${API_SECRET_KEY}`);
-  console.log(`APP_INSTANCE_TOKEN=${APP_INSTANCE_TOKEN}`);
+  // Only show the first 8 and last 4 characters of the API key
+  const maskedApiKey = API_SECRET_KEY.length > 12 
+    ? `${API_SECRET_KEY.substring(0, 8)}...${API_SECRET_KEY.substring(API_SECRET_KEY.length - 4)}` 
+    : '********';
+    
+  // Only show the app- prefix and first few chars of the instance token
+  const maskedAppToken = APP_INSTANCE_TOKEN.startsWith('app-') 
+    ? `app-${APP_INSTANCE_TOKEN.substring(4, 8)}...` 
+    : 'app-********';
+    
+  console.log(`API_SECRET_KEY=${maskedApiKey} (masked for security)`); 
+  console.log(`APP_INSTANCE_TOKEN=${maskedAppToken} (masked for security)`);
 }
 
 // Pass necessary environment variables to the frontend for secure API access
