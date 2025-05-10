@@ -1,6 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Menu, LogIn, LogOut, Lock, User, ChevronDown } from "lucide-react";
-import { DocPage, getDocByPath } from "@/lib/docs";
+import { Menu, LogIn, LogOut, User } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -25,61 +24,25 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
 
-  // This effect captures the scrollY position when the dropdown opens
-  // and prevents the header from disappearing on scroll
+  // Only add a class to body when dropdown is open for styling purposes
   useEffect(() => {
-    if (!dropdownOpen) return;
+    const bodyEl = document.body;
     
-    // Calculate the current scroll position
-    const scrollY = window.scrollY;
+    if (dropdownOpen) {
+      bodyEl.classList.add('dropdown-open');
+    } else {
+      bodyEl.classList.remove('dropdown-open');
+    }
     
-    const handleScroll = () => {
-      // When dropdown is open, maintain the header in the viewport
-      if (headerRef.current) {
-        // Force the header to remain fixed at the top
-        headerRef.current.style.position = 'fixed';
-        headerRef.current.style.top = '0';
-        headerRef.current.style.left = '0';
-        headerRef.current.style.right = '0';
-        headerRef.current.style.width = '100%';
-        headerRef.current.style.zIndex = '100';
-        
-        // If user scrolls, ensure header stays in place and scrolls with them
-        if (window.scrollY !== scrollY) {
-          window.scrollTo(0, scrollY);
-        }
-      }
-    };
-    
-    // Apply initial styles to lock header in place
-    handleScroll();
-    
-    // Add event listeners to react to scroll attempts
-    window.addEventListener('scroll', handleScroll, { passive: false });
-    
-    // Cleanup function
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      
-      // Reset the header back to its CSS-controlled state when dropdown closes
-      if (headerRef.current) {
-        headerRef.current.style.position = '';
-        headerRef.current.style.top = '';
-        headerRef.current.style.left = '';
-        headerRef.current.style.right = '';
-        headerRef.current.style.width = '';
-        headerRef.current.style.zIndex = '';
-      }
+      bodyEl.classList.remove('dropdown-open');
     };
   }, [dropdownOpen]);
 
   return (
     <header 
       ref={headerRef}
-      className={cn(
-        "sticky top-0 z-50 w-full border-b border-[#333] bg-black/90 backdrop-blur-sm",
-        dropdownOpen && "sticky-header-no-shift"
-      )}
+      className="sticky top-0 z-50 w-full border-b border-[#333] bg-black/90 backdrop-blur-sm"
     >
       <div className="flex h-14 items-center px-4 md:px-6">
         <div className="text-white font-bold text-xl flex items-center mr-6 tracking-tight">
@@ -127,9 +90,7 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
                 <DropdownMenuContent
                   align="end"
                   sideOffset={8}
-                  avoidCollisions={false}
-                  collisionPadding={16}
-                  className="w-56 bg-black border border-[#333] p-1 text-white z-[110] fixed-dropdown"
+                  className="w-56 bg-black border border-[#333] p-1 text-white fixed-dropdown"
                 >
                   <div className="flex items-center justify-start gap-3 p-2">
                     <Avatar className="h-9 w-9 border border-[#333]">
