@@ -159,54 +159,51 @@ function rehypeEnhanceCodeBlocks() {
  * @returns Processed HTML string
  */
 export async function processMarkdown(content: string, isMdx: boolean = false): Promise<string> {
-  // For now, we'll use the same processing pipeline for both .md and .mdx
-  // In a full implementation, we would use different pipelines
-  
-  // Create processor based on whether it's MDX or markdown
-  let processor = unified().use(remarkParse).use(remarkGfm);
-  
-  // Add MDX plugin if processing MDX content
-  if (isMdx) {
-    processor = processor.use(remarkMdx);
+  try {
+    // Use the proper processor chain for either Markdown or MDX
+    const processor = unified()
+      .use(remarkParse);
+    
+    // Add GFM support (tables, autolinks, etc.)
+    processor.use(remarkGfm);
+    
+    // Add MDX plugin only if we're processing MDX content
+    if (isMdx) {
+      processor.use(remarkMdx);
+    }
+    
+    // Convert to HTML
+    processor
+      .use(remarkRehype, { 
+        allowDangerousHtml: true,
+        footnoteLabel: 'Footnotes',
+        footnoteBackLabel: 'Back to content'
+      })
+      .use(rehypeRaw)
+      .use(rehypeSanitize, {
+        tagNames: [
+          'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'ul', 'ol', 'li', 'blockquote',
+          'table', 'thead', 'tbody', 'tr', 'th', 'td', 'pre', 'code', 'a', 'strong',
+          'em', 'del', 'br', 'hr', 'div', 'span', 'img', 'iframe'
+        ],
+        attributes: {
+          '*': ['className', 'id'],
+          'iframe': ['src', 'allowFullScreen', 'allow', 'loading', 'title', 'width', 'height', 'frameBorder'],
+          'a': ['href', 'target', 'rel']
+        }
+      })
+      .use(rehypeSlug)
+      .use(rehypeHighlight, { detect: true, ignoreMissing: true })
+      .use(rehypeEnhanceCodeBlocks)
+      .use(rehypeStringify);
+    
+    // Process the content
+    const file = await processor.process(content);
+    return String(file);
+  } catch (error) {
+    console.error('Error processing markdown content:', error);
+    return `<div class="markdown-error">Error processing content: ${error instanceof Error ? error.message : String(error)}</div>`;
   }
-  
-  // Continue with common processing
-  processor = processor.use(remarkRehype, { 
-    allowDangerousHtml: true,
-    footnoteLabel: 'Footnotes',
-    footnoteBackLabel: 'Back to content'
-  })
-    // Handle raw HTML in markdown
-    .use(rehypeRaw)
-    // Sanitize HTML to prevent XSS (very important for security)
-    .use(rehypeSanitize, {
-      tagNames: [
-        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'ul', 'ol', 'li', 'blockquote',
-        'table', 'thead', 'tbody', 'tr', 'th', 'td', 'pre', 'code', 'a', 'strong',
-        'em', 'del', 'br', 'hr', 'div', 'span', 'img', 'iframe'
-      ],
-      attributes: {
-        // Allow common attributes
-        '*': ['className', 'id'],
-        // Allow YouTube iframes with required attributes
-        'iframe': ['src', 'allowFullScreen', 'allow', 'loading', 'title', 'width', 'height', 'frameBorder'],
-        'a': ['href', 'target', 'rel']
-      }
-    })
-    // Add IDs to headings for table of contents
-    .use(rehypeSlug)
-    // Add syntax highlighting to code blocks
-    .use(rehypeHighlight, {
-      detect: true,
-      ignoreMissing: true,
-    })
-    // Apply custom styling to code blocks
-    .use(rehypeEnhanceCodeBlocks)
-    // Convert hast to HTML string
-    .use(rehypeStringify)
-    .process(content);
-
-  return String(result);
 }
 
 /**
