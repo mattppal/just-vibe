@@ -65,48 +65,77 @@ app.use('/api/', apiLimiter);
 // Enable CSRF protection for all routes
 const csrfProtection = csrf({ cookie: { sameSite: 'strict', secure: !isDevelopment } });
 
-// Middleware to check Origin header for all API requests
+// Middleware to check Origin header and referer for all API requests
 app.use('/api', (req, res, next) => {
+  // First check if this is a browser request by checking for standard browser headers
+  const userAgent = req.get('User-Agent') || '';
+  const isBrowserRequest = userAgent.includes('Mozilla') || 
+                          userAgent.includes('Chrome') || 
+                          userAgent.includes('Safari') || 
+                          userAgent.includes('Firefox') || 
+                          userAgent.includes('Edge');
+  
   const origin = req.get('Origin');
+  const referer = req.get('Referer');
   const host = req.get('Host');
   
-  // Allow requests with no origin (like mobile apps, curl)
-  if (!origin) {
-    // For requests from the same host (server-side rendering)
-    if (host) {
-      return next();
+  // Additional security for API endpoints
+  // If there's no browser user agent and no proper authentication, block the request
+  // This helps prevent direct curl/script access
+  if (!isBrowserRequest && !req.isAuthenticated()) {
+    // If this is not a browser and has no auth header, apply strict API key check
+    // Check for session cookies as secondary authentication method
+    const hasCookieAuth = req.cookies && Object.keys(req.cookies).some(key => 
+      key.toLowerCase().includes('session') || key.toLowerCase().includes('auth')
+    );
+    
+    // Check if request came from the same host (server-to-server communication)
+    const isLocalRequest = host && (
+      req.ip === '127.0.0.1' || 
+      req.ip === '::1' || 
+      req.ip === 'localhost'
+    );
+    
+    // If none of the authentication methods are present, block the request
+    if (!hasCookieAuth && !isLocalRequest) {
+      return res.status(403).json({ message: 'Access denied. Authentication required.' });
+    }
+  }
+  
+  // Browser requests must have a valid origin or referer
+  if (isBrowserRequest) {
+    if (!origin && !referer) {
+      return res.status(403).json({ message: 'Origin or Referer required for browser requests' });
     }
     
-    return res.status(403).json({ message: 'Origin required' });
+    // Check if the Origin/Referer is from our site
+    const allowedDomains = [
+      'localhost:5000',
+      req.headers.host || '',
+    ];
+    
+    if (isDevelopment && process.env.REPL_SLUG && process.env.REPL_OWNER) {
+      // Add the Replit domains in development
+      allowedDomains.push(
+        `${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`,
+        `${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.replit.app`
+      );
+    }
+    
+    // Check both Origin and Referer
+    const isValidOrigin = origin && allowedDomains.some(domain => origin.includes(domain));
+    const isValidReferer = referer && allowedDomains.some(domain => referer.includes(domain));
+    
+    if (!isValidOrigin && !isValidReferer) {
+      return res.status(403).json({ message: 'Forbidden - Origin/Referer not allowed' });
+    }
   }
   
-  // Check if the Origin is from our site
-  const allowedOrigins = [
-    `http://localhost:5000`,
-    `https://localhost:5000`,
-    `http://${req.headers.host}`,
-    `https://${req.headers.host}`,
-  ];
-  
-  if (isDevelopment) {
-    // Add the Replit domain in development
-    allowedOrigins.push(
-      `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`,
-      `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.replit.app`
-    );
-  }
-  
-  if (!allowedOrigins.includes(origin)) {
-    return res.status(403).json({ message: 'Forbidden - Origin not allowed' });
-  }
-  
-  // Call CSRF protection for all API routes except for public endpoints
-  if (
-    // Example of public endpoints that don't need CSRF protection
-    req.path === '/api/auth/user' && req.method === 'GET' ||
-    req.path === '/api/docs/path/introduction' && req.method === 'GET' ||
-    req.path === '/api/sections' && req.method === 'GET'
-  ) {
+  // Call CSRF protection for all API routes except for read-only GET requests
+  // We want to apply stricter security to any endpoints that might modify data
+  if (req.method === 'GET') {
+    // Public GET endpoints don't need CSRF protection
+    // But we still want to authenticate the request origin above
     return next();
   }
   

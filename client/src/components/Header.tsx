@@ -22,25 +22,8 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
   const [currentDoc, setCurrentDoc] = useState<DocPage | undefined>(undefined);
   const { isAuthenticated, isLoading, user, login, logout } = useAuth();
 
-  // Only fetch doc metadata when the path is a document path
-  useEffect(() => {
-    // Skip unnecessary fetches for non-doc paths
-    if (!location.startsWith('/')) {
-      return;
-    }
-    
-    async function fetchDoc() {
-      try {
-        const doc = await getDocByPath(location);
-        setCurrentDoc(doc);
-      } catch (e) {
-        // Silent fail - the header just needs to know the document title if available
-        setCurrentDoc(undefined);
-      }
-    }
-
-    fetchDoc();
-  }, [location]);
+  // We don't need to fetch doc metadata in the header - this duplicates requests
+  // from the DocPage component. The header doesn't actually use the current doc data.
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-[#333] bg-black/90 backdrop-blur-sm">
