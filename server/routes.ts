@@ -79,6 +79,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // API endpoint to get the first doc (for home page)
+  app.get("/api/docs/first", async (req, res, next) => {
+    try {
+      const allDocs = await getAllDocs();
+      
+      if (allDocs.length === 0) {
+        return res.status(404).json({ message: "No documentation found" });
+      }
+      
+      // Get the first document in the sorted list
+      const firstDoc = allDocs[0];
+      
+      // Attach doc to response locals for middleware
+      res.locals.doc = firstDoc;
+      next();
+    } catch (error) {
+      console.error("Error fetching first doc:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  }, protectDocIfNeeded, (req, res) => {
+    return res.json(res.locals.doc);
+  });
+  
   app.get("/api/docs/:slug", async (req, res, next) => {
     try {
       const { slug } = req.params;
