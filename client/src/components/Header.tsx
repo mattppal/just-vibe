@@ -32,7 +32,7 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
   }, [location]);
 
   return (
-    <header className="sticky top-0 z-20 w-full border-b border-[#333] bg-black/90 backdrop-blur-sm">
+    <header className="sticky top-0 z-40 w-full border-b border-[#333] bg-black/90 backdrop-blur-sm">
       <div className="flex h-14 items-center px-4 md:px-6">
         <div className="text-white font-bold text-xl flex items-center mr-6 tracking-tight">Just Vibe</div>
         

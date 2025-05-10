@@ -220,6 +220,12 @@
   width: 100%;
 }
 
+/* Fix for sidebar border consistency */
+.sidebar-with-border {
+  border-right: 1px solid #333;
+  box-sizing: border-box;
+}
+
 /* Highlighting theme for code blocks */
 .hljs-comment,
 .hljs-quote {
