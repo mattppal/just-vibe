@@ -1,6 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Search as SearchIcon, X } from "lucide-react";
 import { useLocation } from "wouter";
@@ -21,24 +26,27 @@ export default function Search() {
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
-    
+
     if (query.length < 2) {
       setResults([]);
       return;
     }
-    
+
     // Search through documentation
     const docs = await getAllDocs();
-    const filtered = docs.filter((doc) => 
-      doc.title.toLowerCase().includes(query.toLowerCase()) || 
-      doc.content.toLowerCase().includes(query.toLowerCase())
+    const filtered = docs.filter(
+      (doc) =>
+        doc.title.toLowerCase().includes(query.toLowerCase()) ||
+        doc.content.toLowerCase().includes(query.toLowerCase()),
     );
-    
-    setResults(filtered.map((doc) => ({
-      title: doc.title,
-      path: doc.path,
-      excerpt: doc.content.substring(0, 100) + "..."
-    })));
+
+    setResults(
+      filtered.map((doc) => ({
+        title: doc.title,
+        path: doc.path,
+        excerpt: doc.content.substring(0, 100) + "...",
+      })),
+    );
   };
 
   const handleSelectResult = (path: string) => {
@@ -54,17 +62,17 @@ export default function Search() {
         e.preventDefault();
         setOpen(true);
       }
-      
+
       // Escape to close
       if (e.key === "Escape" && open) {
         setOpen(false);
       }
     };
-    
+
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open]);
-  
+
   // Focus input when dialog opens
   useEffect(() => {
     if (open && inputRef.current) {
@@ -112,18 +120,23 @@ export default function Search() {
               </Button>
             )}
           </div>
-          
+
           {results.length > 0 ? (
             <ul className="max-h-[300px] overflow-y-auto">
               {results.map((result, index) => (
-                <li key={index} className="border-b border-border last:border-0">
+                <li
+                  key={index}
+                  className="border-b border-border last:border-0"
+                >
                   <Button
                     variant="ghost"
                     className="w-full justify-start px-2 py-4 h-auto text-left"
                     onClick={() => handleSelectResult(result.path)}
                   >
                     <div>
-                      <h4 className="font-medium text-foreground">{result.title}</h4>
+                      <h4 className="font-medium text-foreground">
+                        {result.title}
+                      </h4>
                       <p className="text-sm text-secondary truncate">
                         {result.excerpt}
                       </p>

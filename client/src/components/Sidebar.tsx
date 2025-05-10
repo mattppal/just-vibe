@@ -1,14 +1,13 @@
 import { Link, useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { ChevronRight, Search, X, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { DocPage, getAllDocs, getDocsBySection, getDocByPath } from "@/lib/docs";
+import {
+  DocPage,
+  getAllDocs,
+  getDocsBySection,
+  getDocByPath,
+} from "@/lib/docs";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -155,16 +154,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         )}
       >
         <div className="px-8 mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex-1"></div>
-            <button
-              onClick={onClose}
-              className="p-1 text-secondary hover:text-foreground lg:hidden"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
           <div className="relative">
             <Input
               type="search"
@@ -232,7 +221,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                             // Prefetch content when hovering over search result
                             queryClient.prefetchQuery({
                               queryKey: [`/api/docs/path${doc.path}`],
-                              queryFn: () => getDocByPath(doc.path)
+                              queryFn: () => getDocByPath(doc.path),
                             });
                           }}
                           onClick={() => {
@@ -307,7 +296,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                             // This will make navigation feel instant once the user clicks
                             queryClient.prefetchQuery({
                               queryKey: [`/api/docs/path${doc.path}`],
-                              queryFn: () => getDocByPath(doc.path)
+                              queryFn: () => getDocByPath(doc.path),
                             });
                           }}
                         >
