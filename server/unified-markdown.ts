@@ -171,10 +171,15 @@ export async function processMarkdown(content: string): Promise<string> {
     .use(rehypeRaw)
     // Sanitize HTML to prevent XSS (very important for security)
     .use(rehypeSanitize, {
+      tagNames: [
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'ul', 'ol', 'li', 'blockquote',
+        'table', 'thead', 'tbody', 'tr', 'th', 'td', 'pre', 'code', 'a', 'strong',
+        'em', 'del', 'br', 'hr', 'div', 'span', 'img', 'iframe' // Add iframe to allowed tags
+      ],
       attributes: {
         // Allow data attributes for custom functionality
         '*': ['className', 'data-*', 'id'],
-        // Allow YouTube iframes
+        // Allow YouTube iframes with all required attributes
         iframe: ['src', 'allowFullScreen', 'allow', 'loading', 'title', 'width', 'height', 'frameBorder']
       }
     })
