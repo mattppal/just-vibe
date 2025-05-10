@@ -65,7 +65,11 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
                 align="end"
                 sideOffset={8}
                 className="w-56 bg-black border border-[#333] p-1 text-white z-50"
-                style={{ transform: "translateX(0)" }}
+                style={{ 
+                  position: "absolute",
+                  right: 0,
+                  top: "100%"
+                }}
               >
                 <div className="flex items-center justify-start gap-3 p-2">
                   <Avatar className="h-9 w-9 border border-[#333]">
