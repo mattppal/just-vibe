@@ -211,14 +211,46 @@ export default function DocPage() {
       }
     });
     
-    // Convert YouTube embeds to iframes
+    // Make direct iframes responsive (like YouTube embeds)
+    const contentNode = document.getElementById('doc-content');
+    if (contentNode) {
+      const iframes = contentNode.querySelectorAll('iframe');
+      iframes.forEach((iframe) => {
+        if (!(iframe.parentNode as any).__wrapped && iframe.src.includes('youtube.com')) {
+          // Create a responsive container
+          const container = document.createElement('div');
+          container.className = 'relative w-full max-w-full aspect-video bg-[#0a0a0a] rounded-md overflow-hidden my-4';
+          
+          // Clone the iframe and set responsive properties
+          const newIframe = iframe.cloneNode() as HTMLIFrameElement;
+          newIframe.className = 'absolute top-0 left-0 w-full h-full border-0';
+          newIframe.width = '100%';
+          newIframe.height = '100%';
+          newIframe.style.maxWidth = '100%';
+          newIframe.allowFullscreen = true;
+          newIframe.loading = 'lazy';
+          
+          // Add the iframe to the container
+          container.appendChild(newIframe);
+          
+          // Replace the original iframe with the container
+          const parent = iframe.parentNode;
+          if (parent) {
+            parent.replaceChild(container, iframe);
+            (parent as any).__wrapped = true;
+          }
+        }
+      });
+    }
+    
+    // Legacy support for div.youtube-embed elements (if any exist)
     const youtubeEmbeds = document.querySelectorAll('div.youtube-embed');
     youtubeEmbeds.forEach((embed) => {
       const youtubeId = embed.getAttribute('data-youtube-id');
       if (youtubeId && !(embed as any).__processed) {
         // Replace with a simple iframe instead of React component
         const container = document.createElement('div');
-        container.className = 'relative w-full pt-[56.25%] bg-[#0a0a0a] rounded-md overflow-hidden my-4';
+        container.className = 'relative w-full max-w-full aspect-video bg-[#0a0a0a] rounded-md overflow-hidden my-4';
         
         const iframe = document.createElement('iframe');
         iframe.src = `https://www.youtube.com/embed/${youtubeId}`;

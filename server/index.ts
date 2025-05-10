@@ -24,6 +24,8 @@ app.use(helmet({
       baseUri: ["'self'"],
       frameAncestors: ["'none'"],
       formAction: ["'self'"],
+      // Allow YouTube embeds
+      frameSrc: ["'self'", "https://www.youtube.com", "https://youtube.com"],
       // Only apply upgradeInsecureRequests in production
       ...(isDevelopment ? {} : { upgradeInsecureRequests: [] }),
     },
