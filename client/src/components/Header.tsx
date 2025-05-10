@@ -26,7 +26,7 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
   // from the DocPage component. The header doesn't actually use the current doc data.
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-[#333] bg-black/90 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-[#333] bg-black/90 backdrop-blur-sm">
       <div className="flex h-14 items-center px-4 md:px-6">
         <div className="text-white font-bold text-xl flex items-center mr-6 tracking-tight">Just Vibe</div>
         
@@ -62,7 +62,7 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
               <DropdownMenuContent
                 align="end"
                 sideOffset={8}
-                className="w-56 bg-black border border-[#333] p-1 text-white z-50"
+                className="w-56 bg-black border border-[#333] p-1 text-white z-50 fixed"
               >
                 <div className="flex items-center justify-start gap-3 p-2">
                   <Avatar className="h-9 w-9 border border-[#333]">
