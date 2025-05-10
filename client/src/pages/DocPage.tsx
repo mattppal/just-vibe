@@ -211,22 +211,52 @@ export default function DocPage() {
       }
     });
     
-    // Make direct iframes responsive (using CSS only now)
+    // Make direct iframes responsive (proper wrapper approach)
     const contentNode = document.getElementById('doc-content');
     if (contentNode) {
       const iframes = contentNode.querySelectorAll('iframe');
       iframes.forEach((iframe) => {
-        if (!iframe.hasAttribute('width') || !iframe.hasAttribute('height')) {
-          iframe.setAttribute('width', '100%');
-          iframe.setAttribute('height', 'auto');
-        }
-        // Always ensure the iframe has proper attributes
+        // Handle all iframes - basic properties
         iframe.allowFullscreen = true;
         iframe.loading = 'lazy';
         
-        // Set title for accessibility if missing
-        if (!iframe.hasAttribute('title') && iframe.src.includes('youtube.com')) {
-          iframe.setAttribute('title', 'YouTube video');
+        // Special handling for YouTube videos
+        if (iframe.src.includes('youtube.com')) {
+          // Skip already processed YouTube iframes
+          if (iframe.parentElement?.classList.contains('youtube-container')) {
+            return;
+          }
+          
+          // Set title for accessibility if missing
+          if (!iframe.hasAttribute('title')) {
+            iframe.setAttribute('title', 'YouTube video');
+          }
+          
+          // Ensure YouTube iframe has the required attributes
+          iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+          iframe.setAttribute('frameborder', '0');
+          
+          // Create a container for the iframe for proper aspect ratio
+          const container = document.createElement('div');
+          container.className = 'youtube-container';
+          
+          // Replace the iframe with the container + iframe
+          const parent = iframe.parentNode;
+          if (parent) {
+            // Insert the container before the iframe
+            parent.insertBefore(container, iframe);
+            // Move the iframe into the container
+            container.appendChild(iframe);
+          }
+        } else {
+          // Handle non-YouTube iframes
+          iframe.setAttribute('width', '100%');
+          iframe.setAttribute('height', 'auto');
+          
+          // Remove any style attribute that might interfere with our CSS
+          if (iframe.hasAttribute('style')) {
+            iframe.removeAttribute('style');
+          }
         }
       });
     }
@@ -236,17 +266,24 @@ export default function DocPage() {
     youtubeEmbeds.forEach((embed) => {
       const youtubeId = embed.getAttribute('data-youtube-id');
       if (youtubeId && !(embed as any).__processed) {
-        // Replace with a standard iframe
+        // Create a container div for proper aspect ratio
+        const container = document.createElement('div');
+        container.className = 'youtube-container';
+        
+        // Create the iframe
         const iframe = document.createElement('iframe');
         iframe.src = `https://www.youtube.com/embed/${youtubeId}`;
-        iframe.width = '100%';
-        iframe.height = 'auto';
         iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
         iframe.allowFullscreen = true;
         iframe.loading = 'lazy';
         iframe.title = 'YouTube video';
+        iframe.setAttribute('frameborder', '0');
         
-        embed.parentNode?.replaceChild(iframe, embed);
+        // Add iframe to container
+        container.appendChild(iframe);
+        
+        // Replace the original embed with our container
+        embed.parentNode?.replaceChild(container, embed);
         (embed as any).__processed = true;
       }
     });
