@@ -28,7 +28,7 @@ export default function DocLayout({ children }: DocLayoutProps) {
           open={sidebarOpen} 
           onClose={() => setSidebarOpen(false)}
         />
-        <main className="flex-1 pt-8 px-4 md:px-8 lg:px-10 bg-black text-white min-w-0 min-h-[calc(100vh-3.5rem-1px)]">
+        <main className="flex-1 pt-8 px-4 md:px-8 lg:px-10 bg-black text-white min-w-0 min-h-[calc(100vh-3.5rem-1px)]" style={{ width: 'calc(100% - 256px)' }}>
           {children}
         </main>
       </div>
