@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'wouter';
-import { apiRequest } from '@/lib/queryClient';
-import { getDocByPath } from '@/lib/docs';
+import { useLocation, useRoute } from 'wouter';
+import { getDocByPath, DocPage as DocPageType } from '@/lib/docs';
+import { useQuery } from '@tanstack/react-query';
 
 export default function Home() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   
   useEffect(() => {
-    // Immediately redirect to introduction page with full section path
-    setLocation('/welcome/introduction');
-  }, [setLocation]);
+    // If at the root path, redirect to the welcome/introduction page
+    if (location === "/") {
+      // Redirect to the introduction page with the full section path
+      setLocation("/welcome/introduction");
+    }
+  }, [location, setLocation]);
 
   return (
     <div className="py-20 animate-pulse text-center bg-black text-white">

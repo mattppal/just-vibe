@@ -17,7 +17,7 @@ export default function DocPage() {
   const [authRequired, setAuthRequired] = useState(false);
   const { isAuthenticated, login } = useAuth();
   
-  // Determine the path from the URL
+  // Get the current path from the URL
   const path = location;
   
   // Use TanStack Query to fetch the doc data properly

@@ -102,20 +102,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/docs/path/:path(*)", async (req, res, next) => {
     try {
       // Handle root path (this is for backwards compatibility)
-      if (req.params.path === "root") {
-        // First try to find a document specifically for the root path
-        const rootDoc = await getDocByPath("/");
+      if (req.params.path === "root" || req.params.path === "") {
+        // Always use the first content file (alphabetically) as the root document
+        // In this case, it's the introduction page in the welcome section
+        const introDoc = await getDocByPath("/welcome/introduction");
+        if (introDoc) {
+          // For API consistency, we'll add a special flag to indicate it's also available at root
+          res.locals.doc = { ...introDoc, rootAlias: true };
+          return next();
+        }
         
-        // If not found, try to get the introduction document instead
-        if (!rootDoc) {
-          const introDoc = await getDocByPath("/welcome/introduction");
-          if (introDoc) {
-            // For API consistency, we'll add a special flag to indicate it's also available at root
-            res.locals.doc = { ...introDoc, rootAlias: true };
-            return next();
-          }
-        } else {
-          res.locals.doc = rootDoc;
+        // Fallback to any document for the root (shouldn't reach here)
+        const allDocs = await getAllDocs();
+        if (allDocs.length > 0) {
+          res.locals.doc = allDocs[0];
           return next();
         }
       }

@@ -4,23 +4,30 @@
 
 @layer base {
   :root {
-    --background: 0 0% 0%; /* Pure black background */
-    --foreground: 0 0% 100%; /* Pure white text */
+    --background: 0 0% 0%;
+    /* Pure black background */
+    --foreground: 0 0% 100%;
+    /* Pure white text */
 
-    --card: 0 0% 5%; /* Slightly lighter than black for cards */
+    --card: 0 0% 5%;
+    /* Slightly lighter than black for cards */
     --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 7%; /* Dark background for popovers */
+    --popover: 0 0% 7%;
+    /* Dark background for popovers */
     --popover-foreground: 0 0% 100%;
 
-    --primary: 24 91% 49%; /* Orange primary color */
+    --primary: 24 91% 49%;
+    /* Orange primary color */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 15%; /* Dark secondary */
+    --secondary: 0 0% 15%;
+    /* Dark secondary */
     --secondary-foreground: 0 0% 100%;
 
     --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 70%; /* Slightly dimmed white */
+    --muted-foreground: 0 0% 70%;
+    /* Slightly dimmed white */
 
     --accent: 0 0% 15%;
     --accent-foreground: 0 0% 100%;
@@ -28,10 +35,13 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 100%;
 
-    --code: 0 0% 10%; /* Dark code background */
-    --border: 0 0% 20%; /* Dark border */
+    --code: 0 0% 10%;
+    /* Dark code background */
+    --border: 0 0% 20%;
+    /* Dark border */
     --input: 0 0% 15%;
-    --ring: 24 91% 49%; /* Match primary orange color */
+    --ring: 24 91% 49%;
+    /* Match primary orange color */
 
     /* Sidebar-specific colors */
     --sidebar-background: 0 0% 5%;
@@ -80,8 +90,10 @@
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Geist Sans', system-ui, sans-serif;
   }
-  
-  code, pre, kbd {
+
+  code,
+  pre,
+  kbd {
     font-family: 'Geist Mono', monospace;
   }
 }
@@ -111,11 +123,11 @@
   color: inherit !important;
 }
 
-.prose h1, 
-.prose h2, 
-.prose h3, 
-.prose h4, 
-.prose h5, 
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
 .prose h6 {
   @apply text-foreground font-medium tracking-tight mb-4 mt-8 scroll-m-20;
 }
@@ -188,7 +200,7 @@
   word-wrap: break-word;
 }
 
-.prose :not(pre) > code {
+.prose :not(pre)>code {
   @apply bg-[hsl(var(--code))] text-foreground rounded px-1.5 py-0.5 font-mono text-[15px];
 }
 
@@ -236,7 +248,8 @@
   width: 100%;
   max-width: 100%;
   margin: 1.5rem 0;
-  padding-top: 56.25%; /* 16:9 aspect ratio */
+  padding-top: 56.25%;
+  /* 16:9 aspect ratio */
   background-color: #000;
   border-radius: 0.375rem;
   overflow: hidden;
