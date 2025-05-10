@@ -10,14 +10,36 @@ interface MDXProviderProps {
  * with actual React components.
  */
 export default function MDXProvider({ children }: MDXProviderProps) {
+  // First check if this is an MDX document by looking for the data-mdx attribute
+  const processMdxData = React.useCallback((html: string) => {
+    // Look for hidden MDX data elements
+    const mdxDataRegex = /<div class="mdx-data"[^>]*data-mdx="([^"]*)"[^>]*><\/div>/g;
+    let match = mdxDataRegex.exec(html);
+    
+    if (match && match[1]) {
+      try {
+        // Found MDX data - extract and process it
+        const mdxData = decodeURIComponent(match[1]);
+        console.log('Found MDX data, processing components');
+        // In a full implementation, we would now evaluate this code and render the actual React components
+      } catch (error) {
+        console.error('Error processing MDX data:', error);
+      }
+    }
+    
+    return html;
+  }, []);
+  
   const processedContent = React.useMemo(() => {
     if (typeof children !== 'string') return children;
+    
+    // First check for MDX data
+    const html = children as string;
+    processMdxData(html);
     
     // Regular expression to match our custom MDX component markers
     const mdxComponentRegex = /<mdx-component name="([^"]+)"([^>]*)>([\s\S]*?)<\/mdx-component>/g;
     
-    // Starting HTML content
-    let html = children as string;
     let lastIndex = 0;
     let result = [];
     let match;
@@ -35,7 +57,7 @@ export default function MDXProvider({ children }: MDXProviderProps) {
       }
       
       // Extract component info
-      const [fullMatch, componentName, propsString, children] = match;
+      const [fullMatch, componentName, propsString, componentChildren] = match;
       
       // Parse props from string (simple regex approach)
       const props: Record<string, string> = {};
@@ -58,7 +80,7 @@ export default function MDXProvider({ children }: MDXProviderProps) {
           <Component key={`component-${match.index}`} {...props}>
             {/* Process the children recursively for nested components */}
             <MDXProvider>
-              {children}
+              {componentChildren}
             </MDXProvider>
           </Component>
         );
@@ -78,18 +100,23 @@ export default function MDXProvider({ children }: MDXProviderProps) {
       lastIndex = match.index + fullMatch.length;
     }
     
-    // Add any remaining content
-    if (lastIndex < html.length) {
-      result.push(
-        <span 
-          key={`text-${lastIndex}`} 
-          dangerouslySetInnerHTML={{ __html: html.substring(lastIndex) }} 
-        />
-      );
+    // If we found and processed components, return the result array
+    if (result.length > 0) {
+      // Add any remaining content
+      if (lastIndex < html.length) {
+        result.push(
+          <span 
+            key={`text-${lastIndex}`} 
+            dangerouslySetInnerHTML={{ __html: html.substring(lastIndex) }} 
+          />
+        );
+      }
+      return result;
     }
     
-    return result.length ? result : <span dangerouslySetInnerHTML={{ __html: html }} />;
-  }, [children]);
+    // If no MDX components were found, just render the HTML directly
+    return <span dangerouslySetInnerHTML={{ __html: html }} />;
+  }, [children, processMdxData]);
   
   return <>{processedContent}</>;
 }

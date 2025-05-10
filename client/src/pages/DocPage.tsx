@@ -391,12 +391,8 @@ export default function DocPage() {
           id="doc-content"
           className="prose prose-invert prose-content font-sans text-white prose-headings:text-white prose-p:text-white prose-a:text-primary prose-pre:bg-[#111]" 
         >
-          {/* Use MDXProvider for MDX content, fall back to dangerouslySetInnerHTML for regular markdown */}
-          {doc.path.endsWith('.mdx') ? (
-            <MDXProvider>{doc.html}</MDXProvider>
-          ) : (
-            <div dangerouslySetInnerHTML={{ __html: doc.html }} />
-          )}
+          {/* Use MDXProvider for any content, which handles both MDX and regular markdown */}
+          <MDXProvider>{doc.html}</MDXProvider>
         </div>
       </article>
       
