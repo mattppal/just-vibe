@@ -125,6 +125,11 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
   // Format section names for display
   const formatSectionName = (section: string) => {
+    // Special case for root section
+    if (section === 'root') {
+      return 'Home';
+    }
+    
     return section
       .replace(/^\d+-/, "")
       .split("-")

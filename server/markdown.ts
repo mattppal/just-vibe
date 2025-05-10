@@ -28,6 +28,11 @@ export interface Doc extends DocMeta {
 
 // Get section by directory name
 function getSectionFromDir(dir: string): string {
+  // Special case for files in the root of the content directory
+  if (dir === '') {
+    return 'root'; // Special section for root-level files
+  }
+  
   // Return the original directory name with number prefix intact
   // The frontend will handle formatting the display
   return dir;
@@ -59,6 +64,11 @@ function getSlugFromFilename(filename: string, dir: string): string {
   // Remove extension
   const baseSlug = withoutOrder.replace(/\.md$/, '');
   
+  // Special case for files in the root directory
+  if (dir === '') {
+    return baseSlug; // Files in root just use their name as slug
+  }
+  
   // For introduction in getting-started, just return 'introduction'
   if (baseSlug === 'introduction' && dir === 'getting-started') {
     return baseSlug;
@@ -70,6 +80,12 @@ function getSlugFromFilename(filename: string, dir: string): string {
 
 // Get page path from slug
 function getPathFromSlug(slug: string, dir: string): string {
+  // Special case for files in the root directory (no dir)
+  if (dir === '') {
+    // Root files should have the path '/'
+    return '/';
+  }
+  
   // Special case: 'introduction' can be accessed from both '/' and '/introduction'
   if (slug === 'introduction') {
     return '/welcome/introduction';
@@ -154,6 +170,14 @@ export async function getAllDocs(): Promise<Doc[]> {
     // Extract source directory for directory-based ordering
     const dirA = (a as any).sourceDir || '';
     const dirB = (b as any).sourceDir || '';
+    
+    // Special case: Root files (empty dir) should always come first
+    if (dirA === '' && dirB !== '') {
+      return -1; // A is a root file, B is not -> A comes first
+    }
+    if (dirA !== '' && dirB === '') {
+      return 1;  // B is a root file, A is not -> B comes first
+    }
     
     // Get directory orders (from numeric prefix or predefined order)
     const dirOrderA = getOrderFromDir(dirA);

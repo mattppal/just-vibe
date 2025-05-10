@@ -48,8 +48,14 @@ export async function getAllDocs(): Promise<DocPage[]> {
 
 export async function getDocByPath(path: string): Promise<DocPage | undefined> {
   try {
-    // For root path, we need to use "root" as a placeholder
-    const pathParam = path === "/" ? "root" : path.substring(1);
+    // For root path, we need a special case
+    if (path === "/") {
+      // Access the root path API endpoint
+      return await apiRequest('/api/docs/path/');
+    }
+    
+    // For all other paths, remove the leading slash and use as path parameter
+    const pathParam = path.substring(1);
     return await apiRequest(`/api/docs/path/${pathParam}`);
   } catch (error: any) {
     console.error("Error fetching doc by path:", error);

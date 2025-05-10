@@ -101,21 +101,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/docs/path/:path(*)", async (req, res, next) => {
     try {
-      // Handle root path (this is for backwards compatibility)
-      if (req.params.path === "root") {
-        // First try to find a document specifically for the root path
+      // Special case for root path - req.params.path will be empty string for '/'
+      if (req.params.path === "" || req.params.path === "root") {
+        // Try to find a document specifically for the root path
         const rootDoc = await getDocByPath("/");
         
-        // If not found, try to get the introduction document instead
-        if (!rootDoc) {
-          const introDoc = await getDocByPath("/welcome/introduction");
-          if (introDoc) {
-            // For API consistency, we'll add a special flag to indicate it's also available at root
-            res.locals.doc = { ...introDoc, rootAlias: true };
-            return next();
-          }
-        } else {
+        // If found, serve the root document
+        if (rootDoc) {
           res.locals.doc = rootDoc;
+          return next();
+        }
+        
+        // If root doc not found, fall back to introduction
+        const introDoc = await getDocByPath("/welcome/introduction");
+        if (introDoc) {
+          // For API consistency, add a special flag to indicate it's also available at root
+          res.locals.doc = { ...introDoc, rootAlias: true };
           return next();
         }
       }
