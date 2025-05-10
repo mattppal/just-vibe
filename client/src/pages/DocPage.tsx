@@ -25,6 +25,8 @@ export default function DocPage() {
     queryKey: [`/api/docs/path${path}`],
     queryFn: async () => {
       try {
+        // Use the current path to fetch the document
+        // The path already includes the section prefix from the router
         const result = await getDocByPath(path);
         return result || null;
       } catch (error) {
@@ -102,6 +104,7 @@ export default function DocPage() {
                     // Much longer delay to give priority to user's current page
                     setTimeout(() => {
                       if (nextDoc.path) {
+                        // The nextDoc.path already includes the section prefix
                         queryClient.prefetchQuery({
                           queryKey: [`/api/docs/path${nextDoc.path}`],
                           queryFn: () => getDocByPath(nextDoc.path),

@@ -99,18 +99,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.json(res.locals.doc);
   });
   
-  app.get("/api/docs/path/:path", async (req, res, next) => {
+  app.get("/api/docs/path/:path(*)", async (req, res, next) => {
     try {
-      let pagePath = req.params.path === "root" ? "/" : `/${req.params.path}`;
-      
-      // Special handling for root path
-      if (pagePath === "/") {
+      // Handle root path (this is for backwards compatibility)
+      if (req.params.path === "root") {
         // First try to find a document specifically for the root path
         const rootDoc = await getDocByPath("/");
         
         // If not found, try to get the introduction document instead
         if (!rootDoc) {
-          const introDoc = await getDocByPath("/introduction");
+          const introDoc = await getDocByPath("/welcome/introduction");
           if (introDoc) {
             // For API consistency, we'll add a special flag to indicate it's also available at root
             res.locals.doc = { ...introDoc, rootAlias: true };
@@ -119,6 +117,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } else {
           res.locals.doc = rootDoc;
           return next();
+        }
+      }
+      
+      // Format the path parameter to handle both the old format (/introduction) 
+      // and the new format (/welcome/introduction)
+      let pagePath = `/${req.params.path}`;
+      
+      // Backward compatibility for old-style paths without section
+      if (!pagePath.includes('/') || pagePath.split('/').length === 2) {
+        // Try the sections for common pages
+        const sections = ["welcome", "getting-started", "core-concepts"];
+        for (const section of sections) {
+          const potentialPath = `/${section}${pagePath}`;
+          const doc = await getDocByPath(potentialPath);
+          if (doc) {
+            res.locals.doc = doc;
+            return next();
+          }
         }
       }
       
