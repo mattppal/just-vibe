@@ -139,7 +139,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       {/* Mobile backdrop */}
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-background/80 backdrop-blur-sm transition-opacity lg:hidden",
+          "fixed inset-0 z-20 bg-background/80 backdrop-blur-sm transition-opacity lg:hidden",
           open ? "opacity-100" : "opacity-0 pointer-events-none",
         )}
         onClick={onClose}
@@ -148,13 +148,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 min-w-[272px] bg-black text-white border-r border-[#333] overflow-y-auto pb-10 pt-6",
-          "lg:sticky lg:block lg:z-30 lg:shrink-0",
+          "fixed top-14 bottom-0 left-0 z-30 w-72 min-w-[272px] bg-black text-white border-r border-[#333] overflow-y-auto pb-10 pt-6",
+          "lg:sticky lg:block lg:top-14 lg:h-[calc(100vh-3.5rem)] lg:shrink-0",
           "transition-transform duration-300 ease-in-out",
           open ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
       >
-        <div className="px-6 mb-8">
+        <div className="px-8 mb-8">
           <div className="flex items-center justify-between">
             <div className="flex-1"></div>
             <button
@@ -187,7 +187,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           </div>
         </div>
 
-        <nav className="px-6">
+        <nav className="px-8">
           {loading ? (
             <div className="text-secondary text-sm p-4">
               Loading documentation...
