@@ -152,14 +152,52 @@ function rehypeEnhanceCodeBlocks() {
 }
 
 /**
+ * Process MDX content using the MDX compiler
+ * This function specifically handles MDX syntax including JSX, imports/exports, and expressions
+ * 
+ * @param content The MDX content to process
+ * @returns Processed HTML string with MDX components intact
+ */
+async function processMdxContent(content: string): Promise<string> {
+  try {
+    // Step 1: Use the MDX compiler to transform MDX to JavaScript
+    // We'll use the serializable output format which gives us JSX output instead of JS
+    const result = await compile(content, {
+      outputFormat: 'function-body',
+      development: true,
+      jsx: true,
+      // We'll use remark and rehype plugins for consistent styling
+      remarkPlugins: [remarkGfm],
+      rehypePlugins: [
+        rehypeSlug,
+        [rehypeHighlight, { detect: true, ignoreMissing: true }],
+        rehypeEnhanceCodeBlocks
+      ]
+    });
+    
+    // For now, we can simply convert the compiled output to a string
+    // In a full implementation, this would be handled client-side to render components
+    // We'll mock this for now by adding special markers around the components
+    const jsxOutput = String(result)
+      // Add markers for custom components to be recognized client-side
+      .replace(/<([A-Z][A-Za-z0-9]+)/g, '<mdx-component name="$1"')
+      .replace(/<\/([A-Z][A-Za-z0-9]+)>/g, '</mdx-component>')
+      // Replace import statements with HTML comments
+      .replace(/import\s+.*?from\s+['"](.*?)['"];?/g, '<!-- Import: $1 -->');
+    
+    return jsxOutput;
+  } catch (error) {
+    console.error('Error processing MDX content:', error);
+    return `<div class="error">Error processing MDX content: ${error instanceof Error ? error.message : String(error)}</div>`;
+  }
+}
+
+/**
  * Process markdown content using unified ecosystem with remark/rehype
  * 
  * @param content The markdown content to process
  * @returns Processed HTML with syntax highlighting and proper structure
  */
-// Forward declaration to resolve TypeScript error
-async function processMdxContent(content: string): Promise<string>;
-
 export async function processMarkdown(content: string, isMdx: boolean = false): Promise<string> {
   // If this is MDX content, we need a different processing pipeline
   if (isMdx) {
@@ -224,47 +262,6 @@ export async function processMarkdown(content: string, isMdx: boolean = false): 
     .process(content);
 
   return String(result);
-}
-
-/**
- * Process MDX content using the MDX compiler
- * This function specifically handles MDX syntax including JSX, imports/exports, and expressions
- * 
- * @param content The MDX content to process
- * @returns Processed HTML string with MDX components intact
- */
-async function processMdxContent(content: string): Promise<string> {
-  try {
-    // Step 1: Use the MDX compiler to transform MDX to JavaScript
-    // We'll use the serializable output format which gives us JSX output instead of JS
-    const result = await compile(content, {
-      outputFormat: 'function-body',
-      development: true,
-      jsx: true,
-      // We'll use remark and rehype plugins for consistent styling
-      remarkPlugins: [remarkGfm],
-      rehypePlugins: [
-        rehypeSlug,
-        [rehypeHighlight, { detect: true, ignoreMissing: true }],
-        rehypeEnhanceCodeBlocks
-      ]
-    });
-    
-    // For now, we can simply convert the compiled output to a string
-    // In a full implementation, this would be handled client-side to render components
-    // We'll mock this for now by adding special markers around the components
-    const jsxOutput = String(result)
-      // Add markers for custom components to be recognized client-side
-      .replace(/<([A-Z][A-Za-z0-9]+)/g, '<mdx-component name="$1"')
-      .replace(/<\/([A-Z][A-Za-z0-9]+)>/g, '</mdx-component>')
-      // Replace import statements with HTML comments
-      .replace(/import\s+.*?from\s+['"](.*?)['"];?/g, '<!-- Import: $1 -->');
-    
-    return jsxOutput;
-  } catch (error) {
-    console.error('Error processing MDX content:', error);
-    return `<div class="error">Error processing MDX content: ${error instanceof Error ? error.message : String(error)}</div>`;
-  }
 }
 
 /**
