@@ -127,7 +127,7 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
   };
 
   return (
-    <div className="hidden xl:block w-64 shrink-0 fixed right-0 top-24 h-[calc(100vh-6rem)] overflow-y-auto pb-10 scrollbar-thin pr-6">
+    <div className="hidden xl:block w-64 shrink-0 fixed right-0 top-24 h-[calc(100vh-6rem)] overflow-y-auto pb-10 scrollbar-thin pr-6 z-30">
       <div className="space-y-2 pt-6">
         <h3 className="font-medium mb-3 text-foreground text-sm">On This Page</h3>
         <ul className="text-sm space-y-2 border-l border-border pl-3">
