@@ -5,8 +5,6 @@ description: Welcome to the documentation site. This is a public page anyone can
 authenticated: false
 ---
 
-# Welcome to the Documentation
-
 This is the introduction page of our documentation site. This page is publicly accessible to everyone, even if they're not logged in.
 
 ## Public vs. Protected Content

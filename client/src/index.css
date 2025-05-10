@@ -13,7 +13,7 @@
     --popover: 0 0% 7%; /* Dark background for popovers */
     --popover-foreground: 0 0% 100%;
 
-    --primary: 217.2 91.2% 59.8%; /* Keep primary color */
+    --primary: 24 91% 49%; /* Orange primary color */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 15%; /* Dark secondary */
@@ -31,17 +31,17 @@
     --code: 0 0% 10%; /* Dark code background */
     --border: 0 0% 20%; /* Dark border */
     --input: 0 0% 15%;
-    --ring: 217.2 91.2% 59.8%; /* Match primary color */
+    --ring: 24 91% 49%; /* Match primary orange color */
 
     /* Sidebar-specific colors */
     --sidebar-background: 0 0% 5%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 217.2 91.2% 59.8%;
+    --sidebar-primary: 24 91% 49%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 15%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 24 91% 49%;
   }
 }
 
@@ -235,7 +235,7 @@
 .hljs-keyword,
 .hljs-selector-tag,
 .hljs-subst {
-  @apply text-blue-400;
+  @apply text-orange-500;
 }
 
 .hljs-literal,

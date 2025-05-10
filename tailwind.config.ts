@@ -15,6 +15,20 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       colors: {
+        // Custom orange color with different shades
+        orange: {
+          50: '#FEF4ED',
+          100: '#FEEADB',
+          200: '#FCD5B7',
+          300: '#FABC8A',
+          400: '#F7945D',
+          500: '#F26208', // Main orange color
+          600: '#C64E06',
+          700: '#993D05',
+          800: '#6D2C04',
+          900: '#401A02',
+          950: '#250F01',
+        },
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -94,7 +108,7 @@ export default {
             '--tw-prose-body': '#ffffff', /* Pure white */
             '--tw-prose-headings': '#ffffff', /* Pure white */
             '--tw-prose-lead': '#ffffff', /* Pure white */
-            '--tw-prose-links': 'hsl(217.2, 91.2%, 59.8%)', /* Blue links */
+            '--tw-prose-links': '#F26208', /* Orange links */
             '--tw-prose-bold': '#ffffff', /* Pure white */
             '--tw-prose-counters': '#ffffff', /* Pure white */
             '--tw-prose-bullets': '#ffffff', /* Pure white */
@@ -112,7 +126,7 @@ export default {
             '--tw-prose-invert-body': '#ffffff',
             '--tw-prose-invert-headings': '#ffffff',
             '--tw-prose-invert-lead': '#ffffff',
-            '--tw-prose-invert-links': 'hsl(217.2, 91.2%, 59.8%)',
+            '--tw-prose-invert-links': '#F26208', /* Orange links in dark mode */
             '--tw-prose-invert-bold': '#ffffff',
             '--tw-prose-invert-counters': '#ffffff',
             '--tw-prose-invert-bullets': '#ffffff',
