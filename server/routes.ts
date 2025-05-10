@@ -107,14 +107,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Get all docs to see if our root doc is there
         const allDocs = await getAllDocs();
-        console.log('Available docs paths:', allDocs.map(d => d.path));
+        console.log('Available docs (full details):', JSON.stringify(allDocs.map(d => {
+          return {
+            title: d.title,
+            path: d.path,
+            slug: d.slug,
+            section: d.section,
+            sourceDir: (d as any).sourceDir
+          };
+        }), null, 2));
         
-        // Try to find a document specifically for the root path
-        const rootDoc = await getDocByPath("/");
-        console.log('Root doc fetch result:', rootDoc ? `Found: ${rootDoc.title}` : 'Not found');
+        // Find our root doc manually from allDocs
+        const rootDoc = allDocs.find(doc => doc.path === '/');
+        console.log('Manual root doc search result:', rootDoc ? `Found: ${rootDoc.title}` : 'Not found');
         
-        // If found, serve the root document
+        // Use the manually found doc instead of calling getDocByPath
         if (rootDoc) {
+          console.log('Using manually found root document');
           res.locals.doc = rootDoc;
           return next();
         }
