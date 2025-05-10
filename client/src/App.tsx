@@ -22,8 +22,10 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      {/* Handle all doc pages with a single route */}
-      <Route path="/:slug*" component={DocPage} />
+      {/* Handle all doc pages with section-prefixed routes */}
+      <Route path="/:section/:page" component={DocPage} />
+      {/* Legacy path support for old URLs */}
+      <Route path="/:slug" component={DocPage} />
       <Route component={NotFound} />
     </Switch>
   );
