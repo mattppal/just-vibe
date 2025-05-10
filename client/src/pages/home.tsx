@@ -7,8 +7,8 @@ export default function Home() {
   const [, setLocation] = useLocation();
   
   useEffect(() => {
-    // Immediately redirect to introduction page
-    setLocation('/introduction');
+    // Immediately redirect to introduction page with full section path
+    setLocation('/welcome/introduction');
   }, [setLocation]);
 
   return (

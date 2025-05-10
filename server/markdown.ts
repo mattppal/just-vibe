@@ -72,11 +72,15 @@ function getSlugFromFilename(filename: string, dir: string): string {
 function getPathFromSlug(slug: string, dir: string): string {
   // Special case: 'introduction' can be accessed from both '/' and '/introduction'
   if (slug === 'introduction') {
-    return '/introduction';
+    return '/welcome/introduction';
   }
-  // For directory-prefixed slugs, just use the base part
+  
+  // Include section directory in the path for all other pages
   const parts = slug.split('/');
-  return `/${parts[parts.length - 1]}`;
+  const normalizedDir = dir.replace(/^\d+-/, ''); // Remove numeric prefix from directory
+  
+  // Return full path with section directory
+  return `/${normalizedDir}/${parts[parts.length - 1]}`;
 }
 
 // Parse markdown file and extract frontmatter, content, and HTML
