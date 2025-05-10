@@ -92,7 +92,6 @@
     font-family: 'Geist Sans', system-ui, sans-serif;
   }
 
-  code,
   pre,
   kbd {
     font-family: 'Geist Mono', monospace;
@@ -117,11 +116,6 @@
 /* Exception for links */
 .prose a {
   @apply text-primary font-medium;
-}
-
-/* Exception for code highlighting */
-.prose code span {
-  color: inherit !important;
 }
 
 .prose h1,
@@ -187,7 +181,7 @@
 
 /* Code blocks */
 .prose pre {
-  @apply p-4 rounded-md bg-[hsl(var(--code))] text-sm my-6;
+  @apply p-4 bg-[hsl(var(--code))] text-sm;
   /* Enable soft wrap with scrolling if needed */
   white-space: pre-wrap;
   word-wrap: break-word;

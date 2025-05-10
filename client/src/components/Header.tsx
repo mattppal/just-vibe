@@ -1,7 +1,6 @@
 import { Link, useLocation } from "wouter";
-import { Menu, LogIn, LogOut, Lock, User, ChevronDown } from "lucide-react";
-import { DocPage, getDocByPath } from "@/lib/docs";
-import { useEffect, useState } from "react";
+import { Menu, LogIn, LogOut, User } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,8 +9,10 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuPortal
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   onOpenSidebar: () => void;
@@ -19,20 +20,39 @@ interface HeaderProps {
 
 export default function Header({ onOpenSidebar }: HeaderProps) {
   const [location] = useLocation();
-  const [currentDoc, setCurrentDoc] = useState<DocPage | undefined>(undefined);
   const { isAuthenticated, isLoading, user, login, logout } = useAuth();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
 
-  // We don't need to fetch doc metadata in the header - this duplicates requests
-  // from the DocPage component. The header doesn't actually use the current doc data.
+  // Only add a class to body when dropdown is open for styling purposes
+  useEffect(() => {
+    const bodyEl = document.body;
+    
+    if (dropdownOpen) {
+      bodyEl.classList.add('dropdown-open');
+    } else {
+      bodyEl.classList.remove('dropdown-open');
+    }
+    
+    return () => {
+      bodyEl.classList.remove('dropdown-open');
+    };
+  }, [dropdownOpen]);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-[#333] bg-black/90 backdrop-blur-sm">
+    <header 
+      ref={headerRef}
+      className="sticky top-0 z-50 w-full border-b border-[#333] bg-black/90 backdrop-blur-sm"
+    >
       <div className="flex h-14 items-center px-4 md:px-6">
-        <div className="text-white font-bold text-xl flex items-center mr-6 tracking-tight">Just Vibe</div>
-        
+        <div className="text-white font-bold text-xl flex items-center mr-6 tracking-tight">
+          Just Vibe
+        </div>
+
         <button
           onClick={onOpenSidebar}
           className="md:hidden mr-2 p-1 text-gray-400 hover:text-white"
+          aria-label="Open sidebar"
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -41,59 +61,72 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
           {isLoading ? (
             <div className="w-24 h-9 animate-pulse bg-[#111] rounded-md" />
           ) : isAuthenticated ? (
-            <DropdownMenu>
+            <DropdownMenu 
+              open={dropdownOpen} 
+              onOpenChange={setDropdownOpen}
+            >
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="relative h-9 w-9 rounded-full bg-transparent p-0 hover:bg-[#111]"
+                  className="h-9 w-9 rounded-full bg-transparent p-0 hover:bg-[#111] focus:ring-0 focus:ring-offset-0 dropdown-menu-trigger-no-shift"
+                  aria-label="User menu"
                 >
                   <Avatar className="h-9 w-9 border border-[#333]">
                     {user?.profileImageUrl ? (
-                      <AvatarImage src={user.profileImageUrl} alt="Profile" />
+                      <AvatarImage
+                        src={user.profileImageUrl}
+                        alt="Profile"
+                        style={{ objectFit: "cover" }}
+                      />
                     ) : (
                       <AvatarFallback className="bg-[#111] text-white">
                         <User className="h-5 w-5" />
                       </AvatarFallback>
                     )}
                   </Avatar>
-                  <span className="sr-only">User menu</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                sideOffset={8}
-                className="w-56 bg-black border border-[#333] p-1 text-white z-50"
-              >
-                <div className="flex items-center justify-start gap-3 p-2">
-                  <Avatar className="h-9 w-9 border border-[#333]">
-                    {user?.profileImageUrl ? (
-                      <AvatarImage src={user.profileImageUrl} alt="Profile" />
-                    ) : (
-                      <AvatarFallback className="bg-[#111] text-white">
-                        <User className="h-5 w-5" />
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <div className="flex flex-col space-y-0.5">
-                    <p className="text-sm font-medium">
-                      {user?.firstName && user?.lastName
-                        ? `${user.firstName} ${user.lastName}`
-                        : "Welcome"}
-                    </p>
-                    <p className="text-xs text-gray-400 truncate">
-                      @{user?.id || "user"}
-                    </p>
-                  </div>
-                </div>
-                <DropdownMenuSeparator className="bg-[#333] my-1" />
-                <DropdownMenuItem
-                  onClick={logout}
-                  className="cursor-pointer flex items-center gap-2 focus:bg-[#111] focus:text-white hover:bg-[#111] transition-colors duration-200"
+              <DropdownMenuPortal>
+                <DropdownMenuContent
+                  align="end"
+                  sideOffset={8}
+                  className="w-56 bg-black border border-[#333] p-1 text-white fixed-dropdown"
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  <span>Sign out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
+                  <div className="flex items-center justify-start gap-3 p-2">
+                    <Avatar className="h-9 w-9 border border-[#333]">
+                      {user?.profileImageUrl ? (
+                        <AvatarImage
+                          src={user.profileImageUrl}
+                          alt="Profile"
+                          style={{ objectFit: "cover" }}
+                        />
+                      ) : (
+                        <AvatarFallback className="bg-[#111] text-white">
+                          <User className="h-5 w-5" />
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div className="flex flex-col space-y-0.5">
+                      <p className="text-sm font-medium">
+                        {user?.firstName && user?.lastName
+                          ? `${user.firstName} ${user.lastName}`
+                          : "Welcome"}
+                      </p>
+                      <p className="text-xs text-gray-400 truncate">
+                        @{user?.id || "user"}
+                      </p>
+                    </div>
+                  </div>
+                  <DropdownMenuSeparator className="bg-[#333] my-1" />
+                  <DropdownMenuItem
+                    onClick={logout}
+                    className="cursor-pointer flex items-center gap-2 focus:bg-[#111] focus:text-white hover:bg-[#111] transition-colors duration-200"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    <span>Sign out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenuPortal>
             </DropdownMenu>
           ) : (
             <Button
