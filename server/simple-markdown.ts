@@ -1,7 +1,5 @@
 /**
- * A simplified markdown processor without TypeScript errors.
- * This is a temporary solution to get MDX working without advanced unified/rehype features.
- * Now enhanced with Shiki code highlighting.
+ * A simplified markdown processor with Shiki code highlighting via rehype.
  */
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
@@ -21,34 +19,32 @@ import { transformerNotationHighlight } from '@shikijs/transformers';
  */
 export async function processMarkdown(content: string, isMdx: boolean = false): Promise<string> {
   try {
-    // Create the processor pipeline
-    let processor = unified()
+    // Build the processor pipeline
+    const processor = unified()
       .use(remarkParse)  // Parse markdown into mdast
       .use(remarkGfm);   // Support GFM (tables, autolinks, etc)
     
-    // Add MDX support if needed
+    // Add MDX support if processing an MDX file
     if (isMdx) {
-      processor = processor.use(remarkMdx);
+      processor.use(remarkMdx);
     }
     
-    // Convert to HTML and add Shiki syntax highlighting
-    processor = processor
+    processor
+      // Convert markdown to HTML
       .use(remarkRehype, { allowDangerousHtml: true })
+      // Apply Shiki code highlighting
       .use(rehypeShiki, {
-        // Configure Shiki themes
         theme: 'github-dark',
-        
-        // Enable line highlighting using the {1,3-4} syntax after language name
         transformers: [transformerNotationHighlight()],
-        
-        // Optionally enable inline code highlighting
         inline: 'tailing-curly-colon'
       })
+      // Convert to HTML string
       .use(rehypeStringify, { allowDangerousHtml: true });
     
     // Process the content
-    const result = await processor.process(content);
-    return String(result);
+    const vFile = await processor.process(content);
+    return String(vFile);
+    
   } catch (error) {
     console.error('Error processing markdown with Shiki:', error);
     return `<div class="markdown-error">Error processing content: ${error instanceof Error ? error.message : String(error)}</div>`;
