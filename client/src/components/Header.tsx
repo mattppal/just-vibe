@@ -62,8 +62,8 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
               <DropdownMenuContent
                 align="end"
                 sideOffset={8}
-                className="w-56 bg-black border border-[#333] p-1 text-white z-50 origin-top-right"
-                style={{ position: 'absolute', right: 0 }}
+                className="w-56 bg-black border border-[#333] p-1 text-white z-50"
+                style={{ transform: 'translateX(0)' }}
               >
                 <div className="flex items-center justify-start gap-3 p-2">
                   <Avatar className="h-9 w-9 border border-[#333]">
