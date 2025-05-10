@@ -5,6 +5,7 @@ import helmet from "helmet";
 import csrf from "csurf";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
+import crypto from 'crypto';
 
 const app = express();
 
@@ -50,12 +51,31 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Generate a secure token on startup that would be required for all non-browser API requests
+// This makes it extremely difficult for external tools to access our API endpoints
+const API_SECRET_KEY = process.env.API_SECRET_KEY || crypto.randomBytes(32).toString('hex');
+process.env.API_SECRET_KEY = API_SECRET_KEY;
+
+// Create a permanent token for the application instance
+const APP_INSTANCE_TOKEN = `app-${process.env.REPL_ID || crypto.randomBytes(8).toString('hex')}`;
+process.env.APP_INSTANCE_TOKEN = APP_INSTANCE_TOKEN;
+
+// Log the tokens to the console when starting the server (ONLY in development)
+if (isDevelopment) {
+  console.log(`API_SECRET_KEY=${API_SECRET_KEY}`);
+  console.log(`APP_INSTANCE_TOKEN=${APP_INSTANCE_TOKEN}`);
+}
+
 // Pass necessary environment variables to the frontend for secure API access
 app.use((req, res, next) => {
   // This will inject REPL_ID into Vite as VITE_REPL_ID
   if (process.env.REPL_ID) {
     process.env.VITE_REPL_ID = process.env.REPL_ID;
   }
+  
+  // Also pass the app instance token, but in a secure way
+  process.env.VITE_APP_INSTANCE_TOKEN = APP_INSTANCE_TOKEN;
+  
   next();
 });
 
@@ -97,6 +117,29 @@ app.use('/api', (req, res, next) => {
   const origin = req.get('Origin');
   const referer = req.get('Referer');
   const host = req.get('Host');
+  
+  // Get the real client IP, accounting for reverse proxies
+  const clientIp = req.get('X-Forwarded-For')?.split(',')[0].trim() || 
+                  req.get('X-Real-IP') || 
+                  req.ip || 
+                  req.socket.remoteAddress || 
+                  '0.0.0.0';
+                  
+  // Check if request is from the same machine/container (literally local)
+  // This is for distinguishing local server-to-server vs external requests
+  const isActuallyLocalRequest = 
+    clientIp === '127.0.0.1' || 
+    clientIp === '::1' || 
+    clientIp === 'localhost' || 
+    clientIp === '::ffff:127.0.0.1' || 
+    clientIp.startsWith('10.') || // RFC1918 private networks
+    (clientIp.startsWith('172.') && parseInt(clientIp.split('.')[1]) >= 16 && parseInt(clientIp.split('.')[1]) <= 31) || 
+    clientIp.startsWith('192.168.');
+    
+  // Track all non-browser API access for monitoring
+  if (!isBrowserRequest) {
+    console.log(`API access from non-browser: ${clientIp} - ${userAgent} - ${req.method} ${req.path}`);
+  }
   
   // Additional security for API endpoints
   // If there's no browser user agent, apply additional checks

@@ -67,7 +67,7 @@ export async function apiRequest(
     // Add X-Requested-With header for AJAX requests - standard security measure
     "X-Requested-With": "XMLHttpRequest",
     // Add instance token - this helps prevent unauthorized API access
-    "X-App-Token": `app-${import.meta.env.VITE_REPL_ID || ''}`,
+    "X-App-Token": `${import.meta.env.VITE_APP_INSTANCE_TOKEN || (import.meta.env.VITE_REPL_ID ? `app-${import.meta.env.VITE_REPL_ID}` : '')}`,
   };
 
   // For mutating requests (POST, PUT, DELETE, PATCH), add CSRF token
@@ -103,7 +103,7 @@ export async function apiRequest(
             ...headers,
             "X-CSRF-Token": newToken,
             "X-Requested-With": "XMLHttpRequest",
-            "X-App-Token": `app-${import.meta.env.VITE_REPL_ID || ''}`,
+            "X-App-Token": `${import.meta.env.VITE_APP_INSTANCE_TOKEN || (import.meta.env.VITE_REPL_ID ? `app-${import.meta.env.VITE_REPL_ID}` : '')}`,
           },
           body: bodyData ? JSON.stringify(bodyData) : undefined,
           credentials: "include",
@@ -137,7 +137,7 @@ export const getQueryFn: <T>(options: {
         // Security headers for all requests
         "X-Requested-With": "XMLHttpRequest",
         // App instance token to prevent unauthorized access
-        "X-App-Token": `app-${import.meta.env.VITE_REPL_ID || ''}`
+        "X-App-Token": `${import.meta.env.VITE_APP_INSTANCE_TOKEN || (import.meta.env.VITE_REPL_ID ? `app-${import.meta.env.VITE_REPL_ID}` : '')}`
       }
     });
 
@@ -158,7 +158,7 @@ export const getQueryFn: <T>(options: {
             headers: {
               "X-CSRF-Token": token,
               "X-Requested-With": "XMLHttpRequest",
-              "X-App-Token": `app-${import.meta.env.VITE_REPL_ID || ''}`
+              "X-App-Token": `${import.meta.env.VITE_APP_INSTANCE_TOKEN || (import.meta.env.VITE_REPL_ID ? `app-${import.meta.env.VITE_REPL_ID}` : '')}`
             }
           });
           
