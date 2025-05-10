@@ -61,7 +61,8 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="w-56 bg-black border border-[#333] p-1 text-white"
+                sideOffset={8}
+                className="w-56 bg-black border border-[#333] p-1 text-white z-50"
               >
                 <div className="flex items-center justify-start gap-3 p-2">
                   <Avatar className="h-9 w-9 border border-[#333]">

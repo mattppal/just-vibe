@@ -353,8 +353,9 @@ export default function DocPage() {
   }
   
   return (
-    <div className="flex min-h-[calc(100vh-3.5rem-1px)]">
-      <article className="max-w-none flex-1 min-w-0">
+    <div className="min-h-[calc(100vh-3.5rem-1px)] xl:pr-64">
+      {/* Main content column - full width with right padding on large screens to make room for fixed TOC */}
+      <article className="max-w-none xl:w-auto">
         <nav className="flex items-center gap-1 text-sm mb-4">
           <Link href="/" className="text-gray-400 hover:text-white">
             Docs
@@ -389,10 +390,9 @@ export default function DocPage() {
         />
       </article>
       
+      {/* TOC is now positioned with fixed positioning in the TableOfContents component */}
       {doc.headings.length > 0 && (
-        <div className="hidden xl:block w-64 flex-shrink-0">
-          <TableOfContents items={doc.headings.map(h => ({ id: h.id, title: h.title }))} />
-        </div>
+        <TableOfContents items={doc.headings.map(h => ({ id: h.id, title: h.title }))} />
       )}
     </div>
   );
