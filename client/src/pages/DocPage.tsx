@@ -1,8 +1,6 @@
-import { useEffect, useState, useRef } from "react";
-// Direct DOM manipulation for adding interactive elements to rendered HTML
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { getDocByPath, DocPage as DocPageType } from "@/lib/docs";
-import type { DocPage as DocPageServerType } from "@/lib/docs";
+import { getDocByPath, DocPage as DocPageType, getDocsBySection } from "@/lib/docs";
 import TableOfContents from "@/components/TableOfContents";
 import { useAuth } from "@/hooks/useAuth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -10,16 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Lock, LogIn, Home, AlertTriangle } from "lucide-react";
 import { Link } from "wouter";
 import { queryClient } from "@/lib/queryClient";
-// These components are only imported for their types
-// We'll use direct DOM manipulation instead of React components
-
-// Use built-in TypeScript definitions for requestIdleCallback
-// which already exist in lib.dom.d.ts
+import { useQuery } from "@tanstack/react-query";
 
 export default function DocPage() {
   const [location, setLocation] = useLocation();
   const [doc, setDoc] = useState<DocPageType | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [authRequired, setAuthRequired] = useState(false);
   const { isAuthenticated, login } = useAuth();
@@ -27,125 +20,104 @@ export default function DocPage() {
   // Determine the path from the URL
   const path = location;
   
-  // We no longer immediately redirect on auth errors
-  // Instead, we show a proper login screen with options to navigate elsewhere
-
-  useEffect(() => {
-    async function fetchDoc() {
-      try {
-        setLoading(true);
-        setError(null);
-        setAuthRequired(false);
-        
-        // Fetch document with optimization for repeated loads
-        const cachedDoc = queryClient.getQueryData<DocPageType>([`/api/docs/path${path}`]);
-        let docData: DocPageType | null = null;
-        
-        if (cachedDoc) {
-          // Use cached data if available to speed up initial render
-          docData = cachedDoc;
-          // Don't automatically refresh in background
-          // This significantly reduces API requests
-          // If we need fresh data, the user can refresh the page
-        } else {
-          const fetchedDoc = await getDocByPath(path);
-          if (fetchedDoc) {
-            docData = fetchedDoc;
-          }
-        }
-        
-        if (docData) {
-          setDoc(docData);
-          document.title = `${docData.title} | Just Vibe Docs`;
-          
-          // Use requestIdleCallback to prefetch only immediately adjacent docs when browser is idle
-          const prefetchAdjacentDocs = () => {
-            if (docData && docData.section) {
-              // Get preloading function from docs module
-              import('@/lib/docs').then(async ({ getDocsBySection }) => {
-                try {
-                  const sectionsData = await getDocsBySection();
-                  const currentSection = sectionsData[docData.section];
-                  
-                  if (currentSection) {
-                    const currentIndex = currentSection.findIndex(d => d.slug === docData.slug);
-                    
-                    if (currentIndex !== -1) {
-                      // Create a small queue of only adjacent documents to prefetch
-                      const prefetchQueue: DocPageType[] = [];
-                      
-                      // Only prefetch next and previous document, not all documents
-                      // Next document has higher priority
-                      if (currentIndex < currentSection.length - 1) {
-                        const nextDoc = currentSection[currentIndex + 1];
-                        if (!nextDoc.requiresAuth || isAuthenticated) {
-                          prefetchQueue.push(nextDoc);
-                        }
-                      }
-                      
-                      // Previous document second priority
-                      if (currentIndex > 0) {
-                        const prevDoc = currentSection[currentIndex - 1];
-                        if (!prevDoc.requiresAuth || isAuthenticated) {
-                          prefetchQueue.push(prevDoc);
-                        }
-                      }
-                      
-                      // Only prefetch the next doc (first in queue) with much longer delay
-                      // This significantly reduces unnecessary network requests
-                      if (prefetchQueue.length > 0) {
-                        const nextDoc = prefetchQueue[0]; // Only prefetch the first doc (usually the next page)
-                        
-                        // Much longer delay (5 seconds) to give priority to user's current page
-                        setTimeout(() => {
-                          if (nextDoc.path) {
-                            queryClient.prefetchQuery({
-                              queryKey: [`/api/docs/path${nextDoc.path}`],
-                              queryFn: () => getDocByPath(nextDoc.path),
-                              staleTime: 72 * 60 * 60 * 1000 // 72 hours - extended cache life
-                            });
-                          }
-                        }, 15000); // 15 second delay for prefetching
-                      }
-                    }
-                  }
-                } catch (e) {
-                  // Silently fail for preloading - this is a non-critical operation
-                }
-              });
-            }
-          };
-          
-          // Use requestIdleCallback with a much longer timeout
-          // Only run this if user has been on the page for at least 20 seconds
-          if (typeof window.requestIdleCallback === 'function') {
-            setTimeout(() => {
-              window.requestIdleCallback(prefetchAdjacentDocs, { timeout: 15000 }); // 15 second timeout
-            }, 20000); // Wait 20 seconds before even trying to prefetch
-          } else {
-            // No requestIdleCallback support, use a much longer timeout
-            setTimeout(prefetchAdjacentDocs, 30000); // 30 second timeout
-          }
-        } else {
-          setError("Document not found");
-        }
-      } catch (err: any) {
-        // Check if this is an auth error (401)
-        if (err?.response?.status === 401 || 
-            (typeof err === 'object' && err.message === "Unauthorized")) {
-          setAuthRequired(true);
-        } else {
-          setError("Failed to load document");
-        }
-      } finally {
-        setLoading(false);
+  // Use TanStack Query to fetch the doc data properly
+  const { data: docData, isLoading, error: queryError } = useQuery<DocPageType>({
+    queryKey: [`/api/docs/path${path}`],
+    queryFn: () => getDocByPath(path),
+    staleTime: 72 * 60 * 60 * 1000, // 72 hours - extended cache life
+    gcTime: 7 * 24 * 60 * 60 * 1000, // 7 days - keep in cache for a week
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: false,
+    enabled: !!path, // Only run when path exists
+    onError: (err: any) => {
+      // Check if this is an auth error (401)
+      if (err?.response?.status === 401 || 
+          (typeof err === 'object' && err.message === "Unauthorized")) {
+        setAuthRequired(true);
+      } else {
+        setError("Failed to load document");
       }
     }
-    
-    fetchDoc();
-  }, [path, isAuthenticated]); // Added isAuthenticated to the dependencies
-  
-  // No longer need to process HTML content as rehype-highlight handles code blocks
+  });
+
+  // Update component state when query data changes
+  useEffect(() => {
+    if (docData) {
+      setDoc(docData);
+      document.title = `${docData.title} | Just Vibe Docs`;
+      
+      // Use requestIdleCallback to prefetch only immediately adjacent docs when browser is idle
+      const prefetchAdjacentDocs = () => {
+        if (docData && docData.section) {
+          // Get preloading function from docs module
+          getDocsBySection().then(sectionsData => {
+            try {
+              const currentSection = sectionsData[docData.section];
+              
+              if (currentSection) {
+                const currentIndex = currentSection.findIndex(d => d.slug === docData.slug);
+                
+                if (currentIndex !== -1) {
+                  // Create a small queue of only adjacent documents to prefetch
+                  const prefetchQueue: DocPageType[] = [];
+                  
+                  // Only prefetch next and previous document, not all documents
+                  // Next document has higher priority
+                  if (currentIndex < currentSection.length - 1) {
+                    const nextDoc = currentSection[currentIndex + 1];
+                    if (!nextDoc.requiresAuth || isAuthenticated) {
+                      prefetchQueue.push(nextDoc);
+                    }
+                  }
+                  
+                  // Previous document second priority
+                  if (currentIndex > 0) {
+                    const prevDoc = currentSection[currentIndex - 1];
+                    if (!prevDoc.requiresAuth || isAuthenticated) {
+                      prefetchQueue.push(prevDoc);
+                    }
+                  }
+                  
+                  // Only prefetch the next doc (first in queue) with much longer delay
+                  // This significantly reduces unnecessary network requests
+                  if (prefetchQueue.length > 0) {
+                    const nextDoc = prefetchQueue[0]; // Only prefetch the first doc (usually the next page)
+                    
+                    // Much longer delay to give priority to user's current page
+                    setTimeout(() => {
+                      if (nextDoc.path) {
+                        queryClient.prefetchQuery({
+                          queryKey: [`/api/docs/path${nextDoc.path}`],
+                          queryFn: () => getDocByPath(nextDoc.path),
+                          staleTime: 72 * 60 * 60 * 1000 // 72 hours - extended cache life
+                        });
+                      }
+                    }, 15000); // 15 second delay for prefetching
+                  }
+                }
+              }
+            } catch (e) {
+              // Silently fail for preloading - this is a non-critical operation
+            }
+          });
+        }
+      };
+      
+      // Use requestIdleCallback with a much longer timeout
+      // Only run this if user has been on the page for at least 20 seconds
+      if (typeof window.requestIdleCallback === 'function') {
+        setTimeout(() => {
+          window.requestIdleCallback(prefetchAdjacentDocs, { timeout: 15000 }); // 15 second timeout
+        }, 20000); // Wait 20 seconds before even trying to prefetch
+      } else {
+        // No requestIdleCallback support, use a much longer timeout
+        setTimeout(prefetchAdjacentDocs, 30000); // 30 second timeout
+      }
+    } else if (!isLoading && !queryError) {
+      setError("Document not found");
+    }
+  }, [docData, isLoading, queryError, isAuthenticated]);
   
   // Set IDs for headings to support table of contents
   useEffect(() => {
@@ -168,7 +140,7 @@ export default function DocPage() {
     }, 0);
   }, [doc]);
   
-  // Process code blocks to add copy buttons
+  // Process code blocks to add copy buttons and make iframes responsive
   useEffect(() => {
     if (!doc) return;
     
@@ -283,7 +255,7 @@ export default function DocPage() {
     });
   }, [doc]);
   
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex-1 py-8">
         <div className="animate-pulse">
