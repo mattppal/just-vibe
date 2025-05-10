@@ -73,17 +73,32 @@ export async function getDocBySlug(slug: string): Promise<DocPage | undefined> {
   }
 }
 
+// Using a simple in-memory cache for sections data to reduce API calls
+// This is a more reliable approach than depending on the React Query cache
+// which might not be accessible from all contexts
+let sectionDataCache: Record<string, DocPage[]> | null = null;
+let lastSectionFetchTime = 0;
+const SECTION_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
 export async function getDocsBySection(): Promise<Record<string, DocPage[]>> {
   try {
-    // Try to get from query cache first (if already fetched by sidebar)
-    const cachedData = queryClient.getQueryData<Record<string, DocPage[]>>(['/api/sections']);
-    if (cachedData) {
-      return cachedData;
+    const now = Date.now();
+    
+    // Return cached data if it's still fresh
+    if (sectionDataCache && (now - lastSectionFetchTime < SECTION_CACHE_TTL)) {
+      return sectionDataCache;
     }
-    // Fall back to api request if not in cache
-    return await apiRequest("/api/sections");
+    
+    // Fetch new data if needed
+    const data = await apiRequest("/api/sections");
+    
+    // Update cache
+    sectionDataCache = data;
+    lastSectionFetchTime = now;
+    
+    return data;
   } catch (error) {
     console.error("Error fetching doc sections:", error);
-    return {};
+    return sectionDataCache || {};
   }
 }

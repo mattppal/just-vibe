@@ -8,7 +8,7 @@ import {
   getDocsBySection,
   getDocByPath,
 } from "@/lib/docs";
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { debounce } from "@/lib/utils";
@@ -96,11 +96,24 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     setSearchResults(results);
   }
 
-  // Search handler
+  // Debounce search to reduce CPU usage when typing quickly
+  const debouncedSearch = useCallback(
+    debounce((query: string) => {
+      if (query.trim().length >= 2) {
+        performSearch(query);
+      } else if (query.trim().length === 0) {
+        setSearchResults([]);
+        setIsSearching(false);
+      }
+    }, 300),
+    [allDocs] // Only recreate if allDocs changes
+  );
+  
+  // Search handler with debouncing
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
-    performSearch(query);
+    debouncedSearch(query);
   };
 
   // Clear search

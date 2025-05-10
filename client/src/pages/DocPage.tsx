@@ -139,15 +139,15 @@ export default function DocPage() {
       };
       
       // Significantly extend the prefetch delay to reduce server load
-      // Only prefetch content if the user has stayed on the page for at least 30 seconds
+      // Only prefetch content if the user has stayed on the page for at least 45 seconds
       // This suggests they are actually reading the content and might navigate to related pages
       if (typeof window.requestIdleCallback === 'function') {
         setTimeout(() => {
           window.requestIdleCallback(prefetchAdjacentDocs, { timeout: 20000 }); // 20 second timeout (increased)
-        }, 30000); // Wait 30 seconds before even trying to prefetch (increased from 20)
+        }, 45000); // Wait 45 seconds before even trying to prefetch (increased from 20)
       } else {
         // No requestIdleCallback support, use a much longer timeout
-        setTimeout(prefetchAdjacentDocs, 45000); // 45 second timeout (increased from 30)
+        setTimeout(prefetchAdjacentDocs, 60000); // 60 second timeout (doubled from original)
       }
     } else if (!isLoading && !queryError) {
       setError("Document not found");
