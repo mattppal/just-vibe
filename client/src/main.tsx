@@ -7,7 +7,7 @@ import { getCsrfToken } from "./lib/queryClient";
 
 // Initialize CSRF token in the background
 setTimeout(() => {
-  getCsrfToken().catch(error => {
+  getCsrfToken().catch((error: unknown) => {
     console.warn('Initial CSRF token fetch failed. Will retry on first API call:', error);
   });
 }, 1000); // Delay by 1 second to prioritize initial page render
