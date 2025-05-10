@@ -112,30 +112,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!rootDoc) {
           const introDoc = await getDocByPath("/introduction");
           if (introDoc) {
-            console.log("Root document not found, serving introduction as fallback");
             // For API consistency, we'll add a special flag to indicate it's also available at root
-            res.locals.doc = { ...introDoc, rootAlias: true, isHomePage: true };
+            res.locals.doc = { ...introDoc, rootAlias: true };
             return next();
-          } else {
-            // No intro doc found either, try to find any doc to use as fallback
-            const allDocs = await getAllDocs();
-            if (allDocs && allDocs.length > 0) {
-              // Sort by order if available and take the first one
-              const sortedDocs = [...allDocs].sort((a, b) => {
-                if (a.order !== undefined && b.order !== undefined) {
-                  return a.order - b.order;
-                }
-                return 0;
-              });
-              
-              console.log("No home or intro doc found, using first available doc as fallback");
-              res.locals.doc = { ...sortedDocs[0], rootAlias: true, isHomePage: true };
-              return next();
-            }
           }
         } else {
-          console.log("Serving root document as home page");
-          res.locals.doc = { ...rootDoc, isHomePage: true };
+          res.locals.doc = rootDoc;
           return next();
         }
       }
@@ -144,7 +126,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const doc = await getDocByPath(pagePath);
       
       if (!doc) {
-        console.error(`Document not found for path: ${pagePath}`);
         return res.status(404).json({ message: "Documentation not found" });
       }
       

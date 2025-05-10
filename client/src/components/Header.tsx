@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
-import { Menu, LogIn, LogOut, User } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import { Menu, LogIn, LogOut, Lock, User, ChevronDown } from "lucide-react";
+import { DocPage, getDocByPath } from "@/lib/docs";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,10 +10,8 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuPortal
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   onOpenSidebar: () => void;
@@ -21,38 +20,18 @@ interface HeaderProps {
 export default function Header({ onOpenSidebar }: HeaderProps) {
   const [location] = useLocation();
   const { isAuthenticated, isLoading, user, login, logout } = useAuth();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const headerRef = useRef<HTMLElement>(null);
 
-  // Only add a class to body when dropdown is open for styling purposes
-  useEffect(() => {
-    const bodyEl = document.body;
-    
-    if (dropdownOpen) {
-      bodyEl.classList.add('dropdown-open');
-    } else {
-      bodyEl.classList.remove('dropdown-open');
-    }
-    
-    return () => {
-      bodyEl.classList.remove('dropdown-open');
-    };
-  }, [dropdownOpen]);
+  // We don't need to fetch doc metadata in the header
+  // The header doesn't use the current doc data.
 
   return (
-    <header 
-      ref={headerRef}
-      className="sticky top-0 z-50 w-full border-b border-[#333] bg-black/90 backdrop-blur-sm"
-    >
+    <header className="sticky top-0 z-50 w-full border-b border-[#333] bg-black/90 backdrop-blur-sm">
       <div className="flex h-14 items-center px-4 md:px-6">
-        <div className="text-white font-bold text-xl flex items-center mr-6 tracking-tight">
-          Just Vibe
-        </div>
-
+        <div className="text-white font-bold text-xl flex items-center mr-6 tracking-tight">Just Vibe</div>
+        
         <button
           onClick={onOpenSidebar}
           className="md:hidden mr-2 p-1 text-gray-400 hover:text-white"
-          aria-label="Open sidebar"
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -61,45 +40,36 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
           {isLoading ? (
             <div className="w-24 h-9 animate-pulse bg-[#111] rounded-md" />
           ) : isAuthenticated ? (
-            <DropdownMenu 
-              open={dropdownOpen} 
-              onOpenChange={setDropdownOpen}
-            >
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="h-9 w-9 rounded-full bg-transparent p-0 hover:bg-[#111] focus:ring-0 focus:ring-offset-0 dropdown-menu-trigger-no-shift"
-                  aria-label="User menu"
-                >
-                  <Avatar className="h-9 w-9 border border-[#333]">
-                    {user?.profileImageUrl ? (
-                      <AvatarImage
-                        src={user.profileImageUrl}
-                        alt="Profile"
-                        style={{ objectFit: "cover" }}
-                      />
-                    ) : (
-                      <AvatarFallback className="bg-[#111] text-white">
-                        <User className="h-5 w-5" />
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuPortal>
+            <div className="relative" style={{ width: '36px', height: '36px' }}>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="relative h-9 w-9 rounded-full bg-transparent p-0 hover:bg-[#111] fixed-position"
+                    style={{ minHeight: '36px', minWidth: '36px', position: 'relative' }}
+                  >
+                    <Avatar className="h-9 w-9 border border-[#333]" style={{ width: '36px', height: '36px', position: 'absolute', top: '0', left: '0' }}>
+                      {user?.profileImageUrl ? (
+                        <AvatarImage src={user.profileImageUrl} alt="Profile" style={{ objectFit: 'cover' }} />
+                      ) : (
+                        <AvatarFallback className="bg-[#111] text-white">
+                          <User className="h-5 w-5" />
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <span className="sr-only">User menu</span>
+                  </Button>
+                </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
                   sideOffset={8}
-                  className="w-56 bg-black border border-[#333] p-1 text-white fixed-dropdown"
+                  className="w-56 bg-black border border-[#333] p-1 text-white fixed z-[100]"
+                  style={{ position: 'fixed' }}
                 >
                   <div className="flex items-center justify-start gap-3 p-2">
-                    <Avatar className="h-9 w-9 border border-[#333]">
+                    <Avatar className="h-9 w-9 border border-[#333]" style={{ width: '36px', height: '36px' }}>
                       {user?.profileImageUrl ? (
-                        <AvatarImage
-                          src={user.profileImageUrl}
-                          alt="Profile"
-                          style={{ objectFit: "cover" }}
-                        />
+                        <AvatarImage src={user.profileImageUrl} alt="Profile" style={{ objectFit: 'cover' }} />
                       ) : (
                         <AvatarFallback className="bg-[#111] text-white">
                           <User className="h-5 w-5" />
@@ -126,8 +96,8 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
                     <span>Sign out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
-              </DropdownMenuPortal>
-            </DropdownMenu>
+              </DropdownMenu>
+            </div>
           ) : (
             <Button
               onClick={login}
