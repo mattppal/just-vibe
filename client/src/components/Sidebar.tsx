@@ -135,7 +135,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         className={cn(
           "fixed top-[calc(3.5rem+1px)] bottom-0 left-0 z-30 w-72 min-w-[272px] bg-black text-white sidebar-with-border overflow-y-auto pb-10 pt-6",
           "lg:sticky lg:block lg:top-[calc(3.5rem+1px)] lg:h-[calc(100vh-3.5rem-1px)] lg:w-72 lg:min-w-[272px] lg:shrink-0",
-          "transition-transform duration-300 ease-in-out",
+          "transition-transform duration-300 ease-in-out scrollbar-thin",
           open ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
       >
