@@ -7,6 +7,9 @@ import { processMarkdown, extractHeadings } from './unified-markdown';
 // Content directory
 const CONTENT_DIR = path.join(process.cwd(), 'content');
 
+// File extensions that we support for documentation
+const SUPPORTED_EXTENSIONS = ['.md', '.mdx'];
+
 // Interface for document metadata (frontmatter)
 export interface DocMeta {
   title: string;
@@ -61,8 +64,8 @@ function getSlugFromFilename(filename: string, dir: string): string {
   // Remove order prefix (e.g., "1-" from "1-introduction.md")
   // This works with any number (non-zero-padded)
   const withoutOrder = filename.replace(/^\d+-/, '');
-  // Remove extension
-  const baseSlug = withoutOrder.replace(/\.md$/, '');
+  // Remove extensions (.md and .mdx)
+  const baseSlug = withoutOrder.replace(/\.(md|mdx)$/, '');
   
   // Special case for files in the root directory
   if (dir === '') {
@@ -104,8 +107,11 @@ export async function parseMarkdownFile(filePath: string): Promise<Doc> {
   const fileContents = fs.readFileSync(filePath, 'utf8');
   const { data, content } = matter(fileContents);
   
-  // Use the unified ecosystem to process markdown
-  const html = await processMarkdown(content);
+  // Determine if this is an MDX file or a regular Markdown file
+  const isMdx = path.extname(filePath).toLowerCase() === '.mdx';
+  
+  // Use the unified ecosystem to process markdown/mdx content
+  const html = await processMarkdown(content, isMdx);
   
   // Extract headings from markdown content (for table of contents)
   const headings = await extractHeadings(content);
@@ -151,7 +157,13 @@ export async function parseMarkdownFile(filePath: string): Promise<Doc> {
 
 // Get all markdown files recursively
 export async function getAllMarkdownFiles(): Promise<string[]> {
-  return await glob('**/*.md', { cwd: CONTENT_DIR, absolute: true });
+  // Find all files with supported extensions (.md and .mdx)
+  const allFiles = [];
+  for (const ext of SUPPORTED_EXTENSIONS) {
+    const files = await glob(`**/*${ext}`, { cwd: CONTENT_DIR, absolute: true });
+    allFiles.push(...files);
+  }
+  return allFiles;
 }
 
 // Get all documents

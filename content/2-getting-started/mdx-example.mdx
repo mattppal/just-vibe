@@ -1,0 +1,100 @@
+---
+title: MDX Example
+sidebarTitle: MDX Example
+description: Learn how to use MDX features in your documentation pages.
+---
+
+# MDX Example
+
+This documentation page demonstrates the MDX features available in our documentation platform.
+
+## What is MDX?
+
+MDX is a format that combines Markdown with JSX (JavaScript XML) syntax. It allows you to use React components directly in your Markdown content.
+
+## Importing Components
+
+You can import and use React components in your MDX files:
+
+```jsx
+import { Button } from 'some-ui-library';
+
+<Button variant="primary">Click me!</Button>
+```
+
+## Using Components Inline
+
+Here's an example of using a component inline:
+
+<Alert type="info" title="Info">
+  This is an information alert component rendered within MDX content.
+</Alert>
+
+## JavaScript Expressions
+
+You can use JavaScript expressions directly in your MDX:
+
+{/* This is a comment in JSX */}
+
+The result of 1 + 2 is {1 + 2}.
+
+Current date: {new Date().toLocaleDateString()}
+
+## Code Blocks
+
+MDX supports syntax highlighting just like regular Markdown:
+
+```javascript
+function hello() {
+  console.log('Hello, MDX!');
+}
+```
+
+## YouTube Video Embed
+
+You can embed YouTube videos using our custom component:
+
+<YouTube id="dQw4w9WgXcQ" title="Demo Video" />
+
+## Dynamic Content
+
+You can create dynamic content based on variables or props passed to your MDX component:
+
+{/* 
+This would typically be a prop passed to the MDX component:
+function MyMdxPage({ username }) {
+  return <MDXContent username={username} />;
+}
+*/}
+
+Hello, {props.username || 'User'}!
+
+## Interactive Elements
+
+You can create interactive elements like tabs:
+
+<Tabs>
+  <TabItem value="react" title="React">
+    ```jsx
+    function App() {
+      return <h1>Hello React</h1>;
+    }
+    ```
+  </TabItem>
+  <TabItem value="vue" title="Vue">
+    ```js
+    export default {
+      data() {
+        return {
+          message: 'Hello Vue!'
+        }
+      },
+      template: '<h1>{{ message }}</h1>'
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+## Conclusion
+
+MDX provides powerful capabilities for creating rich, interactive documentation. Use it whenever you need to go beyond what regular Markdown offers.
