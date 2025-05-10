@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { getDocByPath, DocPage as DocPageType } from '@/lib/docs';
 import { useQuery } from '@tanstack/react-query';
@@ -33,6 +33,13 @@ export default function HomePage() {
     refetchOnWindowFocus: false,
     retry: false
   });
+  
+  // Update document title when data is loaded
+  useEffect(() => {
+    if (doc) {
+      document.title = `${doc.title} | Just Vibe Docs`;
+    }
+  }, [doc]);
 
   if (isLoading) {
     return (
@@ -87,6 +94,29 @@ export default function HomePage() {
     <div className="min-h-[calc(100vh-3.5rem-1px)] xl:pr-64">
       {/* Main content column - full width with right padding on large screens to make room for fixed TOC */}
       <article className="max-w-none xl:w-auto">
+        <nav className="flex items-center gap-1 text-sm mb-4">
+          <Link href="/" className="text-gray-400 hover:text-white">
+            Docs
+          </Link>
+          {doc.section && (
+            <>
+              <span className="text-gray-400">/</span>
+              <span className="text-gray-400">
+                {doc.section
+                  .replace(/^\d+-/, "")
+                  .split("-")
+                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(" ")}
+              </span>
+            </>
+          )}
+          {doc.title && (
+            <>
+              <span className="text-gray-400">/</span>
+              <span className="text-white">{doc.title}</span>
+            </>
+          )}
+        </nav>
         <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: doc.html }} id="doc-content" />
       </article>
       
