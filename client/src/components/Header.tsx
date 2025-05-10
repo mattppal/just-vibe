@@ -45,10 +45,10 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="relative h-9 w-9 rounded-full bg-transparent p-0 hover:bg-[#111]"
-                    style={{ minHeight: '36px', minWidth: '36px' }}
+                    className="relative h-9 w-9 rounded-full bg-transparent p-0 hover:bg-[#111] fixed-position"
+                    style={{ minHeight: '36px', minWidth: '36px', position: 'relative' }}
                   >
-                    <Avatar className="h-9 w-9 border border-[#333]" style={{ width: '36px', height: '36px' }}>
+                    <Avatar className="h-9 w-9 border border-[#333]" style={{ width: '36px', height: '36px', position: 'absolute', top: '0', left: '0' }}>
                       {user?.profileImageUrl ? (
                         <AvatarImage src={user.profileImageUrl} alt="Profile" style={{ objectFit: 'cover' }} />
                       ) : (
@@ -63,8 +63,8 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
                 <DropdownMenuContent
                   align="end"
                   sideOffset={8}
-                  className="w-56 bg-black border border-[#333] p-1 text-white z-50"
-                  style={{ top: '100%', right: '0' }}
+                  className="w-56 bg-black border border-[#333] p-1 text-white fixed z-[100]"
+                  style={{ position: 'fixed' }}
                 >
                   <div className="flex items-center justify-start gap-3 p-2">
                     <Avatar className="h-9 w-9 border border-[#333]" style={{ width: '36px', height: '36px' }}>
