@@ -208,13 +208,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                               ? "active text-orange-500 bg-[#111] font-medium"
                               : "text-gray-400 hover:text-orange-500",
                           )}
-                          onMouseEnter={() => {
-                            // Prefetch content when hovering over search result
-                            queryClient.prefetchQuery({
-                              queryKey: [`/api/docs/path${doc.path}`],
-                              queryFn: () => getDocByPath(doc.path),
-                            });
-                          }}
+                          // Removed hover prefetching to reduce network requests
                           onClick={() => {
                             // Optionally close search after clicking a result
                             if (window.innerWidth < 1024) {

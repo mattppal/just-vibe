@@ -24,6 +24,9 @@ export default function Search() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [, navigate] = useLocation();
 
+  // Keep a cache of docs to avoid refetching on every keystroke
+  const [docsCache, setDocsCache] = useState<any[]>([]);
+  
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
 
@@ -32,19 +35,26 @@ export default function Search() {
       return;
     }
 
-    // Search through documentation
-    const docs = await getAllDocs();
+    // Only fetch documents once and cache them
+    let docs = docsCache;
+    if (docs.length === 0) {
+      docs = await getAllDocs();
+      setDocsCache(docs);
+    }
+    
+    // Search through cached documentation
+    const normalizedQuery = query.toLowerCase();
     const filtered = docs.filter(
       (doc) =>
-        doc.title.toLowerCase().includes(query.toLowerCase()) ||
-        doc.content.toLowerCase().includes(query.toLowerCase()),
+        doc.title.toLowerCase().includes(normalizedQuery) ||
+        (doc.content && doc.content.toLowerCase().includes(normalizedQuery)),
     );
 
     setResults(
       filtered.map((doc) => ({
         title: doc.title,
         path: doc.path,
-        excerpt: doc.content.substring(0, 100) + "...",
+        excerpt: doc.content?.substring(0, 100) + "..." || "No preview available",
       })),
     );
   };

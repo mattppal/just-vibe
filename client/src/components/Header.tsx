@@ -22,10 +22,21 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
   const [currentDoc, setCurrentDoc] = useState<DocPage | undefined>(undefined);
   const { isAuthenticated, isLoading, user, login, logout } = useAuth();
 
+  // Only fetch doc metadata when the path is a document path
   useEffect(() => {
+    // Skip unnecessary fetches for non-doc paths
+    if (!location.startsWith('/')) {
+      return;
+    }
+    
     async function fetchDoc() {
-      const doc = await getDocByPath(location);
-      setCurrentDoc(doc);
+      try {
+        const doc = await getDocByPath(location);
+        setCurrentDoc(doc);
+      } catch (e) {
+        // Silent fail - the header just needs to know the document title if available
+        setCurrentDoc(undefined);
+      }
     }
 
     fetchDoc();
