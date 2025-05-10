@@ -168,6 +168,17 @@
   @apply py-3 px-4 border-b border-border;
 }
 
+/* YouTube embeds and iframes */
+.prose iframe {
+  @apply w-full max-w-full my-4;
+  aspect-ratio: 16/9;
+}
+
+.prose iframe[src*="youtube.com"] {
+  @apply w-full max-w-full my-6 rounded-md;
+  aspect-ratio: 16/9;
+}
+
 /* Highlighting theme for code blocks */
 .hljs-comment,
 .hljs-quote {

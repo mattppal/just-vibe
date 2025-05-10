@@ -211,34 +211,22 @@ export default function DocPage() {
       }
     });
     
-    // Make direct iframes responsive (like YouTube embeds)
+    // Make direct iframes responsive (using CSS only now)
     const contentNode = document.getElementById('doc-content');
     if (contentNode) {
       const iframes = contentNode.querySelectorAll('iframe');
       iframes.forEach((iframe) => {
-        if (!(iframe.parentNode as any).__wrapped && iframe.src.includes('youtube.com')) {
-          // Create a responsive container
-          const container = document.createElement('div');
-          container.className = 'relative w-full max-w-full aspect-video bg-[#0a0a0a] rounded-md overflow-hidden my-4';
-          
-          // Clone the iframe and set responsive properties
-          const newIframe = iframe.cloneNode() as HTMLIFrameElement;
-          newIframe.className = 'absolute top-0 left-0 w-full h-full border-0';
-          newIframe.width = '100%';
-          newIframe.height = '100%';
-          newIframe.style.maxWidth = '100%';
-          newIframe.allowFullscreen = true;
-          newIframe.loading = 'lazy';
-          
-          // Add the iframe to the container
-          container.appendChild(newIframe);
-          
-          // Replace the original iframe with the container
-          const parent = iframe.parentNode;
-          if (parent) {
-            parent.replaceChild(container, iframe);
-            (parent as any).__wrapped = true;
-          }
+        if (!iframe.hasAttribute('width') || !iframe.hasAttribute('height')) {
+          iframe.setAttribute('width', '100%');
+          iframe.setAttribute('height', 'auto');
+        }
+        // Always ensure the iframe has proper attributes
+        iframe.allowFullscreen = true;
+        iframe.loading = 'lazy';
+        
+        // Set title for accessibility if missing
+        if (!iframe.hasAttribute('title') && iframe.src.includes('youtube.com')) {
+          iframe.setAttribute('title', 'YouTube video');
         }
       });
     }
@@ -248,20 +236,17 @@ export default function DocPage() {
     youtubeEmbeds.forEach((embed) => {
       const youtubeId = embed.getAttribute('data-youtube-id');
       if (youtubeId && !(embed as any).__processed) {
-        // Replace with a simple iframe instead of React component
-        const container = document.createElement('div');
-        container.className = 'relative w-full max-w-full aspect-video bg-[#0a0a0a] rounded-md overflow-hidden my-4';
-        
+        // Replace with a standard iframe
         const iframe = document.createElement('iframe');
         iframe.src = `https://www.youtube.com/embed/${youtubeId}`;
-        iframe.className = 'absolute top-0 left-0 w-full h-full border-0';
+        iframe.width = '100%';
+        iframe.height = 'auto';
         iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
         iframe.allowFullscreen = true;
         iframe.loading = 'lazy';
         iframe.title = 'YouTube video';
         
-        container.appendChild(iframe);
-        embed.parentNode?.replaceChild(container, embed);
+        embed.parentNode?.replaceChild(iframe, embed);
         (embed as any).__processed = true;
       }
     });
