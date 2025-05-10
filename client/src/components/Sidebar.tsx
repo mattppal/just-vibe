@@ -154,7 +154,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           open ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
       >
-        <div className="px-4 mb-8">
+        <div className="px-6 mb-8">
           <div className="flex items-center justify-between">
             <div className="flex-1"></div>
             <button
@@ -187,7 +187,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           </div>
         </div>
 
-        <nav className="px-4">
+        <nav className="px-6">
           {loading ? (
             <div className="text-secondary text-sm p-4">
               Loading documentation...
