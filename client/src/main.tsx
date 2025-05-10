@@ -1,18 +1,11 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 
-// Preload the Geist font for optimal loading performance
-const preloadLink = document.createElement("link");
-preloadLink.rel = "preload";
-preloadLink.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap";
-preloadLink.as = "style";
-document.head.appendChild(preloadLink);
-
-// Add the actual font stylesheet
-const fontLink = document.createElement("link");
-fontLink.rel = "stylesheet";
-fontLink.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap";
-document.head.appendChild(fontLink);
+// Add the Geist fonts class to the document root
+document.documentElement.classList.add(GeistSans.variable);
+document.documentElement.classList.add(GeistMono.variable);
 
 createRoot(document.getElementById("root")!).render(<App />);

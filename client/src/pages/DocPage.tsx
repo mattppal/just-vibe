@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+// Direct DOM manipulation for adding interactive elements to rendered HTML
 import { useLocation } from "wouter";
 import { getDocByPath, DocPage as DocPageType } from "@/lib/docs";
+import type { DocPage as DocPageServerType } from "@/lib/docs";
 import TableOfContents from "@/components/TableOfContents";
 import { useAuth } from "@/hooks/useAuth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -8,20 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Lock, LogIn, Home, AlertTriangle } from "lucide-react";
 import { Link } from "wouter";
 import { queryClient } from "@/lib/queryClient";
+// These components are only imported for their types
+// We'll use direct DOM manipulation instead of React components
 
-// For TypeScript interface for requestIdleCallback
-interface RequestIdleCallbackOptions {
-  timeout: number;
-}
-interface RequestIdleCallbackDeadline {
-  didTimeout: boolean;
-  timeRemaining: () => number;
-}
-declare global {
-  interface Window {
-    requestIdleCallback: (callback: (deadline: RequestIdleCallbackDeadline) => void, opts?: RequestIdleCallbackOptions) => number;
-  }
-}
+// Use built-in TypeScript definitions for requestIdleCallback
+// which already exist in lib.dom.d.ts
 
 export default function DocPage() {
   const [location, setLocation] = useLocation();
@@ -56,7 +49,10 @@ export default function DocPage() {
             queryClient.refetchQueries({ queryKey: [`/api/docs/path${path}`], type: 'inactive' });
           }, 2000); // Delay refetch to prioritize UI responsiveness
         } else {
-          docData = await getDocByPath(path);
+          const fetchedDoc = await getDocByPath(path);
+          if (fetchedDoc) {
+            docData = fetchedDoc;
+          }
         }
         
         if (docData) {
@@ -178,7 +174,66 @@ export default function DocPage() {
     }, 0);
   }, [doc]);
   
-  // We no longer need this code block processing - rehype-highlight does it for us
+  // Process code blocks to add copy buttons
+  useEffect(() => {
+    if (!doc) return;
+    
+    // Find code blocks for copy buttons
+    const codeBlocks = document.querySelectorAll('pre[data-copyable="true"]');
+    codeBlocks.forEach((block) => {
+      const codeContent = block.getAttribute('data-code');
+      if (codeContent && !(block as any).__hasCopyButton) {
+        // Create a simpler copy button without React components
+        const copyButton = document.createElement('button');
+        copyButton.className = 'absolute top-2 right-2 h-7 w-7 rounded-sm bg-black/30 p-1 text-white opacity-70 hover:opacity-100 transition-opacity z-10';
+        copyButton.title = 'Copy code to clipboard';
+        copyButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+        
+        // Ensure the original pre tag has relative positioning for absolute copy button
+        (block as HTMLElement).style.position = 'relative';
+        
+        // Add copy functionality
+        copyButton.addEventListener('click', () => {
+          navigator.clipboard.writeText(codeContent)
+            .then(() => {
+              // Show success indication
+              copyButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+              setTimeout(() => {
+                copyButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+              }, 2000);
+            })
+            .catch(err => console.error('Failed to copy text: ', err));
+        });
+        
+        // Add the copy button to the pre tag
+        block.appendChild(copyButton);
+        (block as any).__hasCopyButton = true;
+      }
+    });
+    
+    // Convert YouTube embeds to iframes
+    const youtubeEmbeds = document.querySelectorAll('div.youtube-embed');
+    youtubeEmbeds.forEach((embed) => {
+      const youtubeId = embed.getAttribute('data-youtube-id');
+      if (youtubeId && !(embed as any).__processed) {
+        // Replace with a simple iframe instead of React component
+        const container = document.createElement('div');
+        container.className = 'relative w-full pt-[56.25%] bg-[#0a0a0a] rounded-md overflow-hidden my-4';
+        
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.youtube.com/embed/${youtubeId}`;
+        iframe.className = 'absolute top-0 left-0 w-full h-full border-0';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        iframe.allowFullscreen = true;
+        iframe.loading = 'lazy';
+        iframe.title = 'YouTube video';
+        
+        container.appendChild(iframe);
+        embed.parentNode?.replaceChild(container, embed);
+        (embed as any).__processed = true;
+      }
+    });
+  }, [doc]);
   
   if (loading) {
     return (

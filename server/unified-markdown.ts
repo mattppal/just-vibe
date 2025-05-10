@@ -56,9 +56,27 @@ function rehypeEnhanceCodeBlocks() {
           case 'td':
             node.properties.className.push('border', 'border-gray-700', 'px-4', 'py-2', 'text-white');
             break;
+          // Handle YouTube embeds
+          case 'iframe':
+            if (node.properties.src && typeof node.properties.src === 'string' && 
+                node.properties.src.match(/youtube\.com|youtu\.be/)) {
+              const youtubeIdMatch = node.properties.src.match(/(?:youtube\.com\/embed\/|youtu\.be\/)([^\/?&]+)/);
+              if (youtubeIdMatch && youtubeIdMatch[1]) {
+                const youtubeId = youtubeIdMatch[1];
+                // Transform into a div that our React component will replace
+                node.tagName = 'div';
+                node.properties.className.push('youtube-embed');
+                node.properties['data-youtube-id'] = youtubeId;
+                node.children = [{
+                  type: 'text',
+                  value: 'YouTube video: ' + youtubeId
+                }];
+              }
+            }
+            break;
         }
 
-        // Enhance code blocks
+        // Enhance code blocks with copy button
         if (node.tagName === 'pre' && node.children?.[0]?.tagName === 'code') {
           // Add classes for styling with Tailwind Typography
           node.properties.className.push(
@@ -67,11 +85,22 @@ function rehypeEnhanceCodeBlocks() {
             'bg-[#111]',
             'p-4',
             'my-6',
-            'overflow-x-auto'
+            'overflow-x-auto',
+            'relative' // For positioning the copy button
           );
 
-          // Get language from the code element
+          // Get language from the code element and code content
           const code = node.children[0];
+          const codeContent = code.children
+            .map((child: any) => child.value || '')
+            .join('');
+          
+          // Store the code content as a data attribute for the copy button
+          node.properties['data-code'] = codeContent;
+          
+          // Add a data attribute to identify as a code block with copy button
+          node.properties['data-copyable'] = 'true';
+          
           const lang = code.properties?.className
             ?.find((cls: string) => cls.startsWith('language-'))
             ?.replace('language-', '');
@@ -141,7 +170,14 @@ export async function processMarkdown(content: string): Promise<string> {
     // Handle raw HTML in markdown
     .use(rehypeRaw)
     // Sanitize HTML to prevent XSS (very important for security)
-    .use(rehypeSanitize)
+    .use(rehypeSanitize, {
+      attributes: {
+        // Allow data attributes for custom functionality
+        '*': ['className', 'data-*', 'id'],
+        // Allow YouTube iframes
+        iframe: ['src', 'allowFullScreen', 'allow', 'loading', 'title', 'width', 'height', 'frameBorder']
+      }
+    })
     // Add IDs to headings for table of contents
     .use(rehypeSlug)
     // Add syntax highlighting to code blocks
