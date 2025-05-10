@@ -68,6 +68,12 @@ export default function HomePage() {
     <div className="min-h-[calc(100vh-3.5rem-1px)] xl:pr-64">
       {/* Main content column - full width with right padding on large screens to make room for fixed TOC */}
       <article className="max-w-none xl:w-auto">
+        {/* Home-specific title and description */}
+        <div className="mb-8 border-b border-[#222] pb-8">
+          <h1 className="text-4xl font-bold mb-4">Documentation</h1>
+          <p className="text-xl text-gray-400">Welcome to our comprehensive documentation platform. Find detailed guides, tutorials, and API references to help you get started.</p>
+        </div>
+        
         <nav className="flex items-center gap-1 text-sm mb-4">
           <Link href="/" className="text-gray-400 hover:text-white">
             Docs
