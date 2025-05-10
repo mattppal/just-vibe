@@ -12,6 +12,7 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { debounce } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 
 interface SidebarProps {
   open: boolean;
@@ -30,42 +31,35 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const [allDocs, setAllDocs] = useState<DocPage[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Combined data fetching with optimizations
+  // Use React Query for data fetching with built-in caching
+  const { data, isLoading: isSectionsLoading } = useQuery({
+    queryKey: ["/api/sections"],
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours - effectively disable refetching
+    gcTime: 7 * 24 * 60 * 60 * 1000, // 7 days cache retention
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  
+  // Process the data when it changes
   useEffect(() => {
-    let isMounted = true;
-    
-    async function fetchData() {
-      try {
-        // First fetch sections - this is critical for navigation
-        const sectionsData = await getDocsBySection();
-        
-        if (isMounted) {
-          setSections(sectionsData);
-          setLoading(false);
-          
-          // Build allDocs from sections - avoid a separate network request
-          const allDocsArray: DocPage[] = [];
-          Object.values(sectionsData).forEach(section => {
-            allDocsArray.push(...section);
-          });
-          
-          setAllDocs(allDocsArray);
-        }
-      } catch (error) {
-        // Silent fail on errors
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
+    if (data && typeof data === 'object') {
+      setSections(data as SectionData);
+      
+      // Build allDocs from sections - avoid separate network requests
+      const allDocsArray: DocPage[] = [];
+      Object.values(data as SectionData).forEach(section => {
+        allDocsArray.push(...section);
+      });
+      
+      setAllDocs(allDocsArray);
     }
-
-    fetchData();
-    
-    // Cleanup function
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  }, [data]);
+  
+  // Update the loading state based on the query
+  useEffect(() => {
+    setLoading(isSectionsLoading);
+  }, [isSectionsLoading]);
   
   // Reset search results when allDocs gets updated
   useEffect(() => {
