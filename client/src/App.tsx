@@ -23,7 +23,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       {/* Handle all doc pages with a single route */}
-      <Route path="/:slug" component={DocPage} />
+      <Route path="/:slug*" component={DocPage} />
       <Route component={NotFound} />
     </Switch>
   );

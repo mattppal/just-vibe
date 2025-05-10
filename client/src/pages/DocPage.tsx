@@ -58,8 +58,11 @@ export default function DocPage() {
       // Use requestIdleCallback to prefetch only immediately adjacent docs when browser is idle
       const prefetchAdjacentDocs = () => {
         if (docData && docData.section) {
-          // Get preloading function from docs module
-          getDocsBySection().then(sectionsData => {
+          // Get sections data from the cache if available, otherwise fetch from API
+          const sectionsQueryData = queryClient.getQueryData<Record<string, DocPageType[]>>(['/api/sections']);
+          
+          // Process function to handle sections data
+          const processSectionsData = (sectionsData: Record<string, DocPageType[]>) => {
             try {
               const currentSection = sectionsData[docData.section];
               
@@ -108,7 +111,23 @@ export default function DocPage() {
             } catch (e) {
               // Silently fail for preloading - this is a non-critical operation
             }
-          });
+          };
+
+          // If we have sections data in the cache, use it
+          if (sectionsQueryData) {
+            processSectionsData(sectionsQueryData);
+          } else {
+            // If not in cache, fetch it (this should be rare since the sidebar should have loaded it)
+            queryClient.fetchQuery({
+              queryKey: ['/api/sections'],
+              staleTime: 24 * 60 * 60 * 1000, // 24 hours
+              gcTime: 7 * 24 * 60 * 60 * 1000, // 7 days
+            }).then(data => {
+              if (data) processSectionsData(data as Record<string, DocPageType[]>);
+            }).catch(() => {
+              // Silently fail for preloading
+            });
+          }
         }
       };
       

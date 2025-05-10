@@ -39,6 +39,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    refetchInterval: false // Ensure no periodic refetching
   });
   
   // Process the data when it changes
