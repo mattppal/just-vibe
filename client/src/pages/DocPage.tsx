@@ -44,10 +44,9 @@ export default function DocPage() {
         if (cachedDoc) {
           // Use cached data if available to speed up initial render
           docData = cachedDoc;
-          // Also refresh in background if it's stale
-          setTimeout(() => {
-            queryClient.refetchQueries({ queryKey: [`/api/docs/path${path}`], type: 'inactive' });
-          }, 2000); // Delay refetch to prioritize UI responsiveness
+          // Don't automatically refresh in background
+          // This significantly reduces API requests
+          // If we need fresh data, the user can refresh the page
         } else {
           const fetchedDoc = await getDocByPath(path);
           if (fetchedDoc) {
@@ -92,20 +91,22 @@ export default function DocPage() {
                         }
                       }
                       
-                      // Prefetch only the adjacent pages with a longer delay
-                      let delay = 1000; // Start with a 1 second delay
-                      prefetchQueue.forEach((doc) => {
+                      // Only prefetch the next doc (first in queue) with much longer delay
+                      // This significantly reduces unnecessary network requests
+                      if (prefetchQueue.length > 0) {
+                        const nextDoc = prefetchQueue[0]; // Only prefetch the first doc (usually the next page)
+                        
+                        // Much longer delay (5 seconds) to give priority to user's current page
                         setTimeout(() => {
-                          if (doc.path) {
+                          if (nextDoc.path) {
                             queryClient.prefetchQuery({
-                              queryKey: [`/api/docs/path${doc.path}`],
-                              queryFn: () => getDocByPath(doc.path),
-                              staleTime: 24 * 60 * 60 * 1000 // 24 hours
+                              queryKey: [`/api/docs/path${nextDoc.path}`],
+                              queryFn: () => getDocByPath(nextDoc.path),
+                              staleTime: 48 * 60 * 60 * 1000 // 48 hours - extended cache life
                             });
                           }
-                        }, delay);
-                        delay += 1000; // Longer stagger between prefetches
-                      });
+                        }, 5000); // 5 second delay for prefetching
+                      }
                     }
                   }
                 } catch (e) {
@@ -115,11 +116,15 @@ export default function DocPage() {
             }
           };
           
-          // Use requestIdleCallback with a longer timeout
+          // Use requestIdleCallback with a much longer timeout
+          // Only run this if user has been on the page for at least 10 seconds
           if (typeof window.requestIdleCallback === 'function') {
-            window.requestIdleCallback(prefetchAdjacentDocs, { timeout: 5000 });
+            setTimeout(() => {
+              window.requestIdleCallback(prefetchAdjacentDocs, { timeout: 10000 }); // 10 second timeout
+            }, 10000); // Wait 10 seconds before even trying to prefetch
           } else {
-            setTimeout(prefetchAdjacentDocs, 2000);
+            // No requestIdleCallback support, use a much longer timeout
+            setTimeout(prefetchAdjacentDocs, 15000); // 15 second timeout
           }
         } else {
           setError("Document not found");
