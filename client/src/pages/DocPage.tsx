@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { getDocByPath, DocPage as DocPageType, getDocsBySection } from "@/lib/docs";
+import MDXProvider from "@/components/MDXProvider";
 import TableOfContents from "@/components/TableOfContents";
 import { useAuth } from "@/hooks/useAuth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
