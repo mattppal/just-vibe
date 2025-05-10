@@ -1,4 +1,4 @@
-import { apiRequest } from "./queryClient";
+import { apiRequest, queryClient } from "./queryClient";
 
 export interface Heading {
   id: string;
@@ -75,6 +75,12 @@ export async function getDocBySlug(slug: string): Promise<DocPage | undefined> {
 
 export async function getDocsBySection(): Promise<Record<string, DocPage[]>> {
   try {
+    // Try to get from query cache first (if already fetched by sidebar)
+    const cachedData = queryClient.getQueryData<Record<string, DocPage[]>>(['/api/sections']);
+    if (cachedData) {
+      return cachedData;
+    }
+    // Fall back to api request if not in cache
     return await apiRequest("/api/sections");
   } catch (error) {
     console.error("Error fetching doc sections:", error);

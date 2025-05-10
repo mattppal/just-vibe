@@ -121,11 +121,14 @@ export default function DocPage() {
           if (sectionsQueryData) {
             processSectionsData(sectionsQueryData);
           } else {
-            // If not in cache, fetch it (this should be rare since the sidebar should have loaded it)
-            queryClient.fetchQuery({
+            // If not in cache, we'll use getQueryData with ensureQueryData for better caching
+            // This will prioritize using the cache and only fetch if absolutely necessary
+            // We're not using fetchQuery to avoid unnecessary network requests
+            queryClient.ensureQueryData({
               queryKey: ['/api/sections'],
               staleTime: 24 * 60 * 60 * 1000, // 24 hours
               gcTime: 7 * 24 * 60 * 60 * 1000, // 7 days
+              queryFn: () => getDocsBySection() // Use the existing function but wrapped in ensureQueryData
             }).then(data => {
               if (data) processSectionsData(data as Record<string, DocPageType[]>);
             }).catch(() => {
@@ -135,15 +138,16 @@ export default function DocPage() {
         }
       };
       
-      // Use requestIdleCallback with a much longer timeout
-      // Only run this if user has been on the page for at least 20 seconds
+      // Significantly extend the prefetch delay to reduce server load
+      // Only prefetch content if the user has stayed on the page for at least 30 seconds
+      // This suggests they are actually reading the content and might navigate to related pages
       if (typeof window.requestIdleCallback === 'function') {
         setTimeout(() => {
-          window.requestIdleCallback(prefetchAdjacentDocs, { timeout: 15000 }); // 15 second timeout
-        }, 20000); // Wait 20 seconds before even trying to prefetch
+          window.requestIdleCallback(prefetchAdjacentDocs, { timeout: 20000 }); // 20 second timeout (increased)
+        }, 30000); // Wait 30 seconds before even trying to prefetch (increased from 20)
       } else {
         // No requestIdleCallback support, use a much longer timeout
-        setTimeout(prefetchAdjacentDocs, 30000); // 30 second timeout
+        setTimeout(prefetchAdjacentDocs, 45000); // 45 second timeout (increased from 30)
       }
     } else if (!isLoading && !queryError) {
       setError("Document not found");
