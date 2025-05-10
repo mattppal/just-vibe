@@ -37,17 +37,21 @@ export default function DocPage() {
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     retry: false,
-    enabled: !!path, // Only run when path exists
-    onError: (err: any) => {
+    enabled: !!path // Only run when path exists
+  });
+  
+  // Handle errors separately (React Query v5 doesn't accept onError in the options)
+  useEffect(() => {
+    if (queryError) {
       // Check if this is an auth error (401)
-      if (err?.response?.status === 401 || 
-          (typeof err === 'object' && err.message === "Unauthorized")) {
+      if ((queryError as any)?.response?.status === 401 || 
+          (typeof queryError === 'object' && queryError.message === "Unauthorized")) {
         setAuthRequired(true);
       } else {
         setError("Failed to load document");
       }
     }
-  });
+  }, [queryError]);
 
   // Update component state when query data changes
   useEffect(() => {

@@ -174,7 +174,8 @@ export const queryClient = new QueryClient({
       retry: false,
       networkMode: 'offlineFirst', // Prefer cache first for better performance
       gcTime: 24 * 60 * 60 * 1000, // 24 hours in cache (significantly increased for better offline access)
-      refetchOnMount: false // Don't refetch when component mounts if we have cached data
+      refetchOnMount: false, // Don't refetch when component mounts if we have cached data
+      refetchOnReconnect: false // Don't refetch on reconnect as our docs rarely change
     },
     mutations: {
       retry: false,
