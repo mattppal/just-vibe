@@ -232,16 +232,14 @@
   background-color: #111 !important;
 }
 
-/* Hide browser's default X button for search inputs and replace with our own */
-.sidebar input[type="search"]::-webkit-search-cancel-button {
-  -webkit-appearance: none;
-  display: none;
+/* Input customization */
+.sidebar input::placeholder {
+  color: #777 !important;
 }
 
-/* For Firefox */
-.sidebar input[type="search"]::-moz-search-cancel-button {
-  -moz-appearance: none;
-  display: none;
+.sidebar input {
+  color: white !important;
+  background-color: #111 !important;
 }
 
 /* Highlighting theme for code blocks */

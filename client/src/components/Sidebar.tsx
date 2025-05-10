@@ -156,7 +156,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         <div className="px-8 mb-8">
           <div className="relative">
             <Input
-              type="search"
+              type="text" /* Changed from search to text to remove default browser behavior */
               placeholder="Search..."
               className="w-full bg-[#111] text-white border-[#333] placeholder-gray-500"
               value={searchQuery}
