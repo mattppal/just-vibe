@@ -87,7 +87,7 @@
 .prose h4, 
 .prose h5, 
 .prose h6 {
-  @apply text-foreground font-semibold tracking-tight mb-4 mt-8 scroll-m-20;
+  @apply text-foreground font-medium tracking-tight mb-4 mt-8 scroll-m-20;
 }
 
 .prose h1 {
