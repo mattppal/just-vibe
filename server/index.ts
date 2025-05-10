@@ -80,9 +80,9 @@ app.use('/api', (req, res, next) => {
   const host = req.get('Host');
   
   // Additional security for API endpoints
-  // If there's no browser user agent and no proper authentication, block the request
+  // If there's no browser user agent, apply additional checks
   // This helps prevent direct curl/script access
-  if (!isBrowserRequest && !req.isAuthenticated()) {
+  if (!isBrowserRequest) {
     // If this is not a browser and has no auth header, apply strict API key check
     // Check for session cookies as secondary authentication method
     const hasCookieAuth = req.cookies && Object.keys(req.cookies).some(key => 

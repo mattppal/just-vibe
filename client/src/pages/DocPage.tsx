@@ -21,9 +21,17 @@ export default function DocPage() {
   const path = location;
   
   // Use TanStack Query to fetch the doc data properly
-  const { data: docData, isLoading, error: queryError } = useQuery<DocPageType>({
+  const { data: docData, isLoading, error: queryError } = useQuery<DocPageType | null, Error, DocPageType | null>({
     queryKey: [`/api/docs/path${path}`],
-    queryFn: () => getDocByPath(path),
+    queryFn: async () => {
+      try {
+        const result = await getDocByPath(path);
+        return result || null;
+      } catch (error) {
+        console.error('Error fetching doc:', error);
+        throw error;
+      }
+    },
     staleTime: 72 * 60 * 60 * 1000, // 72 hours - extended cache life
     gcTime: 7 * 24 * 60 * 60 * 1000, // 7 days - keep in cache for a week
     refetchOnMount: false,
