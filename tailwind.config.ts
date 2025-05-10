@@ -1,24 +1,97 @@
 import type { Config } from "tailwindcss";
+import daisyui, { type Config as DaisyUIConfig } from "daisyui";
+
+type DaisyuiThemeExtend = {
+  borderRadius: {
+    badge: string;
+    btn: string;
+    box: string;
+  };
+  colors: {
+    "base-100": string;
+    "base-200": string;
+    "base-300": string;
+    "base-content": string;
+    primary: string;
+    "primary-content": string;
+    secondary: string;
+    "secondary-content": string;
+    accent: string;
+    "accent-content": string;
+    neutral: string;
+    "neutral-content": string;
+    info: string;
+    "info-content": string;
+    success: string;
+    "success-content": string;
+    warning: string;
+    "warning-content": string;
+    error: string;
+    "error-content": string;
+  };
+};
+const daisyuiThemeExtend = daisyui.config!.theme!.extend as DaisyuiThemeExtend;
+
+const shadcnThemeExtend = {
+  borderRadius: {
+    lg: daisyuiThemeExtend.borderRadius.badge,
+    md: daisyuiThemeExtend.borderRadius.btn,
+    sm: daisyuiThemeExtend.borderRadius.box,
+  },
+  colors: {
+    background: daisyuiThemeExtend.colors["base-100"],
+    foreground: daisyuiThemeExtend.colors["base-content"],
+    card: {
+      DEFAULT: daisyuiThemeExtend.colors["base-100"],
+      foreground: daisyuiThemeExtend.colors["base-content"],
+    },
+    popover: {
+      DEFAULT: daisyuiThemeExtend.colors["base-100"],
+      foreground: daisyuiThemeExtend.colors["base-content"],
+    },
+    primary: {
+      DEFAULT: daisyuiThemeExtend.colors.primary,
+      foreground: daisyuiThemeExtend.colors["primary-content"],
+    },
+    secondary: {
+      DEFAULT: daisyuiThemeExtend.colors.secondary,
+      foreground: daisyuiThemeExtend.colors["secondary-content"],
+    },
+    muted: {
+      DEFAULT: daisyuiThemeExtend.colors["base-300"],
+      foreground: daisyuiThemeExtend.colors["base-content"],
+    },
+    accent: {
+      DEFAULT: daisyuiThemeExtend.colors.accent,
+      foreground: daisyuiThemeExtend.colors["accent-content"],
+    },
+    destructive: {
+      DEFAULT: daisyuiThemeExtend.colors.error,
+      foreground: daisyuiThemeExtend.colors["error-content"],
+    },
+    border: daisyuiThemeExtend.colors["base-300"],
+    input: daisyuiThemeExtend.colors["base-300"],
+    ring: daisyuiThemeExtend.colors.primary,
+    chart: {
+      "1": "hsl(var(--chart-1))",
+      "2": "hsl(var(--chart-2))",
+      "3": "hsl(var(--chart-3))",
+      "4": "hsl(var(--chart-4))",
+      "5": "hsl(var(--chart-5))",
+    },
+  },
+};
 
 export default {
   darkMode: ["class"],
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
-  daisyui: {
-    themes: false, // false: only light + dark | true: all themes | array: specific themes like this ["light", "dark", "cupcake"]
-    darkTheme: "dark", // name of one of the included themes for dark mode
-    base: true, // applies background color and foreground color for root element by default
-    styled: true, // include daisyUI colors and design decisions for all components
-    utils: true, // adds responsive and modifier utility classes
-    prefix: "", // prefix for daisyUI classnames (components, modifiers and responsive class names. Not colors)
-    logs: true, // Shows info about daisyUI version and used config in the console when building your CSS
-    themeRoot: ":root", // The element that receives theme color CSS variables
-  },
   theme: {
     fontFamily: {
       sans: ["'Geist Sans'", "system-ui", "sans-serif"],
       mono: ["'Geist Mono'", "monospace"],
     },
     extend: {
+      // ...shadcnThemeExtend,
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
