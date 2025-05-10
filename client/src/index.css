@@ -226,6 +226,12 @@
   box-sizing: border-box;
 }
 
+/* Search input styling */
+.sidebar input[type="search"]:focus {
+  @apply border-orange-500 ring-1 ring-orange-500;
+  background-color: #111 !important;
+}
+
 /* Highlighting theme for code blocks */
 .hljs-comment,
 .hljs-quote {

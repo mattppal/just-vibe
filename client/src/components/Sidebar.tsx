@@ -176,13 +176,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             {searchQuery ? (
               <button
                 onClick={clearSearch}
-                className="absolute right-3 top-2.5 text-gray-400 hover:text-white"
+                className="absolute right-3 top-2.5 text-gray-400 hover:text-orange-500"
                 aria-label="Clear search"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4 text-orange-600" />
               </button>
             ) : (
-              <Search className="absolute right-3 top-2.5 w-4 h-4 text-secondary" />
+              <Search className="absolute right-3 top-2.5 w-4 h-4 text-orange-600" />
             )}
           </div>
         </div>
