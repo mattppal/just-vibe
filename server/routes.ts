@@ -144,18 +144,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const docsBySection = await getDocsBySection();
       
-      // For unauthenticated users, only include basic info for authenticated docs
-      if (!req.isAuthenticated()) {
-        Object.keys(docsBySection).forEach(section => {
-          docsBySection[section].forEach((doc: any) => {
-            if (doc.authenticated !== false) {
-              doc.requiresAuth = true; // Flag for frontend
-            }
-          });
-        });
-      }
+      // Create a lightweight version of the docs with only necessary fields for the sidebar
+      const lightweightDocsBySection: Record<string, any[]> = {};
       
-      return res.json(docsBySection);
+      Object.keys(docsBySection).forEach(section => {
+        lightweightDocsBySection[section] = docsBySection[section].map(doc => {
+          const lightDoc = {
+            title: doc.title,
+            sidebarTitle: doc.sidebarTitle,
+            description: doc.description,
+            slug: doc.slug,
+            path: doc.path,
+            order: doc.order,
+          };
+          
+          // For unauthenticated users, include auth flag
+          if (!req.isAuthenticated() && doc.authenticated !== false) {
+            (lightDoc as any).requiresAuth = true;
+          }
+          
+          return lightDoc;
+        });
+      });
+      
+      return res.json(lightweightDocsBySection);
     } catch (error) {
       console.error("Error fetching sections:", error);
       return res.status(500).json({ message: "Internal server error" });

@@ -6,12 +6,12 @@ export function useAuth() {
   const { data: user, isLoading } = useQuery<User | null>({
     queryKey: ["/api/auth/user"],
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes - user info changes infrequently
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 30 * 60 * 1000, // 30 minutes - user info changes very infrequently
+    gcTime: 60 * 60 * 1000, // 1 hour
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    refetchInterval: 5 * 60 * 1000, // Only check every 5 minutes to see if still logged in
+    refetchInterval: 30 * 60 * 1000, // Only check every 30 minutes to see if still logged in
   });
 
   return {

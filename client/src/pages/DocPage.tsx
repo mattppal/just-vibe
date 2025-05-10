@@ -102,10 +102,10 @@ export default function DocPage() {
                             queryClient.prefetchQuery({
                               queryKey: [`/api/docs/path${nextDoc.path}`],
                               queryFn: () => getDocByPath(nextDoc.path),
-                              staleTime: 48 * 60 * 60 * 1000 // 48 hours - extended cache life
+                              staleTime: 72 * 60 * 60 * 1000 // 72 hours - extended cache life
                             });
                           }
-                        }, 5000); // 5 second delay for prefetching
+                        }, 15000); // 15 second delay for prefetching
                       }
                     }
                   }
@@ -117,14 +117,14 @@ export default function DocPage() {
           };
           
           // Use requestIdleCallback with a much longer timeout
-          // Only run this if user has been on the page for at least 10 seconds
+          // Only run this if user has been on the page for at least 20 seconds
           if (typeof window.requestIdleCallback === 'function') {
             setTimeout(() => {
-              window.requestIdleCallback(prefetchAdjacentDocs, { timeout: 10000 }); // 10 second timeout
-            }, 10000); // Wait 10 seconds before even trying to prefetch
+              window.requestIdleCallback(prefetchAdjacentDocs, { timeout: 15000 }); // 15 second timeout
+            }, 20000); // Wait 20 seconds before even trying to prefetch
           } else {
             // No requestIdleCallback support, use a much longer timeout
-            setTimeout(prefetchAdjacentDocs, 15000); // 15 second timeout
+            setTimeout(prefetchAdjacentDocs, 30000); // 30 second timeout
           }
         } else {
           setError("Document not found");
