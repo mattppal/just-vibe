@@ -79,29 +79,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // API endpoint to get the first doc (for home page)
-  app.get("/api/docs/first", async (req, res, next) => {
-    try {
-      const allDocs = await getAllDocs();
-      
-      if (allDocs.length === 0) {
-        return res.status(404).json({ message: "No documentation found" });
-      }
-      
-      // Get the first document in the sorted list
-      const firstDoc = allDocs[0];
-      
-      // Attach doc to response locals for middleware
-      res.locals.doc = firstDoc;
-      next();
-    } catch (error) {
-      console.error("Error fetching first doc:", error);
-      return res.status(500).json({ message: "Internal server error" });
-    }
-  }, protectDocIfNeeded, (req, res) => {
-    return res.json(res.locals.doc);
-  });
-  
   app.get("/api/docs/:slug", async (req, res, next) => {
     try {
       const { slug } = req.params;
@@ -125,20 +102,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/docs/path/:path(*)", async (req, res, next) => {
     try {
       // Handle root path (this is for backwards compatibility)
-      if (req.params.path === "root" || req.params.path === "") {
-        // Always use the first content file (alphabetically) as the root document
-        // In this case, it's the introduction page in the welcome section
-        const introDoc = await getDocByPath("/welcome/introduction");
-        if (introDoc) {
-          // For API consistency, we'll add a special flag to indicate it's also available at root
-          res.locals.doc = { ...introDoc, rootAlias: true };
-          return next();
-        }
+      if (req.params.path === "root") {
+        // First try to find a document specifically for the root path
+        const rootDoc = await getDocByPath("/");
         
-        // Fallback to any document for the root (shouldn't reach here)
-        const allDocs = await getAllDocs();
-        if (allDocs.length > 0) {
-          res.locals.doc = allDocs[0];
+        // If not found, try to get the introduction document instead
+        if (!rootDoc) {
+          const introDoc = await getDocByPath("/welcome/introduction");
+          if (introDoc) {
+            // For API consistency, we'll add a special flag to indicate it's also available at root
+            res.locals.doc = { ...introDoc, rootAlias: true };
+            return next();
+          }
+        } else {
+          res.locals.doc = rootDoc;
           return next();
         }
       }
