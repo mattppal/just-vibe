@@ -1,10 +1,18 @@
 import type { Config } from "tailwindcss";
-import { type Config as DaisyUIConfig } from "daisyui";
 
-// Define the theme extensions directly instead of trying to access daisyui config
-const config: Config = {
+export default {
   darkMode: ["class"],
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
+  daisyui: {
+    themes: false, // false: only light + dark | true: all themes | array: specific themes like this ["light", "dark", "cupcake"]
+    darkTheme: "dark", // name of one of the included themes for dark mode
+    base: true, // applies background color and foreground color for root element by default
+    styled: true, // include daisyUI colors and design decisions for all components
+    utils: true, // adds responsive and modifier utility classes
+    prefix: "", // prefix for daisyUI classnames (components, modifiers and responsive class names. Not colors)
+    logs: true, // Shows info about daisyUI version and used config in the console when building your CSS
+    themeRoot: ":root", // The element that receives theme color CSS variables
+  },
   theme: {
     fontFamily: {
       sans: ["'Geist Sans'", "system-ui", "sans-serif"],
@@ -107,28 +115,30 @@ const config: Config = {
       typography: {
         DEFAULT: {
           css: {
-            "--tw-prose-body": "#ffffff",
-            "--tw-prose-headings": "#ffffff",
-            "--tw-prose-lead": "#ffffff",
-            "--tw-prose-links": "#F26208", // Orange links
-            "--tw-prose-bold": "#ffffff",
-            "--tw-prose-counters": "#ffffff",
-            "--tw-prose-bullets": "#ffffff",
-            "--tw-prose-hr": "#333333",
-            "--tw-prose-quotes": "#ffffff",
-            "--tw-prose-quote-borders": "#333333",
-            "--tw-prose-captions": "#ffffff",
-            "--tw-prose-code": "#ffffff",
-            "--tw-prose-pre-code": "#ffffff",
-            "--tw-prose-pre-bg": "#0a0a0a",
+            "--tw-prose-body": "#ffffff" /* Pure white */,
+            "--tw-prose-headings": "#ffffff" /* Pure white */,
+            "--tw-prose-lead": "#ffffff" /* Pure white */,
+            "--tw-prose-links": "#F26208" /* Orange links */,
+            "--tw-prose-bold": "#ffffff" /* Pure white */,
+            "--tw-prose-counters": "#ffffff" /* Pure white */,
+            "--tw-prose-bullets": "#ffffff" /* Pure white */,
+            "--tw-prose-hr": "#333333" /* Dark dividers */,
+            "--tw-prose-quotes": "#ffffff" /* Pure white */,
+            "--tw-prose-quote-borders": "#333333" /* Dark border */,
+            "--tw-prose-captions": "#ffffff" /* Pure white */,
+            "--tw-prose-code": "#ffffff" /* Pure white */,
+            "--tw-prose-pre-code": "#ffffff" /* Pure white */,
+            "--tw-prose-pre-bg":
+              "#0a0a0a" /* Very dark, not pure black for contrast */,
             "--tw-prose-th-borders": "#333333",
             "--tw-prose-td-borders": "#333333",
 
-            // Dark mode overwrites
+            // Dark mode overwrites (same as light mode since we want consistent black/white theme)
             "--tw-prose-invert-body": "#ffffff",
             "--tw-prose-invert-headings": "#ffffff",
             "--tw-prose-invert-lead": "#ffffff",
-            "--tw-prose-invert-links": "#F26208",
+            "--tw-prose-invert-links":
+              "#F26208" /* Orange links in dark mode */,
             "--tw-prose-invert-bold": "#ffffff",
             "--tw-prose-invert-counters": "#ffffff",
             "--tw-prose-invert-bullets": "#ffffff",
@@ -197,6 +207,4 @@ const config: Config = {
     require("@tailwindcss/typography"),
     require("daisyui"),
   ],
-};
-
-export default config;
+} satisfies Config;
