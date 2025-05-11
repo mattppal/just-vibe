@@ -137,6 +137,26 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
   };
+  
+  // Helper function to construct consistent full path for lessons
+  const getFullLessonPath = (doc: any, section: string) => {
+    // If the slug already includes a path, use it as is
+    if (doc.slug.includes('/')) {
+      return doc.slug;
+    }
+    
+    // Otherwise, construct a full path with section and lesson name
+    // Normalize section name - remove numeric prefixes
+    const normalizedSection = section.replace(/^\d+-/, '');
+    const baseSlug = doc.slug.split('/').pop() || doc.slug;
+    
+    // Special case for root section
+    if (section === 'root') {
+      return baseSlug;
+    }
+    
+    return `${normalizedSection}/${baseSlug}`;
+  };
 
   // Handle sidebar link click
   const handleLinkClick = () => {
@@ -244,9 +264,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                               <span className="font-medium">
                                 {doc.sidebarTitle || doc.title}
                               </span>
-                              {isLessonCompleted(doc.slug) && (
+                              {isLessonCompleted(getFullLessonPath(doc, doc.section || 'root')) && (
                                 <EmojiProvider data={emojiData}>
-                                  <Emoji name="red-heart" />
+                                  <Emoji name="check-mark-button" className="h-4 w-4 flex-shrink-0 ml-1 opacity-75"/>
                                 </EmojiProvider>
                               )}
                             </div>
@@ -322,7 +342,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                           >
                             <div className="flex items-center gap-2 justify-between w-full">
                               <span>{doc.sidebarTitle}</span>
-                              {isLessonCompleted(doc.slug) && (
+                              {isLessonCompleted(getFullLessonPath(doc, sectionName)) && (
                                 <EmojiProvider data={emojiData}>
                                   <Emoji
                                     name="check-mark-button"
