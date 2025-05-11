@@ -95,8 +95,15 @@ export async function processMarkdown(
       // Process Alert components
       result = result.replace(/<div><p>(.*?)<\/p><\/div>/g, (match, content, offset, string) => {
         // Check if this appears to be from an Alert component (by proximity to Alert text)
-        if (string.substring(Math.max(0, offset - 100), offset).includes('<Alert')) {
-          return `<div data-mdx-component="Alert" data-props="{&quot;content&quot;:&quot;${content.replace(/"/g, '&quot;')}&quot;}"><p>${content}</p></div>`;
+        if (string.substring(Math.max(0, offset - 150), offset).includes('<Alert')) {
+          // Look for type and title props in the Alert component
+          const typeMatch = string.substring(Math.max(0, offset - 150), offset).match(/type=["']([^"']*)["']/i);
+          const titleMatch = string.substring(Math.max(0, offset - 150), offset).match(/title=["']([^"']*)["']/i);
+          
+          const type = typeMatch ? typeMatch[1] : 'info';
+          const title = titleMatch ? titleMatch[1] : 'Information';
+          
+          return `<div data-mdx-component="Alert" data-props="{&quot;type&quot;:&quot;${type}&quot;,&quot;title&quot;:&quot;${title}&quot;,&quot;content&quot;:&quot;${content.replace(/"/g, '&quot;')}&quot;}"><p>${content}</p></div>`;
         }
         return match;
       });
