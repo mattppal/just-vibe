@@ -1,6 +1,6 @@
 ---
 title: Course home
-sidebarTitle: 👉 Start here
+sidebarTitle: Start here
 description: This course will teach you everything you need to know about vibe coding on Replit.
 authenticated: false
 ---

@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { getDocByPath, DocPage as DocPageType, getDocsBySection } from "@/lib/docs";
 import MDXProvider from "@/components/MDXProvider";
 import TableOfContents from "@/components/TableOfContents";
+import { DocNavigation, findAdjacentDocs } from "@/components/DocNavigation";
 import { useAuth } from "@/hooks/useAuth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,8 @@ export default function DocPage() {
   const [doc, setDoc] = useState<DocPageType | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [authRequired, setAuthRequired] = useState(false);
+  const [previousDoc, setPreviousDoc] = useState<{ title: string; path: string } | null>(null);
+  const [nextDoc, setNextDoc] = useState<{ title: string; path: string } | null>(null);
   const { isAuthenticated, login } = useAuth();
   
   // Determine the path from the URL
@@ -43,6 +46,18 @@ export default function DocPage() {
     enabled: !!path // Only run when path exists
   });
   
+  // Get all sections data for navigation
+  const { data: sectionsData } = useQuery<Record<string, DocPageType[]>>({  
+    queryKey: ['/api/sections'],
+    queryFn: async () => {
+      return await getDocsBySection();
+    },
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours
+    gcTime: 7 * 24 * 60 * 60 * 1000, // 7 days
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
+  
   // Handle errors separately (React Query v5 doesn't accept onError in the options)
   useEffect(() => {
     if (queryError) {
@@ -58,9 +73,14 @@ export default function DocPage() {
 
   // Update component state when query data changes
   useEffect(() => {
-    if (docData) {
+    if (docData && sectionsData) {
       setDoc(docData);
       document.title = `${docData.title} | Just Vibe Docs`;
+      
+      // Find previous and next docs
+      const { previousDoc, nextDoc } = findAdjacentDocs(docData, sectionsData);
+      setPreviousDoc(previousDoc);
+      setNextDoc(nextDoc);
       
       // Use requestIdleCallback to prefetch only immediately adjacent docs when browser is idle
       const prefetchAdjacentDocs = () => {
@@ -156,7 +176,7 @@ export default function DocPage() {
     } else if (!isLoading && !queryError) {
       setError("Document not found");
     }
-  }, [docData, isLoading, queryError, isAuthenticated]);
+  }, [docData, sectionsData, isLoading, queryError, isAuthenticated]);
   
   // Set IDs for headings to support table of contents
   useEffect(() => {
@@ -361,6 +381,9 @@ export default function DocPage() {
           {/* Use MDXProvider for any content, which handles both MDX and regular markdown */}
           <MDXProvider>{doc.html}</MDXProvider>
         </div>
+        
+        {/* Navigation links to previous and next pages */}
+        <DocNavigation previousDoc={previousDoc} nextDoc={nextDoc} />
       </article>
       
       {/* TOC is now positioned with fixed positioning in the TableOfContents component */}
