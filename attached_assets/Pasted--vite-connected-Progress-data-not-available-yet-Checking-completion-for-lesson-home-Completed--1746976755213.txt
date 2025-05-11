@@ -1,0 +1,48 @@
+[vite] connected.
+Progress data not available yet
+Checking completion for lesson: home - Completed: false 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: 1-getting-started/course-welcome - Completed: true 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: 1-getting-started/installation - Completed: false 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: 1-getting-started/quick-start - Completed: false 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: 1-getting-started/youtube-embed - Completed: false 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: 2-core-concepts/prompting - Completed: false 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: 1-getting-started/installation - Completed: false 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: home - Completed: false 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: 1-getting-started/course-welcome - Completed: true 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: 1-getting-started/installation - Completed: false 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: 1-getting-started/quick-start - Completed: false 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: 1-getting-started/youtube-embed - Completed: false 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: 2-core-concepts/prompting - Completed: false 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: home - Completed: false 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: 1-getting-started/course-welcome - Completed: true 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: 1-getting-started/installation - Completed: false 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: 1-getting-started/quick-start - Completed: false 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: 1-getting-started/youtube-embed - Completed: false 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: 2-core-concepts/prompting - Completed: false 
+Object {completedLessons: {…}, totalCount: 1}
+Attempting to mark lesson 1-getting-started/installation as complete
+Checking completion for lesson: 1-getting-started/installation - Completed: false 
+Object {completedLessons: {…}, totalCount: 1}
+Checking completion for lesson: 1-getting-started/installation - Completed: false 
+Object {completedLessons: {…}, totalCount: 1}
+completedLessons: Object
+totalCount: 1
+[[Prototype]]: Object

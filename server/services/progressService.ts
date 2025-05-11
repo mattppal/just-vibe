@@ -67,11 +67,15 @@ export class ProgressService {
       throw new Error("User ID and lesson slug are required");
     }
     
+    console.log(`Marking lesson ${lessonSlug} as complete for user ${userId}`);
+    
     // Get current progress data
     const progressData = await this.getProgressData(userId);
+    console.log('Current progress data:', JSON.stringify(progressData));
     
     // Check if lesson is already completed to avoid unnecessary updates
     const isAlreadyCompleted = !!progressData.completedLessons[lessonSlug];
+    console.log(`Lesson ${lessonSlug} already completed: ${isAlreadyCompleted}`);
     
     // Update completion status
     progressData.completedLessons[lessonSlug] = {
@@ -87,23 +91,40 @@ export class ProgressService {
       progressData.totalCompletedCount++;
     }
     
-    // Save to database
-    await db
-      .insert(userProgress)
-      .values({
-        userId,
-        progressData: progressData as any,
-        lastUpdated: new Date()
-      })
-      .onConflictDoUpdate({
-        target: userProgress.userId,
-        set: {
+    console.log('Updated progress data to be saved:', JSON.stringify(progressData));
+    
+    try {
+      // Save to database
+      await db
+        .insert(userProgress)
+        .values({
+          userId,
           progressData: progressData as any,
           lastUpdated: new Date()
-        }
-      });
-    
-    return progressData;
+        })
+        .onConflictDoUpdate({
+          target: userProgress.userId,
+          set: {
+            progressData: progressData as any,
+            lastUpdated: new Date()
+          }
+        });
+      
+      console.log(`Successfully updated progress for user ${userId} in database`);
+      
+      // Double-check the data was correctly saved
+      const verifyProgress = await this.getUserProgress(userId);
+      if (verifyProgress) {
+        console.log('Verified progress data in database:', JSON.stringify(verifyProgress.progressData));
+      } else {
+        console.warn('Could not verify progress data was saved - no record found');
+      }
+      
+      return progressData;
+    } catch (error) {
+      console.error('Error saving progress to database:', error);
+      throw new Error(`Failed to save progress: ${error.message}`);
+    }
   }
 
   /**
@@ -117,38 +138,60 @@ export class ProgressService {
       throw new Error("User ID and lesson slug are required");
     }
     
+    console.log(`Marking lesson ${lessonSlug} as incomplete for user ${userId}`);
+    
     // Get current progress data
     const progressData = await this.getProgressData(userId);
+    console.log('Current progress data:', JSON.stringify(progressData));
     
     // Check if lesson was completed
     const wasCompleted = !!progressData.completedLessons[lessonSlug];
+    console.log(`Lesson ${lessonSlug} was previously completed: ${wasCompleted}`);
     
     // Remove lesson from completed lessons
     if (wasCompleted) {
       delete progressData.completedLessons[lessonSlug];
       progressData.totalCompletedCount = Math.max(0, progressData.totalCompletedCount - 1);
+      console.log(`Removed lesson ${lessonSlug} from completed lessons. New count: ${progressData.totalCompletedCount}`);
     }
     
     // Update last activity
     progressData.lastActivity = new Date().toISOString();
     
-    // Save to database
-    await db
-      .insert(userProgress)
-      .values({
-        userId,
-        progressData: progressData as any,
-        lastUpdated: new Date()
-      })
-      .onConflictDoUpdate({
-        target: userProgress.userId,
-        set: {
+    console.log('Updated progress data to be saved:', JSON.stringify(progressData));
+    
+    try {
+      // Save to database
+      await db
+        .insert(userProgress)
+        .values({
+          userId,
           progressData: progressData as any,
           lastUpdated: new Date()
-        }
-      });
-    
-    return progressData;
+        })
+        .onConflictDoUpdate({
+          target: userProgress.userId,
+          set: {
+            progressData: progressData as any,
+            lastUpdated: new Date()
+          }
+        });
+      
+      console.log(`Successfully updated progress for user ${userId} in database`);
+      
+      // Double-check the data was correctly saved
+      const verifyProgress = await this.getUserProgress(userId);
+      if (verifyProgress) {
+        console.log('Verified progress data in database:', JSON.stringify(verifyProgress.progressData));
+      } else {
+        console.warn('Could not verify progress data was saved - no record found');
+      }
+      
+      return progressData;
+    } catch (error) {
+      console.error('Error saving progress to database:', error);
+      throw new Error(`Failed to save progress: ${error.message}`);
+    }
   }
 
   /**
