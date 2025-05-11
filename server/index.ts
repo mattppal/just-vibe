@@ -236,7 +236,8 @@ app.use('/api', (req, res, next) => {
   }
   
   // Apply CSRF protection only to data-modifying requests
-  if (req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'OPTIONS') {
+  // Exclude progress API routes from CSRF protection as they are user-specific and already protected by auth
+  if (req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'OPTIONS' && !req.path.startsWith('/progress')) {
     return csrfProtection(req, res, next);
   }
   
