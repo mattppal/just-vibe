@@ -230,10 +230,15 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                           )}
                           onClick={handleLinkClick}
                         >
-                          <div className="flex flex-col">
-                            <span className="font-medium">
-                              {doc.sidebarTitle || doc.title}
-                            </span>
+                          <div className="flex flex-col w-full">
+                            <div className="flex items-center justify-between w-full">
+                              <span className="font-medium">
+                                {doc.sidebarTitle || doc.title}
+                              </span>
+                              {isLessonCompleted(doc.slug) && (
+                                <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 ml-2" />
+                              )}
+                            </div>
                             <span className="text-xs text-gray-500 truncate mt-1">
                               {doc.description}
                             </span>

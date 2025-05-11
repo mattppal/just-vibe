@@ -6,6 +6,7 @@ import TableOfContents from "@/components/TableOfContents";
 import { DocNavigation, findAdjacentDocs } from "@/components/DocNavigation";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
+import { LessonCompleteButton } from "@/components/LessonCompleteButton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Lock, LogIn, Home, AlertTriangle } from "lucide-react";
@@ -403,6 +404,7 @@ export default function DocPage() {
           </div>
           
           {/* Navigation links to previous and next pages */}
+          {doc && <LessonCompleteButton lessonSlug={doc.slug} />}
           <DocNavigation previousDoc={previousDoc} nextDoc={nextDoc} />
         </article>
         
