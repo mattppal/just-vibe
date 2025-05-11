@@ -137,24 +137,24 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
   };
-  
+
   // Helper function to construct consistent full path for lessons
   const getFullLessonPath = (doc: any, section: string) => {
     // If the slug already includes a path, use it as is
-    if (doc.slug.includes('/')) {
+    if (doc.slug.includes("/")) {
       return doc.slug;
     }
-    
+
     // Otherwise, construct a full path with section and lesson name
     // Normalize section name - remove numeric prefixes
-    const normalizedSection = section.replace(/^\d+-/, '');
-    const baseSlug = doc.slug.split('/').pop() || doc.slug;
-    
+    const normalizedSection = section.replace(/^\d+-/, "");
+    const baseSlug = doc.slug.split("/").pop() || doc.slug;
+
     // Special case for root section
-    if (section === 'root') {
+    if (section === "root") {
       return baseSlug;
     }
-    
+
     return `${normalizedSection}/${baseSlug}`;
   };
 
@@ -208,10 +208,17 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 className="absolute right-3 top-2.5 text-gray-400 hover:text-orange-500"
                 aria-label="Clear search"
               >
-                <X className="w-4 h-4 text-orange-600" />
+                <EmojiProvider data={emojiData}>
+                  <Emoji name="multiply" className="w-4 h-4 " />
+                </EmojiProvider>
               </button>
             ) : (
-              <Search className="absolute right-3 top-2.5 w-4 h-4 text-orange-600" />
+              <EmojiProvider data={emojiData}>
+                <Emoji
+                  name="magnifying-glass-tilted-left"
+                  className="absolute right-3 top-2.5 w-4 h-4 "
+                />
+              </EmojiProvider>
             )}
           </div>
         </div>
@@ -264,9 +271,14 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                               <span className="font-medium">
                                 {doc.sidebarTitle || doc.title}
                               </span>
-                              {isLessonCompleted(getFullLessonPath(doc, doc.section || 'root')) && (
+                              {isLessonCompleted(
+                                getFullLessonPath(doc, doc.section || "root"),
+                              ) && (
                                 <EmojiProvider data={emojiData}>
-                                  <Emoji name="check-mark-button" className="h-4 w-4 flex-shrink-0 ml-1 opacity-75"/>
+                                  <Emoji
+                                    name="check-mark-button"
+                                    className="h-4 w-4 flex-shrink-0 ml-1 opacity-75"
+                                  />
                                 </EmojiProvider>
                               )}
                             </div>
@@ -342,7 +354,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                           >
                             <div className="flex items-center gap-2 justify-between w-full">
                               <span>{doc.sidebarTitle}</span>
-                              {isLessonCompleted(getFullLessonPath(doc, sectionName)) && (
+                              {isLessonCompleted(
+                                getFullLessonPath(doc, sectionName),
+                              ) && (
                                 <EmojiProvider data={emojiData}>
                                   <Emoji
                                     name="check-mark-button"
