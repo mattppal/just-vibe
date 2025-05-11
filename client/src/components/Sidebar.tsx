@@ -1,4 +1,5 @@
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
+import NavigationLink from "./NavigationLink";
 import { Input } from "@/components/ui/input";
 import { ChevronRight, Search, X, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -133,6 +134,14 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       .join(" ");
   };
 
+  // Handle sidebar link click
+  const handleLinkClick = () => {
+    // Close sidebar on mobile
+    if (window.innerWidth < 1024) {
+      onClose();
+    }
+  };
+
   return (
     <>
       {/* Mobile backdrop */}
@@ -209,7 +218,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                           </div>
                         </div>
                       ) : (
-                        <Link
+                        <NavigationLink
                           href={doc.path}
                           className={cn(
                             "nav-link block relative px-3 py-2 rounded-md hover:bg-[#111] text-sm",
@@ -217,14 +226,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                               ? "active text-orange-500 bg-[#111] font-medium"
                               : "text-gray-400 hover:text-orange-500",
                           )}
-                          // Removed hover prefetching to reduce network requests
-                          onClick={() => {
-                            // Optionally close search after clicking a result
-                            if (window.innerWidth < 1024) {
-                              // Close on mobile
-                              onClose();
-                            }
-                          }}
+                          onClick={handleLinkClick}
                         >
                           <div className="flex flex-col">
                             <span className="font-medium">
@@ -234,7 +236,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                               {doc.description}
                             </span>
                           </div>
-                        </Link>
+                        </NavigationLink>
                       )}
                     </li>
                   ))}
@@ -268,8 +270,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                   {formatSectionName(sectionName).toUpperCase()}
                 </div>
                 <ul className="space-y-1">
-                  {" "}
-                  {/* Reduced item spacing for better visual grouping */}
                   {sectionDocs.map((doc) => (
                     <li key={doc.slug}>
                       {doc.requiresAuth && !isAuthenticated ? (
@@ -290,7 +290,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                           </div>
                         </div>
                       ) : (
-                        <Link
+                        <NavigationLink
                           href={doc.path}
                           className={cn(
                             "nav-link block relative px-3 py-1.5 rounded-md hover:bg-[#111] text-sm transition-colors duration-150" /* Adjusted padding and added transition */,
@@ -298,17 +298,12 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                               ? "active text-orange-500 bg-[#111] font-medium"
                               : "text-gray-400 hover:text-orange-500",
                           )}
-                          onClick={() => {
-                            // Close sidebar on mobile after user clicks a link
-                            if (window.innerWidth < 1024) {
-                              onClose();
-                            }
-                          }}
+                          onClick={handleLinkClick}
                         >
                           <div className="flex items-center gap-2">
                             <span>{doc.sidebarTitle}</span>
                           </div>
-                        </Link>
+                        </NavigationLink>
                       )}
                     </li>
                   ))}

@@ -16,13 +16,25 @@ interface DocNavigationProps {
 export function DocNavigation({ previousDoc, nextDoc }: DocNavigationProps) {
   // If there's no previous or next document, don't render anything
   if (!previousDoc && !nextDoc) return null;
+  
+  // Scroll to top when link is clicked
+  const handleNavClick = (e: React.MouseEvent) => {
+    // Use a slight delay to ensure navigation completes before scrolling
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }, 100);
+  };
 
   return (
-    <div className="mt-16 pt-8 border-t border-border flex justify-between">
+    <div className="mt-10 pt-6 border-t border-border flex justify-between">
       {/* Previous Doc Link */}
       {previousDoc ? (
         <Link 
           href={previousDoc.path} 
+          onClick={handleNavClick}
           className="group inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
@@ -39,6 +51,7 @@ export function DocNavigation({ previousDoc, nextDoc }: DocNavigationProps) {
       {nextDoc ? (
         <Link 
           href={nextDoc.path} 
+          onClick={handleNavClick}
           className="group inline-flex items-center gap-2 text-right text-muted-foreground hover:text-primary transition-colors"
         >
           <div>

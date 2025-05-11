@@ -6,8 +6,8 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
   
   return (
-    <footer className="mt-20 pt-10 pb-16 border-t border-border">
-      <div className="container px-4 mx-auto max-w-screen-xl">
+    <footer className="mt-10 pt-6 pb-16 border-t border-border">
+      <div className="max-w-none prose prose-invert px-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex flex-col items-center md:items-start space-y-2">
             <div className="text-xl font-bold">Just Vibe Docs</div>
