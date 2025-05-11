@@ -1,0 +1,147 @@
+---
+title: Prompting effectively
+sidebarTitle: Prompting
+description: Learn about the system architecture. This is a protected page that requires authentication.
+---
+
+Clear, concise, and context-rich prompts are the foundation of effective vibe coding with Replit AI. Think of prompting as giving precise instructions to a very capable—but literal-minded—assistant like [**Replit Agent**](/replitai/agent) or [**Replit Assistant**](/replitai/assistant). Guiding these tools effectively helps you go from idea to app, fast.
+
+## Examples of bad and good prompts
+
+Here are some examples of bad and good prompts:
+
+| Bad Prompt | Good Prompt | Explanation |
+| :--- | :--- | :--- |
+| "Fix my code." | "My script fails when processing user input. The error seems to be in the validation function. Can you help debug the `validate_input` part? Here's the relevant error message: [details]" | **Specificity & Context (Debug, Select, Show)**: The good prompt identifies the problem area and the suspected function. It also offers specific context like code and error details, unlike the vague request. |
+| "Make a website." | "Create a simple portfolio website. It needs sections for Home, About Me, and a Contact Form. Use a clean, modern design theme and placeholder content." | **Clarity & Constraints (Simplify, Specify, Test)**: The good prompt defines the purpose, core features (sections), desired aesthetic, and initial content state. |
+| "Don't make it slow." | "Refactor the data processing function to handle larger inputs more efficiently. Could we use a different algorithm or data structure?" | **Positive Instruction & Goal (Instruct, Specify)**: Tells the AI *how* to improve (efficiency) and suggests *what* to consider (algorithm, data structure) rather than a negative constraint. |
+| "Add animation." | "Animate the main image on the landing page so it gently fades in when the page first loads to create a welcoming effect." | **Specificity & Outcome (Specify, Show)**: The good prompt identifies the specific element, desired visual effect (fade in), timing (page load), and the intended user experience. |
+| "Build the backend." | "Set up the server-side logic. Implement user authentication (signup/login) and create an API endpoint to retrieve user profile data securely." | **Breaking Down Tasks (Checkpoint, Test, Specify)**: The good prompt breaks down a large task ("backend") into specific functionalities (authentication, data retrieval API). |
+
+Just like leading a team, providing clear direction, the right resources, and constructive feedback to your AI partner yields the best results. Mastering the art of the prompt unlocks the full power of AI-assisted development.
+
+## Core prompting principles
+
+![Prompting principles](/public/content/3-core-concepts/prompting.png)
+
+Effective prompting isn't about complex linguistic tricks; it's about clarity, context, and iteration. Here are the key principles to remember when interacting with **Agent** and **Assistant**:
+
+| Tip         | Description                                                                  |
+| :---------- | :--------------------------------------------------------------------------- |
+| **Checkpoint**  | Structure development iteratively. Break large goals into smaller, testable steps, using [**Checkpoints**](/replitai/agent#checkpoints) in **Agent** to save progress and enable safe experimentation. |
+| **Debug**       | Assist the AI in troubleshooting by providing detailed context, including exact error messages, relevant code snippets, and the steps taken.           |
+| **Discover**    | Leverage the AI's knowledge by asking for suggestions on appropriate tools, libraries, frameworks, or general programming approaches for your task. |
+| **Experiment**  | Treat prompting as an iterative process. Refine your requests by adjusting wording, adding detail, or simplifying instructions to improve AI responses.         |
+| **Instruct**    | Guide the AI effectively by stating clear, positive goals and desired actions, rather than focusing on negative constraints or what to avoid.             |
+| **Select**      | Provide focused, relevant context using features like file mentions. Avoid overwhelming the AI with unrelated information; start new chats for distinct tasks. |
+| **Show**        | Reduce ambiguity by providing concrete examples, such as code snippets, desired output formats, sample data, or even UI mockups via image uploads.         |
+| **Simplify**    | Communicate clearly and directly. Use concise language, break down complex ideas, and avoid jargon, as if instructing a new team member.             |
+| **Specify**     | Ensure the AI understands the exact requirements by defining expected outputs, necessary constraints, data formats, and edge case handling.                       |
+| **Test**        | Plan your application's structure and features *before* prompting. Break down requirements like a PM/engineer to guide the AI effectively.    |
+
+Let's explore how to apply each of these principles.
+
+### Checkpoint: Build incrementally
+
+Instead of asking the AI to build your entire application at once, break the project down into smaller, logical steps. Approach development iteratively, confirming each piece works before moving on. This mirrors traditional development cycles and makes the process more manageable for both you and the AI.
+
+-   **Why it matters**: Building step-by-step makes debugging easier and allows the AI to focus its capabilities.
+-   **How to apply**: Prompt for one feature or component at a time. After each successful step, use **Replit Agent**'s [**Checkpoint**](/replitai/agent#checkpoints) feature (like a `git commit`) to save your progress. If a subsequent step fails, you can easily **Rollback** to a working state and try a different prompt.
+
+    *   **Less Effective**: "Build a complete e-commerce platform."
+    *   **More Effective**: "Set up a basic full-stack project for an e-commerce site. Include user sign-up and login functionality using a Replit Database." (Followed by prompts for product listings, cart, etc.)
+
+### Debug: Provide contextual clues
+
+When errors pop up, treat the AI like a collaborator who needs information to help. Go beyond saying "it's broken" and provide specific details about the problem, including error messages and the relevant code sections, so the AI can effectively assist in troubleshooting.
+
+-   **Why it matters**: The AI needs context to understand the error and suggest a correct fix.
+-   **How to apply**: Include the *exact* error message, the relevant code snippet(s), the file name(s) where the error occurs, what you were trying to achieve, and any steps you've already tried.
+
+    *   **Less Effective**: "My login page is broken."
+    *   **More Effective**: "When I try to log in with correct credentials on the `/login` page, I get a 'User not found' error in the browser console. It seems like the check against the database isn't working. Here's the relevant login handling code in `auth.js`."
+
+### Discover: Ask about possibilities
+
+Don't hesitate to ask **Agent** or **Assistant** for advice. If you're unsure about the best library for a task or different ways to approach a feature, ask! This is a great way to learn about new tools or techniques relevant to your project.
+
+-   **Why it matters**: You can quickly learn about relevant technologies or techniques you might not be aware of.
+-   **How to apply**: Frame questions openly. Ask about options, trade-offs, or common practices.
+
+    *   **Less Effective**: "Add payments."
+    *   **More Effective**: "What are some good options for accepting credit card payments in a web app built on Replit? I need something relatively simple to integrate."
+
+### Experiment: Iterate and refine
+
+Your first prompt might not yield the perfect result, and that's okay. Prompting is a conversation. If the AI's response isn't quite right, try rephrasing your request, adding more detail, or simplifying the language. Small adjustments can lead to significantly better outcomes.
+
+-   **Why it matters**: Iteration helps you converge on the desired outcome and learn what prompts work best for specific tasks.
+-   **How to apply**: If the first response isn't quite right, rephrase your request. Add more detail, provide an example, or simplify the instruction. Try different ways of explaining the same goal.
+
+    *   **Initial Prompt**: "Create a header for my website."
+    *   **Refined Prompt**: "Create a sticky header component for my website. It should include the site logo on the left and navigation links (Home, About, Contact) on the right."
+
+### Instruct: Use positive and direct language
+
+Clearly state what you want the AI *to do*, rather than listing things to avoid. Positive, direct instructions are easier for the AI to understand and act on, leading to more predictable and useful results.
+
+-   **Why it matters**: Positive instructions are less ambiguous and guide the AI more effectively toward the desired action.
+-   **How to apply**: Frame your requests as clear commands or descriptions of the desired state.
+
+    *   **Less Effective**: "Don't make the user profile page confusing."
+    *   **More Effective**: "Design a clean user profile page. Display the username prominently, followed by the user's email and join date. Include an 'Edit Profile' button."
+
+### Select: Curate relevant context
+
+Give the AI the specific information it needs for the task at hand, but avoid flooding it with irrelevant details. Use features like file mentioning to focus the AI's attention. If switching to a completely different task, starting a **New chat** can prevent confusion.
+
+-   **Why it matters**: Helps the AI focus on the specific problem without getting sidetracked by unrelated details. **Agent** and **Assistant** have features to help manage context, like mentioning specific files or scraping URLs.
+-   **How to apply**: When asking for changes to specific files (`profile.js`, `profile.html`), mention or attach only those key files. Supplement with specific external context like documentation URLs or design mockups instead of attaching the entire codebase.
+
+    *   **Less Effective**: (Attaching the whole project) "Implement the user profile page based on our design system."
+    *   **More Effective**: "Create the user profile page. Fetch user data from the server endpoint. Style the page according to the guidelines in the design system documentation: [URL to design system docs] and match the layout shown in this mockup: [attach image `profile_mockup.jpg`]."
+
+### Show: Provide examples and demonstrations
+
+Sometimes, the best way to explain what you want is to show an example. Provide code snippets illustrating a style, sample data structures, or even upload screenshots of a UI element you want the AI to replicate. This helps eliminate ambiguity.
+
+-   **Why it matters**: Examples reduce ambiguity and give the AI a clear target to aim for. Replit AI supports multimodal input like images.
+-   **How to apply**: Include code snippets of the desired style, sample input/output data, links to documentation, or even UI mockups/screenshots (which **Agent** can often interpret).
+
+    *   **Less Effective**: "Make the product cards look better."
+    *   **More Effective**: "Redesign the product cards on the shop page. Each card should display the product image, name, price, and an 'Add to Cart' button, similar to this layout: [link to example site or attach screenshot]. Use a light gray border for each card."
+    *   **Alternatively**: "Use this JSON structure for representing product data: [example JSON snippet]. Generate display logic based on this."
+
+### Simplify: Be clear and concise
+
+Communicate with the AI using clear, straightforward language. Avoid unnecessary jargon or overly complex sentences. Breaking down your request into simple steps or bullet points can greatly improve the AI's understanding.
+
+-   **Why it matters**: Simple, direct language reduces the chance of misinterpretation.
+-   **How to apply**: Break down complex requests. Use bullet points for lists of requirements. State the primary goal clearly upfront.
+
+    *   **Less Effective**: "Implement the necessary server-side infrastructure to facilitate the dynamic generation and retrieval of user-generated content artifacts."
+    *   **More Effective**: "Create the backend functionality for users to submit blog posts. Users should be able to enter a title and body content. Store these posts in the Replit Database."
+
+### Specify: Define outputs and constraints
+
+Be explicit about your requirements and expectations. Define the desired output format, specify any constraints (like using a particular library), and mention important edge cases the AI should consider. The more specific you are, the better the AI can meet your needs.
+
+-   **Why it matters**: Reduces ambiguity and ensures the AI's output meets your specific needs.
+-   **How to apply**: Detail the expected function signature, return types, data formats, error handling behavior, or specific technologies to use.
+
+    *   **Less Effective**: "Add a contact form."
+    *   **More Effective**: "Create a contact form page at `/contact`. The form should include fields for Name (required), Email (required, must be valid format), and Message (required, min 10 characters). On submit, send the form data to `contact@mydomain.com`."
+
+### Test: Plan before you prompt
+
+Before you start prompting, take a moment to plan. Think through the application's structure, key features, and user flow, much like a product manager or engineer would. Having a clear plan will help you write more targeted and effective prompts.
+
+-   **Why it matters**: A clear plan leads to more focused prompts and a more coherent final application.
+-   **How to apply**: Outline the features, data structures, and user flows before you start prompting **Agent** or **Assistant**. Break the overall goal into logical development stages.
+
+    *   **Less Effective**: "Build a task manager app."
+    *   **More Effective**: (After planning) "1. Create the basic HTML structure for a task manager with an input field and a task list. 2. Add JavaScript to allow users to add tasks to the list. 3. Use Replit Database to store tasks so they persist. 4. Add functionality to mark tasks as complete..." (Then prompt for each step).
+
+## Summary
+
+Apply these principles: build incrementally, provide clear context, be specific, show examples, and plan ahead. This approach significantly improves collaboration with **Replit Agent** and **Replit Assistant**. This allows developers to leverage the power of AI to build and deploy applications faster and more effectively.
