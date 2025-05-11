@@ -12,9 +12,7 @@ import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import { transformerNotationHighlight } from "@shikijs/transformers";
 import { transformerCopyButton } from "@rehype-pretty/transformers";
-import { visit } from "unist-util-visit";
 import { Node } from "unist";
-import path from "path";
 
 // Cache for processed content to avoid reprocessing the same markdown
 const processedCache = new Map<string, string>();
@@ -57,7 +55,7 @@ function getProcessor(isMdx: boolean): any {
           inline: "tailing-curly-colon",
           transformers: [
             transformerNotationHighlight(),
-            transformerCopyButton()
+            transformerCopyButton(),
           ],
         })
         // Convert to HTML string
@@ -85,7 +83,7 @@ function getProcessor(isMdx: boolean): any {
           inline: "tailing-curly-colon",
           transformers: [
             transformerNotationHighlight(),
-            transformerCopyButton()
+            transformerCopyButton(),
           ],
         })
         // Convert to HTML string
