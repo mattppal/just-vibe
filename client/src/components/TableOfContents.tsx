@@ -19,8 +19,8 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
     // Update active ID if items change
     if (items.length > 0) {
       // Check for hash in URL and use it if it exists and matches an item
-      const hash = window.location.hash.replace('#', '');
-      if (hash && items.some(item => item.id === hash)) {
+      const hash = window.location.hash.replace("#", "");
+      if (hash && items.some((item) => item.id === hash)) {
         setActiveId(hash);
       } else {
         // Otherwise default to first item
@@ -38,22 +38,23 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
         timeout = setTimeout(() => func(...args), wait);
       };
     };
-    
+
     // Function to determine which heading is currently at the top of the viewport
     const determineActiveHeading = () => {
       // Get all heading elements
-      const headingElements = items.map(item => document.getElementById(item.id))
-        .filter(el => el !== null) as HTMLElement[];
-      
+      const headingElements = items
+        .map((item) => document.getElementById(item.id))
+        .filter((el) => el !== null) as HTMLElement[];
+
       if (headingElements.length === 0) return;
-      
+
       // Define the top threshold - we consider a heading "at the top" when it's within this range from the top
       const topThreshold = 120; // pixels from the top of the viewport
-      
+
       // Sort headings by their position - we want the one closest to but still below our threshold
       let activeHeading = null;
       let minDistance = Infinity;
-      
+
       for (const heading of headingElements) {
         const rect = heading.getBoundingClientRect();
         // We only consider headings above the threshold (negative position means it's scrolled up)
@@ -67,7 +68,7 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
           }
         }
       }
-      
+
       // If no heading is found above the threshold (very top of the page)
       // use the first visible heading
       if (!activeHeading && headingElements.length > 0) {
@@ -79,29 +80,29 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
             break;
           }
         }
-        
+
         // If still no heading is visible, use the first one
         if (!activeHeading) {
           activeHeading = headingElements[0];
         }
       }
-      
+
       if (activeHeading) {
         setActiveId(activeHeading.id);
       }
     };
-    
+
     // Debounced version to reduce performance impact
     const debouncedHandleScroll = debounce(determineActiveHeading, 100);
-    
+
     // Initial check
     determineActiveHeading();
-    
+
     // Add scroll event listener
-    window.addEventListener('scroll', debouncedHandleScroll);
-    
+    window.addEventListener("scroll", debouncedHandleScroll);
+
     return () => {
-      window.removeEventListener('scroll', debouncedHandleScroll);
+      window.removeEventListener("scroll", debouncedHandleScroll);
     };
   }, [items]);
 
@@ -111,17 +112,17 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
     if (element) {
       // Set the active ID immediately to avoid a delay in highlighting
       setActiveId(id);
-      
+
       // Get the element's position accounting for any layout shifts
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - 110; // More offset for better positioning
-      
+
       // More natural scrolling with smooth behavior
       window.scrollTo({
         top: offsetPosition,
-        behavior: "smooth"
+        behavior: "smooth",
       });
-      
+
       // Update URL without scrolling
       history.pushState(null, "", `#${id}`);
     }
@@ -130,16 +131,21 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
   return (
     <div className="hidden xl:block w-64 shrink-0 fixed right-0 top-24 h-[calc(100vh-6rem)] overflow-y-auto pb-10 scrollbar-thin pr-6">
       <div className="space-y-2 pt-6">
-        <h3 className="font-medium mb-3 text-foreground text-sm">On This Page</h3>
-        <ul className="text-sm space-y-2 border-l border-border pl-3">
+        <h3 className="font-medium mb-3 text-foreground text-sm">
+          On This Page
+        </h3>
+        <ul className="text-sm space-y-2  pl-3">
           {items.map((item) => {
             // Calculate indentation based on heading level
             // Find minimum level to determine base indentation
-            const minLevel = items.reduce((min, i) => Math.min(min, i.level), 6);
+            const minLevel = items.reduce(
+              (min, i) => Math.min(min, i.level),
+              6,
+            );
             // Add indentation based on heading level difference
             const indentLevel = item.level - minLevel;
             const indentPadding = indentLevel * 8; // 8px per level
-            
+
             return (
               <li key={item.id}>
                 <a
@@ -149,9 +155,11 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
                     "block py-1 border-l -ml-[1px] transition-colors duration-200",
                     activeId === item.id
                       ? "text-primary border-primary font-medium"
-                      : "text-secondary hover:text-foreground border-transparent"
+                      : "text-secondary hover:text-foreground border-transparent",
                   )}
-                  style={{ paddingLeft: `${indentPadding + 12}px` }} /* Base padding (pl-3 = 12px) + indent */
+                  style={{
+                    paddingLeft: `${indentPadding + 12}px`,
+                  }} /* Base padding (pl-3 = 12px) + indent */
                 >
                   {item.title}
                 </a>

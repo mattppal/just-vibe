@@ -258,7 +258,6 @@
 
 /* Fix for sidebar border consistency */
 .sidebar-with-border {
-  border-right: 1px solid #333;
   box-sizing: border-box;
 }
 

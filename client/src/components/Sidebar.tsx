@@ -39,29 +39,29 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    refetchInterval: false // Ensure no periodic refetching
+    refetchInterval: false, // Ensure no periodic refetching
   });
-  
+
   // Process the data when it changes
   useEffect(() => {
-    if (data && typeof data === 'object') {
+    if (data && typeof data === "object") {
       setSections(data as SectionData);
-      
+
       // Build allDocs from sections - avoid separate network requests
       const allDocsArray: DocPage[] = [];
-      Object.values(data as SectionData).forEach(section => {
+      Object.values(data as SectionData).forEach((section) => {
         allDocsArray.push(...section);
       });
-      
+
       setAllDocs(allDocsArray);
     }
   }, [data]);
-  
+
   // Update the loading state based on the query
   useEffect(() => {
     setLoading(isSectionsLoading);
   }, [isSectionsLoading]);
-  
+
   // Reset search results when allDocs gets updated
   useEffect(() => {
     if (searchQuery && allDocs.length > 0) {
@@ -106,9 +106,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         setIsSearching(false);
       }
     }, 300),
-    [allDocs] // Only recreate if allDocs changes
+    [allDocs], // Only recreate if allDocs changes
   );
-  
+
   // Search handler with debouncing
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
@@ -126,10 +126,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   // Format section names for display
   const formatSectionName = (section: string) => {
     // Special case for root section
-    if (section === 'root') {
-      return 'Home';
+    if (section === "root") {
+      return "Home";
     }
-    
+
     return section
       .replace(/^\d+-/, "")
       .split("-")
