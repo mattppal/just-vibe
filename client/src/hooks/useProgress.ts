@@ -10,12 +10,16 @@ export function useProgress() {
   const { toast } = useToast();
   
   // Fetch user progress data
-  const { data: progress, isLoading, error } = useQuery<ProgressData>({
+  const { data: progress, isLoading, error, refetch } = useQuery<ProgressData>({
     queryKey: ['/api/progress'],
     // Only fetch if user is authenticated
     enabled: !!queryClient.getQueryData(['/api/auth/user']),
-    staleTime: 1 * 60 * 1000, // 1 minute
-    refetchOnWindowFocus: true,
+    staleTime: 0, // Always consider data stale to ensure fresh data
+    cacheTime: 10 * 1000, // Short cache time of 10 seconds
+    refetchOnWindowFocus: true, 
+    refetchOnMount: true,
+    refetchInterval: 5000, // Refetch every 5 seconds to keep progress data updated
+    retry: 3, // Retry failed requests 3 times
   });
   
   // Calculate total lessons completed
@@ -45,10 +49,14 @@ export function useProgress() {
     },
     onSuccess: (data) => {
       console.log('Mark complete mutation successful, updating cache with:', data);
+      
       // Immediately update the local cache with the new data
       queryClient.setQueryData(['/api/progress'], data);
       
-      // Then invalidate cached queries
+      // Force refetch to get the latest data from the server
+      refetch();
+      
+      // Then invalidate cached queries to trigger refetch on next render
       queryClient.invalidateQueries({ queryKey: ['/api/progress'] });
       
       // Show success notification
@@ -85,10 +93,14 @@ export function useProgress() {
     },
     onSuccess: (data) => {
       console.log('Mark incomplete mutation successful, updating cache with:', data);
+      
       // Immediately update the local cache with the new data
       queryClient.setQueryData(['/api/progress'], data);
       
-      // Then invalidate cached queries
+      // Force refetch to get the latest data from the server
+      refetch();
+      
+      // Then invalidate cached queries to trigger refetch on next render
       queryClient.invalidateQueries({ queryKey: ['/api/progress'] });
       
       // Show notification

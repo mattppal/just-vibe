@@ -413,6 +413,16 @@ export default function DocPage() {
 
           {/* Navigation links to previous and next pages */}
           <DocNavigation previousDoc={previousDoc} nextDoc={nextDoc} />
+
+          {/* Debug tool for development */}
+          {isAuthenticated && (path.includes('youtube-embed') || path.includes('quick-start')) && (
+            <div className="mt-8 border-t border-border pt-6">
+              <details>
+                <summary className="text-lg font-semibold cursor-pointer mb-4">🐛 Progress Debugging Tools</summary>
+                <ProgressDebugger />
+              </details>
+            </div>
+          )}
         </article>
         
         {/* TOC is now positioned with fixed positioning in the TableOfContents component */}
