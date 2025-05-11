@@ -257,7 +257,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid user ID" });
       }
 
+      console.log('Request body:', req.body);
+      
+      // Check if lessonSlug exists and is a string
       const { lessonSlug } = req.body;
+      console.log('Extracted lessonSlug:', lessonSlug, 'type:', typeof lessonSlug);
+      
       if (!lessonSlug) {
         return res.status(400).json({ message: "Lesson slug is required" });
       }

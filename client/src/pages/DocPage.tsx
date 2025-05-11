@@ -406,7 +406,13 @@ export default function DocPage() {
           {/* Navigation links to previous and next pages */}
           {doc && (
             <>
-              {/* Debug info */}
+              {/* Debug panel - hidden in production */}
+              <div className="p-3 my-4 border border-gray-600 bg-gray-900 rounded-md">
+                <h4 className="text-sm font-bold mb-2">Debug Info:</h4>
+                <p className="text-xs mb-1">Slug: <code>{doc.slug || 'undefined'}</code></p>
+                <p className="text-xs mb-1">Path: <code>{doc.path || 'undefined'}</code></p>
+                <p className="text-xs">Title: <code>{doc.title || 'undefined'}</code></p>
+              </div>
               <LessonCompleteButton lessonSlug={doc.slug} />
             </>
           )}
