@@ -45,21 +45,30 @@ export async function completeLesson(userId: string, lessonSlug: string) {
       return existingCompletion[0];
     }
 
-    // Parse the section name from the lessonSlug if available
-    // For format like "1-getting-started/installation", extract "getting-started"
+    // Parse the section name and ensure we save the full path
+    // For format like "getting-started/installation", extract "getting-started" as section
+    // and save the full normalized path as the lessonSlug
     let sectionName = null;
-    if (lessonSlug.includes('/')) {
-      const parts = lessonSlug.split('/');
+    
+    // Normalize the lesson slug to ensure consistent format
+    // Remove any numeric prefixes from all path segments
+    const normalizedSlug = lessonSlug.split('/').map(segment => {
+      return segment.replace(/^\d+-/, '');
+    }).join('/');
+    
+    // Extract section name if available
+    if (normalizedSlug.includes('/')) {
+      const parts = normalizedSlug.split('/');
       if (parts.length > 1 && parts[0]) {
-        // Remove numeric prefix if present (e.g., "1-getting-started" -> "getting-started")
-        sectionName = parts[0].replace(/^\d+-/, '');
+        sectionName = parts[0]; // Already normalized above
       }
     }
-
-    // Otherwise, insert a new completion
+    
+    // Otherwise, insert a new completion with the full normalized path
     const [newCompletion] = await db.insert(courseCompletions)
       .values({
-        ...validData,
+        userId,
+        lessonSlug: normalizedSlug, // Save the full normalized path
         sectionName
       })
       .returning({ 
@@ -131,11 +140,17 @@ export async function getUserProgress(userId: string): Promise<ProgressResponse>
  */
 export async function uncompleteLesson(userId: string, lessonSlug: string) {
   try {
+    // Normalize the lesson slug to ensure consistent format
+    // Remove any numeric prefixes from all path segments
+    const normalizedSlug = lessonSlug.split('/').map(segment => {
+      return segment.replace(/^\d+-/, '');
+    }).join('/');
+    
     await db.delete(courseCompletions)
       .where(
         and(
           eq(courseCompletions.userId, userId),
-          eq(courseCompletions.lessonSlug, lessonSlug)
+          eq(courseCompletions.lessonSlug, normalizedSlug)
         )
       );
 
