@@ -28,8 +28,6 @@ export function useProgress() {
   // Mark lesson as complete mutation
   const completeMutation = useMutation({
     mutationFn: async (lessonSlug: string) => {
-      console.log('Sending API request with lesson slug:', lessonSlug);
-      
       // Ensure we're sending the slug without any ordering prefix
       // Extract just the base part of the slug, removing section prefix and number ordering
       // For example, "1-getting-started/course-welcome" → "course-welcome"
@@ -43,8 +41,6 @@ export function useProgress() {
       
       // Remove any numeric prefix
       cleanSlug = cleanSlug.replace(/^\d+-/, '');
-      
-      console.log('Clean slug:', cleanSlug);
       
       // Make a direct fetch request to bypass any middleware issues
       const response = await fetch('/api/progress/complete', {
@@ -104,10 +100,7 @@ export function useProgress() {
   
   // Mark a lesson as complete
   const completeLesson = useCallback((lessonSlug: string) => {
-    console.log('Completing lesson with slug:', lessonSlug);
-    
     if (!lessonSlug) {
-      console.error('Invalid lesson slug:', lessonSlug);
       toast({
         title: 'Error',
         description: 'Invalid lesson slug. Please try again.',
@@ -131,8 +124,6 @@ export function useProgress() {
   // Uncomplete lesson mutation
   const uncompleteMutation = useMutation({
     mutationFn: async (lessonSlug: string) => {
-      console.log('Sending API request to uncomplete lesson:', lessonSlug);
-      
       // Extract just the base part of the slug, removing section prefix
       let cleanSlug = lessonSlug;
       
@@ -142,8 +133,6 @@ export function useProgress() {
       
       // Remove any numeric prefix
       cleanSlug = cleanSlug.replace(/^\d+-/, '');
-      
-      console.log('Clean slug for uncomplete:', cleanSlug);
       
       // Make a direct fetch request 
       const response = await fetch('/api/progress/uncomplete', {
@@ -183,10 +172,12 @@ export function useProgress() {
   
   // Uncomplete a lesson
   const uncompleteLesson = useCallback((lessonSlug: string) => {
-    console.log('Uncompleting lesson with slug:', lessonSlug);
-    
     if (!lessonSlug) {
-      console.error('Invalid lesson slug for uncomplete:', lessonSlug);
+      toast({
+        title: 'Error',
+        description: 'Invalid lesson slug. Please try again.',
+        variant: 'destructive',
+      });
       return;
     }
     
