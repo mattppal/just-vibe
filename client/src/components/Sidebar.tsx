@@ -1,8 +1,9 @@
 import { useLocation } from "wouter";
 import NavigationLink from "./NavigationLink";
 import { Input } from "@/components/ui/input";
-import { ChevronRight, Search, X, FileText } from "lucide-react";
+import { ChevronRight, Search, X, FileText, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useProgress } from "@/hooks/useProgress";
 import {
   DocPage,
 } from "@/lib/docs";
@@ -23,6 +24,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const [sections, setSections] = useState<SectionData>({});
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
+  const { isLessonCompleted } = useProgress();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<DocPage[]>([]);
   const [allDocs, setAllDocs] = useState<DocPage[]>([]);
@@ -300,8 +302,11 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                           )}
                           onClick={handleLinkClick}
                         >
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 justify-between w-full">
                             <span>{doc.sidebarTitle}</span>
+                            {isLessonCompleted(doc.slug) && (
+                              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                            )}
                           </div>
                         </NavigationLink>
                       )}

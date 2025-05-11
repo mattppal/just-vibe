@@ -9,6 +9,7 @@ import {
 } from "./markdown";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { storage } from "./storage";
+import { completeLesson, getUserProgress, uncompleteLesson } from "./progress";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication
@@ -222,6 +223,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching sections:", error);
       return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Course progress tracking API endpoints
+  app.get("/api/progress", isAuthenticated, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const userId = (req.user as any).claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Invalid user ID" });
+      }
+
+      const progress = await getUserProgress(userId);
+      return res.json(progress);
+    } catch (error) {
+      console.error("Error fetching progress:", error);
+      return res.status(500).json({ message: "Failed to fetch progress" });
+    }
+  });
+
+  app.post("/api/progress/complete", isAuthenticated, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const userId = (req.user as any).claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Invalid user ID" });
+      }
+
+      const { lessonSlug } = req.body;
+      if (!lessonSlug) {
+        return res.status(400).json({ message: "Lesson slug is required" });
+      }
+
+      await completeLesson(userId, lessonSlug);
+      
+      // Return the updated progress
+      const progress = await getUserProgress(userId);
+      return res.json(progress);
+    } catch (error) {
+      console.error("Error completing lesson:", error);
+      return res.status(500).json({ message: "Failed to complete lesson" });
+    }
+  });
+
+  // Admin endpoint to uncomplete a lesson (for testing)
+  app.post("/api/progress/uncomplete", isAuthenticated, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const userId = (req.user as any).claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Invalid user ID" });
+      }
+
+      const { lessonSlug } = req.body;
+      if (!lessonSlug) {
+        return res.status(400).json({ message: "Lesson slug is required" });
+      }
+
+      await uncompleteLesson(userId, lessonSlug);
+      
+      // Return the updated progress
+      const progress = await getUserProgress(userId);
+      return res.json(progress);
+    } catch (error) {
+      console.error("Error uncompleting lesson:", error);
+      return res.status(500).json({ message: "Failed to uncomplete lesson" });
     }
   });
 
