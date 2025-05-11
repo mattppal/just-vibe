@@ -398,7 +398,7 @@ export default function DocPage() {
       
       {/* TOC is now positioned with fixed positioning in the TableOfContents component */}
       {doc.headings.length > 0 && (
-        <TableOfContents items={doc.headings.map(h => ({ id: h.id, title: h.title }))} />
+        <TableOfContents items={doc.headings.map(h => ({ id: h.id, title: h.title, level: h.level }))} />
       )}
     </div>
   );
