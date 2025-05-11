@@ -23,21 +23,8 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
   const { isAuthenticated, isLoading, user, login, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
-
-  // Only add a class to body when dropdown is open for styling purposes
-  useEffect(() => {
-    const bodyEl = document.body;
-
-    if (dropdownOpen) {
-      bodyEl.classList.add("dropdown-open");
-    } else {
-      bodyEl.classList.remove("dropdown-open");
-    }
-
-    return () => {
-      bodyEl.classList.remove("dropdown-open");
-    };
-  }, [dropdownOpen]);
+  
+  // We're removing the body class manipulation which might be causing CLS
 
   return (
     <header
@@ -75,7 +62,9 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 sideOffset={8}
+                align="end"
                 className="w-56 bg-black border border-[#333] p-1 text-white"
+                style={{ transformOrigin: "var(--radix-dropdown-menu-content-transform-origin)" }}
               >
                 <div className="flex items-center justify-start gap-3 p-2">
                   <div className="flex flex-col">

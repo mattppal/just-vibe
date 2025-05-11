@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fix for dropdown CLS */
+[data-radix-popper-content-wrapper] {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: var(--radix-popper-anchor-width);
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin);
+  z-index: 50;
+}
+
 @plugin "daisyui" {
   prefix: "d-";
 }
