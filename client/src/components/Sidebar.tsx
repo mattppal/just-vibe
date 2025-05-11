@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { ChevronRight, Search, X, FileText, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/hooks/useProgress";
+import { ProgressBar } from "./ProgressBar";
 import {
   DocPage,
 } from "@/lib/docs";
