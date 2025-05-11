@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { CopyButton } from "./CopyButton";
 
 interface CodeBlockProps {
   code: string;
@@ -42,6 +43,7 @@ export default function CodeBlock({ code, language = "javascript", className }: 
 
   return (
     <div className={cn("relative rounded-md bg-[hsl(var(--code))] p-4", className)}>
+      <CopyButton code={code} />
       <pre className="text-sm font-mono text-foreground whitespace-pre-wrap break-words">
         <code dangerouslySetInnerHTML={{ __html: highlightedCode }} />
       </pre>
