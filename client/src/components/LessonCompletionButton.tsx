@@ -41,12 +41,24 @@ export function LessonCompletionButton({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
-  // Handle successful completion with confetti
+  // State for success message
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  
+  // Handle successful completion with confetti and success message
   useEffect(() => {
     if (markComplete.isSuccess) {
+      // Show confetti
       setShowConfetti(true);
-      const timer = setTimeout(() => setShowConfetti(false), 5000);
-      return () => clearTimeout(timer);
+      const confettiTimer = setTimeout(() => setShowConfetti(false), 4000);
+      
+      // Show success message
+      setShowSuccessMessage(true);
+      const successTimer = setTimeout(() => setShowSuccessMessage(false), 3000);
+      
+      return () => {
+        clearTimeout(confettiTimer);
+        clearTimeout(successTimer);
+      };
     }
   }, [markComplete.isSuccess]);
   
@@ -67,6 +79,19 @@ export function LessonCompletionButton({
   
   return (
     <div className={`${className || ''} flex justify-center items-center`}>
+      {/* Confetti animation when completing a lesson */}
+      {showConfetti && (
+        <Confetti
+          width={windowSize.width}
+          height={windowSize.height}
+          recycle={false}
+          numberOfPieces={500}
+          gravity={0.2}
+          colors={['#10b981', '#3b82f6', '#6366f1', '#f59e0b', '#ef4444']}
+          style={{ position: 'fixed', top: 0, left: 0, zIndex: 100 }}
+        />
+      )}
+      
       {/* Success animation overlay */}
       {markComplete.isPending && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
@@ -87,6 +112,16 @@ export function LessonCompletionButton({
               <XCircle className="h-20 w-20" />
             </div>
             <p className="text-white font-medium text-lg">Resetting progress...</p>
+          </div>
+        </div>
+      )}
+      
+      {/* Success message overlay */}
+      {showSuccessMessage && (
+        <div className="fixed bottom-8 inset-x-0 flex justify-center items-center z-40 pointer-events-none">
+          <div className="bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 border border-green-500/70 animate-confetti-pop">
+            <CheckCircle className="h-6 w-6" />
+            <span className="font-medium">Great job! Lesson completed!</span>
           </div>
         </div>
       )}
