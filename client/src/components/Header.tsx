@@ -62,8 +62,9 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
                 align="end"
                 className="w-56 bg-black border border-[#333] p-1 text-white"
                 style={{
-                  transformOrigin:
-                    "var(--radix-dropdown-menu-content-transform-origin)",
+                  transformOrigin: "var(--radix-dropdown-menu-content-transform-origin)",
+                  position: "relative",
+                  transform: "translateZ(0)",
                 }}
               >
                 <div className="flex items-center justify-start gap-3 p-2">

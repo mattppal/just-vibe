@@ -10,6 +10,17 @@
   width: var(--radix-popper-anchor-width);
   transform-origin: var(--radix-dropdown-menu-content-transform-origin);
   z-index: 50;
+  will-change: transform;
+  backface-visibility: hidden;
+  contain: layout;
+}
+
+/* Enhanced positioning for high-DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  [data-radix-popper-content-wrapper] {
+    transform: translateZ(0);
+    contain: layout paint;
+  }
 }
 
 @plugin "daisyui" {
