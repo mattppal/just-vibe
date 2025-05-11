@@ -9,11 +9,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { LessonCompleteButton } from "@/components/LessonCompleteButton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { LogIn, Home, AlertTriangle, Lock } from "lucide-react";
+import { Lock, LogIn, Home, AlertTriangle } from "lucide-react";
 import { Link } from "wouter";
 import { queryClient } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
-// We're using Lucide icons for UI elements
 
 export default function DocPage() {
   const [location, setLocation] = useLocation();

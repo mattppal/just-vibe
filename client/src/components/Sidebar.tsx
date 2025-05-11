@@ -1,8 +1,9 @@
 import { useLocation } from "wouter";
 import NavigationLink from "./NavigationLink";
 import { Input } from "@/components/ui/input";
-import { ChevronRight, Search, X, FileText, CheckCircle, Lock } from "lucide-react";
-// We're using Lucide icons for UI elements
+import { ChevronRight, Search, X, FileText, CheckCircle } from "lucide-react";
+import { EmojiProvider, Emoji } from "react-apple-emojis";
+import emojiData from "react-apple-emojis/src/data.json";
 
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/hooks/useProgress";
@@ -136,24 +137,24 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
   };
-
+  
   // Helper function to construct consistent full path for lessons
   const getFullLessonPath = (doc: any, section: string) => {
     // If the slug already includes a path, use it as is
-    if (doc.slug.includes("/")) {
+    if (doc.slug.includes('/')) {
       return doc.slug;
     }
-
+    
     // Otherwise, construct a full path with section and lesson name
     // Normalize section name - remove numeric prefixes
-    const normalizedSection = section.replace(/^\d+-/, "");
-    const baseSlug = doc.slug.split("/").pop() || doc.slug;
-
+    const normalizedSection = section.replace(/^\d+-/, '');
+    const baseSlug = doc.slug.split('/').pop() || doc.slug;
+    
     // Special case for root section
-    if (section === "root") {
+    if (section === 'root') {
       return baseSlug;
     }
-
+    
     return `${normalizedSection}/${baseSlug}`;
   };
 
@@ -207,10 +208,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 className="absolute right-3 top-2.5 text-gray-400 hover:text-orange-500"
                 aria-label="Clear search"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4 text-orange-600" />
               </button>
             ) : (
-              <Search className="absolute right-3 top-2.5 w-4 h-4" />
+              <Search className="absolute right-3 top-2.5 w-4 h-4 text-orange-600" />
             )}
           </div>
         </div>
@@ -241,7 +242,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                           className="block px-3 py-2 rounded-md text-sm opacity-50 cursor-not-allowed text-gray-500"
                         >
                           <div className="flex items-center gap-2">
-                            <Lock className="h-4 w-4 text-gray-500 mr-1" />
+                            <span role="img" aria-label="lock">
+                              🔒
+                            </span>
                             <span>{doc.sidebarTitle || doc.title}</span>
                           </div>
                         </div>
@@ -261,10 +264,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                               <span className="font-medium">
                                 {doc.sidebarTitle || doc.title}
                               </span>
-                              {isLessonCompleted(
-                                getFullLessonPath(doc, doc.section || "root"),
-                              ) && (
-                                <CheckCircle className="h-4 w-4 flex-shrink-0 ml-1 opacity-75 text-green-500" />
+                              {isLessonCompleted(getFullLessonPath(doc, doc.section || 'root')) && (
+                                <EmojiProvider data={emojiData}>
+                                  <Emoji name="check-mark-button" className="h-4 w-4 flex-shrink-0 ml-1 opacity-75"/>
+                                </EmojiProvider>
                               )}
                             </div>
                             <span className="text-xs text-gray-500 truncate mt-1">
@@ -320,7 +323,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                             )}
                           >
                             <div className="flex items-center gap-2">
-                              <Lock className="h-4 w-4 text-gray-500 mr-1" />
+                              <span role="img" aria-label="lock">
+                                🔒
+                              </span>
                               <span>{doc.sidebarTitle}</span>
                             </div>
                           </div>
@@ -337,10 +342,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                           >
                             <div className="flex items-center gap-2 justify-between w-full">
                               <span>{doc.sidebarTitle}</span>
-                              {isLessonCompleted(
-                                getFullLessonPath(doc, sectionName),
-                              ) && (
-                                <CheckCircle className="h-4 w-4 flex-shrink-0 ml-1 opacity-75 text-green-500" />
+                              {isLessonCompleted(getFullLessonPath(doc, sectionName)) && (
+                                <EmojiProvider data={emojiData}>
+                                  <Emoji
+                                    name="check-mark-button"
+                                    className="h-4 w-4 flex-shrink-0 ml-1 opacity-75"
+                                  />
+                                </EmojiProvider>
                               )}
                             </div>
                           </NavigationLink>
