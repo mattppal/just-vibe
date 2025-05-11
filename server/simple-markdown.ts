@@ -104,7 +104,7 @@ export async function processMarkdown(
       const components: Array<{match: string, name: string, attrs: string, children?: string, selfClosing: boolean}> = [];
       
       // Find all self-closing components
-      let selfClosingMatch;
+      let selfClosingMatch: RegExpExecArray | null;
       while ((selfClosingMatch = selfClosingRegex.exec(content)) !== null) {
         components.push({
           match: selfClosingMatch[0],
@@ -115,15 +115,16 @@ export async function processMarkdown(
       }
       
       // Find all components with children
-      let componentMatch;
-      while ((componentMatch = componentRegex.exec(content)) !== null) {
+      const componentMatches = Array.from(content.matchAll(componentRegex));
+      
+      for (const match of componentMatches) {
         // Skip if it matches any of the already detected self-closing components
-        if (!components.some(c => c.match === componentMatch[0])) {
+        if (!components.some(c => c.match === match[0])) {
           components.push({
-            match: componentMatch[0],
-            name: componentMatch[1],
-            attrs: componentMatch[2] || '',
-            children: componentMatch[3],
+            match: match[0],
+            name: match[1],
+            attrs: match[2] || '',
+            children: match[3] || '',
             selfClosing: false
           });
         }
@@ -208,10 +209,14 @@ export async function extractHeadings(
   const headings: Array<{ id: string; title: string; level: number }> = [];
   const usedIds = new Set<string>();
 
-  // Extract headings using regex
+  // First, remove all code blocks to prevent headings in code from being captured
+  // This regex matches all fenced code blocks (```code```) and inline code (`code`)
+  const contentWithoutCodeBlocks = content.replace(/```[\s\S]*?```|`[^`\n]+`/g, '');
+  
+  // Extract headings using regex, now from content with code blocks removed
   const headingRegex = /^(#{1,6})\s+(.+)$/gm;
   let match;
-  while ((match = headingRegex.exec(content)) !== null) {
+  while ((match = headingRegex.exec(contentWithoutCodeBlocks)) !== null) {
     const level = match[1].length;
     const title = match[2].trim();
 

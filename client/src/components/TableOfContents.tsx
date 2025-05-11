@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 interface TocItem {
   id: string;
   title: string;
+  level: number; // Add level for proper indentation
 }
 
 interface TableOfContentsProps {
@@ -131,22 +132,32 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
       <div className="space-y-2 pt-6">
         <h3 className="font-medium mb-3 text-foreground text-sm">On This Page</h3>
         <ul className="text-sm space-y-2 border-l border-border pl-3">
-          {items.map((item) => (
-            <li key={item.id}>
-              <a
-                href={`#${item.id}`}
-                onClick={(e) => handleClick(e, item.id)}
-                className={cn(
-                  "block pl-3 py-1 border-l -ml-[1px] transition-colors duration-200",
-                  activeId === item.id
-                    ? "text-primary border-primary font-medium"
-                    : "text-secondary hover:text-foreground border-transparent"
-                )}
-              >
-                {item.title}
-              </a>
-            </li>
-          ))}
+          {items.map((item) => {
+            // Calculate indentation based on heading level
+            // Find minimum level to determine base indentation
+            const minLevel = items.reduce((min, i) => Math.min(min, i.level), 6);
+            // Add indentation based on heading level difference
+            const indentLevel = item.level - minLevel;
+            const indentPadding = indentLevel * 8; // 8px per level
+            
+            return (
+              <li key={item.id}>
+                <a
+                  href={`#${item.id}`}
+                  onClick={(e) => handleClick(e, item.id)}
+                  className={cn(
+                    "block py-1 border-l -ml-[1px] transition-colors duration-200",
+                    activeId === item.id
+                      ? "text-primary border-primary font-medium"
+                      : "text-secondary hover:text-foreground border-transparent"
+                  )}
+                  style={{ paddingLeft: `${indentPadding + 12}px` }} /* Base padding (pl-3 = 12px) + indent */
+                >
+                  {item.title}
+                </a>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </div>
