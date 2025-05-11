@@ -12,15 +12,22 @@ import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import { transformerNotationHighlight } from "@shikijs/transformers";
 import { transformerCopyButton } from "@rehype-pretty/transformers";
+import { visit } from "unist-util-visit";
 import { Node } from "unist";
+import path from "path";
 
 // Cache for processed content to avoid reprocessing the same markdown
 const processedCache = new Map<string, string>();
 
-// No image path handling needed
+// Simplified image path handling - don't modify paths, just log them
 function remarkFixImagePaths() {
   return (tree: Node) => {
-    // No modifications to image paths
+    visit(tree, 'image', (node: any) => {
+      // Simply log the image paths being processed
+      if (node.url && typeof node.url === 'string') {
+        console.log(`Image in Markdown: ${node.url}`);
+      }
+    });
     return tree;
   };
 }
@@ -55,7 +62,7 @@ function getProcessor(isMdx: boolean): any {
           inline: "tailing-curly-colon",
           transformers: [
             transformerNotationHighlight(),
-            transformerCopyButton(),
+            transformerCopyButton()
           ],
         })
         // Convert to HTML string
@@ -83,7 +90,7 @@ function getProcessor(isMdx: boolean): any {
           inline: "tailing-curly-colon",
           transformers: [
             transformerNotationHighlight(),
-            transformerCopyButton(),
+            transformerCopyButton()
           ],
         })
         // Convert to HTML string
@@ -176,6 +183,9 @@ export async function processMarkdown(
       const vFile = await processor.process(contentToProcess);
       let result = String(vFile);
 
+      // Fix encoded URLs in image tags - the key issue!
+      result = result.replace(/src="(%22)([^"]+)(%22)"/g, 'src="$2"');
+
       // Now reinsert the original React components
       components.forEach((component, index) => {
         // Parse attributes to data-prop attributes for client-side processing
@@ -210,7 +220,10 @@ export async function processMarkdown(
       // Regular markdown processing
       const processor = getProcessor(false);
       const vFile = await processor.process(content);
-      const result = String(vFile);
+      let result = String(vFile);
+      
+      // Fix encoded URLs in image tags for regular markdown too
+      result = result.replace(/src="(%22)([^"]+)(%22)"/g, 'src="$2"');
 
       // Cache the result for future requests
       processedCache.set(cacheKey, result);
