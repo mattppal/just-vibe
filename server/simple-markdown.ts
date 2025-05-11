@@ -27,17 +27,7 @@ function getProcessor(isMdx: boolean): any {
         .use(remarkParse)
         .use(remarkGfm)
         .use(remarkMdx)
-        .use(remarkRehype, { 
-          allowDangerousHtml: true,
-          // Preserve JSX elements in MDX files by adding a data-mdx attribute
-          // This will help client-side code identify MDX components
-          components: {
-            'Alert': 'div',
-            'Tabs': 'div',
-            'TabItem': 'div',
-            'YouTubeEmbed': 'div'
-          }
-        })
+        .use(remarkRehype, { allowDangerousHtml: true })
         .use(rehypeShiki, {
           theme: "github-dark",
           transformers: [transformerNotationHighlight()],
@@ -88,35 +78,7 @@ export async function processMarkdown(
     
     // Process the content
     const vFile = await processor.process(content);
-    let result = String(vFile);
-    
-    // Add special data attributes for MDX components to make them easier to replace on the client
-    if (isMdx) {
-      // Process Alert components
-      result = result.replace(/<div><p>(.*?)<\/p><\/div>/g, (match, content, offset, string) => {
-        // Check if this appears to be from an Alert component (by proximity to Alert text)
-        if (string.substring(Math.max(0, offset - 150), offset).includes('<Alert')) {
-          // Look for type and title props in the Alert component
-          const typeMatch = string.substring(Math.max(0, offset - 150), offset).match(/type=["']([^"']*)["']/i);
-          const titleMatch = string.substring(Math.max(0, offset - 150), offset).match(/title=["']([^"']*)["']/i);
-          
-          const type = typeMatch ? typeMatch[1] : 'info';
-          const title = titleMatch ? titleMatch[1] : 'Information';
-          
-          return `<div data-mdx-component="Alert" data-props="{&quot;type&quot;:&quot;${type}&quot;,&quot;title&quot;:&quot;${title}&quot;,&quot;content&quot;:&quot;${content.replace(/"/g, '&quot;')}&quot;}"><p>${content}</p></div>`;
-        }
-        return match;
-      });
-      
-      // Process YouTubeEmbed components
-      result = result.replace(/<div><\/div>/g, (match, offset, string) => {
-        // Check if this appears to be from a YouTubeEmbed component (by proximity to YouTube text)
-        if (string.substring(Math.max(0, offset - 150), offset).includes('YouTube')) {
-          return `<div data-mdx-component="YouTubeEmbed" data-props="{&quot;id&quot;:&quot;dQw4w9WgXcQ&quot;,&quot;title&quot;:&quot;Example Video&quot;}"></div>`;
-        }
-        return match;
-      });
-    }
+    const result = String(vFile);
     
     // Cache the result for future requests
     processedCache.set(cacheKey, result);
