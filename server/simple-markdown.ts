@@ -1,5 +1,5 @@
 /**
- * An optimized markdown processor with Shiki code highlighting via rehype.
+ * A simplified markdown processor with Shiki code highlighting
  */
 import { unified } from "unified";
 import remarkParse from "remark-parse";
@@ -12,97 +12,67 @@ import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import { transformerNotationHighlight } from "@shikijs/transformers";
 import { transformerCopyButton } from "@rehype-pretty/transformers";
-import { visit } from "unist-util-visit";
-import { Node } from "unist";
-import path from "path";
 
-// Cache for processed content to avoid reprocessing the same markdown
+// Cache for processed content
 const processedCache = new Map<string, string>();
 
-// Simplified image path handling - don't modify paths, just log them
-function remarkFixImagePaths() {
-  return (tree: Node) => {
-    visit(tree, 'image', (node: any) => {
-      // Simply log the image paths being processed
-      if (node.url && typeof node.url === 'string') {
-        console.log(`Image in Markdown: ${node.url}`);
-      }
-    });
-    return tree;
-  };
-}
+// Cache for extracted headings
+const headingsCache = new Map<
+  string,
+  Array<{ id: string; title: string; level: number }>
+>();
 
 // Reusable processor instances
 let markdownProcessor: any = null;
 let mdxProcessor: any = null;
 
 /**
- * Get the appropriate processor for markdown or MDX
+ * Get a processor for markdown or MDX content
  */
 function getProcessor(isMdx: boolean): any {
+  // Return cached processor if available
+  if (isMdx && mdxProcessor) return mdxProcessor;
+  if (!isMdx && markdownProcessor) return markdownProcessor;
+  
+  // Create new processor with the appropriate configuration
+  let processor = unified()
+    .use(remarkParse)
+    .use(remarkGfm);
+    
+  // Only use MDX parser for MDX files
   if (isMdx) {
-    if (!mdxProcessor) {
-      mdxProcessor = unified()
-        .use(remarkParse)
-        .use(remarkGfm)
-        .use(remarkMdx)
-        // Add our custom image path fixer
-        .use(remarkFixImagePaths)
-        // Transform MDX to HTML
-        .use(remarkRehype, {
-          allowDangerousHtml: true,
-        })
-        // Process HTML in MDX
-        .use(rehypeRaw)
-        // Add IDs to headings for anchor links
-        .use(rehypeSlug)
-        // Apply syntax highlighting
-        .use(rehypeShiki, {
-          theme: "vitesse-dark",
-          inline: "tailing-curly-colon",
-          transformers: [
-            transformerNotationHighlight(),
-            transformerCopyButton()
-          ],
-        })
-        // Convert to HTML string
-        .use(rehypeStringify, { allowDangerousHtml: true });
-    }
-    return mdxProcessor;
-  } else {
-    if (!markdownProcessor) {
-      markdownProcessor = unified()
-        .use(remarkParse)
-        .use(remarkGfm)
-        // Add our custom image path fixer
-        .use(remarkFixImagePaths)
-        // Transform Markdown to HTML
-        .use(remarkRehype, {
-          allowDangerousHtml: true,
-        })
-        // Process HTML in Markdown
-        .use(rehypeRaw)
-        // Add IDs to headings for anchor links
-        .use(rehypeSlug)
-        // Apply syntax highlighting
-        .use(rehypeShiki, {
-          theme: "vitesse-dark",
-          inline: "tailing-curly-colon",
-          transformers: [
-            transformerNotationHighlight(),
-            transformerCopyButton()
-          ],
-        })
-        // Convert to HTML string
-        .use(rehypeStringify, { allowDangerousHtml: true });
-    }
-    return markdownProcessor;
+    processor = processor.use(remarkMdx);
   }
+  
+  // Transform to HTML
+  processor = processor.use(remarkRehype, { allowDangerousHtml: true })
+    // Process HTML
+    .use(rehypeRaw)
+    // Add IDs to headings for anchor links
+    .use(rehypeSlug)
+    // Apply syntax highlighting with copy button
+    .use(rehypeShiki, {
+      theme: "vitesse-dark",
+      transformers: [
+        transformerNotationHighlight(),
+        transformerCopyButton()
+      ],
+    })
+    // Convert to HTML string
+    .use(rehypeStringify, { allowDangerousHtml: true });
+  
+  // Cache the processor
+  if (isMdx) {
+    mdxProcessor = processor;
+  } else {
+    markdownProcessor = processor;
+  }
+  
+  return processor;
 }
 
 /**
- * Process markdown content with Shiki syntax highlighting with improved performance
- *
+ * Process markdown content with syntax highlighting
  * @param content The markdown or MDX content to process
  * @param isMdx Whether the content is MDX
  * @returns Processed HTML string with syntax highlighting
@@ -111,143 +81,41 @@ export async function processMarkdown(
   content: string,
   isMdx: boolean = false,
 ): Promise<string> {
-  // Clear caches to ensure changes are picked up immediately
-  processedCache.clear();
-  headingsCache.clear();
   try {
-    // Generate a cache key based on content and type
+    // Generate a cache key
     const cacheKey = `${isMdx ? "mdx" : "md"}:${content.substring(0, 100)}`;
-
-    // Check if we have a cached version
+    
+    // Use cached result if available
     if (processedCache.has(cacheKey)) {
       return processedCache.get(cacheKey)!;
     }
-
-    // For MDX content, we need to preserve the React component tags
-    if (isMdx) {
-      // Process MDX by preserving React component syntax
-      // Extract all the React component instances (both self-closing and with children)
-      const componentRegex = /<([A-Z][a-zA-Z0-9]*)([^>]*)>([\s\S]*?)<\/\1>/g;
-      const selfClosingRegex = /<([A-Z][a-zA-Z0-9]*)([^>]*?)\s*\/>/g;
-
-      // Collect all components to process
-      const components: Array<{
-        match: string;
-        name: string;
-        attrs: string;
-        children?: string;
-        selfClosing: boolean;
-      }> = [];
-
-      // Find all self-closing components
-      let selfClosingMatch: RegExpExecArray | null;
-      while ((selfClosingMatch = selfClosingRegex.exec(content)) !== null) {
-        components.push({
-          match: selfClosingMatch[0],
-          name: selfClosingMatch[1],
-          attrs: selfClosingMatch[2] || "",
-          selfClosing: true,
-        });
-      }
-
-      // Find all components with children
-      const componentMatches = Array.from(content.matchAll(componentRegex));
-
-      for (const match of componentMatches) {
-        // Skip if it matches any of the already detected self-closing components
-        if (!components.some((c) => c.match === match[0])) {
-          components.push({
-            match: match[0],
-            name: match[1],
-            attrs: match[2] || "",
-            children: match[3] || "",
-            selfClosing: false,
-          });
-        }
-      }
-
-      // Create a copy of the content to work with
-      let contentToProcess = content;
-
-      // Replace each component with a text placeholder
-      components.forEach((component, index) => {
-        contentToProcess = contentToProcess.replace(
-          component.match,
-          `MDX_COMPONENT_${index}`,
-        );
-      });
-
-      // Process the markdown content (without the React components)
-      // Use the MDX processor (with image path fixing) but with MDX components temporarily removed
-      const processor = getProcessor(true);
-      const vFile = await processor.process(contentToProcess);
-      let result = String(vFile);
-
-      // Fix encoded URLs in image tags - the key issue!
-      result = result.replace(/src="(%22)([^"]+)(%22)"/g, 'src="$2"');
-
-      // Now reinsert the original React components
-      components.forEach((component, index) => {
-        // Parse attributes to data-prop attributes for client-side processing
-        let dataProps = "";
-        if (component.attrs) {
-          const attrRegex = /([a-zA-Z0-9_]+)\s*=\s*["']([^"']*)["']/g;
-          let attrMatch;
-          while ((attrMatch = attrRegex.exec(component.attrs)) !== null) {
-            dataProps += ` data-prop-${attrMatch[1].toLowerCase()}="${attrMatch[2]}"`;
-          }
-        }
-
-        // For components with children, insert the children into a div that will be processed
-        // by the client-side rendering
-        if (!component.selfClosing && component.children) {
-          result = result.replace(
-            `MDX_COMPONENT_${index}`,
-            `<div class="mdx-component-placeholder" data-component="${component.name}"${dataProps}>${component.children}</div>`,
-          );
-        } else {
-          result = result.replace(
-            `MDX_COMPONENT_${index}`,
-            `<div class="mdx-component-placeholder" data-component="${component.name}"${dataProps}></div>`,
-          );
-        }
-      });
-
-      // Cache the result for future requests
-      processedCache.set(cacheKey, result);
-      return result;
-    } else {
-      // Regular markdown processing
-      const processor = getProcessor(false);
-      const vFile = await processor.process(content);
-      let result = String(vFile);
-      
-      // Fix encoded URLs in image tags for regular markdown too
-      result = result.replace(/src="(%22)([^"]+)(%22)"/g, 'src="$2"');
-
-      // Cache the result for future requests
-      processedCache.set(cacheKey, result);
-      return result;
-    }
+    
+    // Process content with the appropriate processor
+    const processor = getProcessor(isMdx);
+    const vFile = await processor.process(content);
+    let result = String(vFile);
+    
+    // Fix encoded image URLs if present (e.g. %22/path/to/image.png%22)
+    result = result.replace(/src="(%22)([^"]+)(%22)"/g, 'src="$2"');
+    
+    // Cache the result
+    processedCache.set(cacheKey, result);
+    return result;
   } catch (error) {
-    console.error("Error processing markdown with Shiki:", error);
+    console.error("Error processing markdown:", error);
     return `<div class="markdown-error">Error processing content: ${error instanceof Error ? error.message : String(error)}</div>`;
   }
 }
 
-// Cache for extracted headings to avoid reprocessing the same content
-const headingsCache = new Map<
-  string,
-  Array<{ id: string; title: string; level: number }>
->();
-
 /**
  * Extract headings from markdown content with caching for better performance
+ * @param content The markdown content to extract headings from
+ * @returns Array of headings with ID, title, and level
  */
 export async function extractHeadings(
   content: string,
 ): Promise<Array<{ id: string; title: string; level: number }>> {
-  // Generate a cache key based on content
+  // Generate a cache key
   const cacheKey = content.substring(0, 100);
 
   // Check if we have a cached version
@@ -259,20 +127,16 @@ export async function extractHeadings(
   const usedIds = new Set<string>();
 
   // First, remove all code blocks to prevent headings in code from being captured
-  // This regex matches all fenced code blocks (```code```) and inline code (`code`)
-  const contentWithoutCodeBlocks = content.replace(
-    /```[\s\S]*?```|`[^`\n]+`/g,
-    "",
-  );
+  const contentWithoutCodeBlocks = content.replace(/```[\s\S]*?```|`[^`\n]+`/g, "");
 
-  // Extract headings using regex, now from content with code blocks removed
+  // Extract headings using regex
   const headingRegex = /^(#{1,6})\s+(.+)$/gm;
   let match;
   while ((match = headingRegex.exec(contentWithoutCodeBlocks)) !== null) {
     const level = match[1].length;
     const title = match[2].trim();
 
-    // Generate ID from title
+    // Generate ID from title (same logic as rehype-slug)
     let id = title
       .toLowerCase()
       .replace(/[^\w\s-]/g, "") // Remove special chars
@@ -291,8 +155,7 @@ export async function extractHeadings(
     headings.push({ id: uniqueId, title, level });
   }
 
-  // Cache the result for future requests
+  // Cache the result
   headingsCache.set(cacheKey, headings);
-
   return headings;
 }
