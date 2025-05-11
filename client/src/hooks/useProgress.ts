@@ -22,12 +22,20 @@ export function useProgress() {
   // Mutation for marking a lesson as complete
   const markComplete = useMutation({
     mutationFn: async ({ lessonSlug, version }: { lessonSlug: string, version?: string }) => {
+      // Get CSRF token first
+      const csrfToken = await getCsrfToken();
+      if (!csrfToken) {
+        throw new Error('Could not get CSRF token');
+      }
+      
       const response = await fetch(`/api/progress/lesson/${lessonSlug}/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'CSRF-Token': csrfToken
         },
         body: JSON.stringify({ version }),
+        credentials: 'include'
       });
       
       if (!response.ok) {
@@ -45,11 +53,19 @@ export function useProgress() {
   // Mutation for marking a lesson as incomplete
   const markIncomplete = useMutation({
     mutationFn: async (lessonSlug: string) => {
+      // Get CSRF token first
+      const csrfToken = await getCsrfToken();
+      if (!csrfToken) {
+        throw new Error('Could not get CSRF token');
+      }
+      
       const response = await fetch(`/api/progress/lesson/${lessonSlug}/incomplete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'CSRF-Token': csrfToken
         },
+        credentials: 'include'
       });
       
       if (!response.ok) {
