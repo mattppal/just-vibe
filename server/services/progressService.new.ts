@@ -22,7 +22,7 @@ export class ProgressService {
         
       return progress;
     } catch (error) {
-      console.error("Error fetching user progress:", error);
+      console.error("[PROGRESS SERVICE] Error fetching user progress:", error);
       return undefined;
     }
   }
@@ -101,7 +101,7 @@ export class ProgressService {
       
       return progressData;
     } catch (error) {
-      console.error('Error updating progress with database function:', error);
+      console.error('[PROGRESS SERVICE] Error updating progress with database function:', error);
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to update progress: ${errorMessage}`);
     }
@@ -152,7 +152,7 @@ export class ProgressService {
       
       return progressData;
     } catch (error) {
-      console.error('Error updating progress with database function:', error);
+      console.error('[PROGRESS SERVICE] Error updating progress with database function:', error);
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to update progress: ${errorMessage}`);
     }
