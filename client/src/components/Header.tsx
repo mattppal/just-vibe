@@ -49,8 +49,9 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="h-9 w-9 rounded-full bg-transparent p-0 hover:bg-[#111] focus:ring-0 focus:ring-offset-0"
+                  className="h-9 w-9 rounded-full bg-transparent p-0 hover:bg-[#111] focus:ring-0 focus:ring-offset-0 relative z-10"
                   aria-label="User menu"
+                  style={{ isolation: "isolate" }}
                 >
                   <Avatar className="h-9 w-9 border border-[#333]">
                     <AvatarImage src={user.profileImageUrl} alt="Profile" />
@@ -63,7 +64,9 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
                 className="w-56 bg-black border border-[#333] p-1 text-white"
                 style={{
                   transformOrigin: "var(--radix-dropdown-menu-content-transform-origin)",
-                  position: "relative",
+                  position: "fixed", /* Change to fixed positioning */
+                  width: "14rem", /* Explicit width to prevent any calculation shifts */
+                  maxHeight: "calc(100vh - 80px)",
                   transform: "translateZ(0)",
                 }}
               >
