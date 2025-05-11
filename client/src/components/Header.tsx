@@ -62,13 +62,6 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
                 sideOffset={8}
                 align="end"
                 className="w-56 bg-black border border-[#333] p-1 text-white"
-                style={{
-                  transformOrigin: "var(--radix-dropdown-menu-content-transform-origin)",
-                  position: "fixed", /* Change to fixed positioning */
-                  width: "14rem", /* Explicit width to prevent any calculation shifts */
-                  maxHeight: "calc(100vh - 80px)",
-                  transform: "translateZ(0)",
-                }}
               >
                 <div className="flex items-center justify-start gap-3 p-2">
                   <div className="flex flex-col">

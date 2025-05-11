@@ -2,27 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Fix for dropdown CLS */
-[data-radix-popper-content-wrapper] {
-  position: absolute !important;
-  top: 0;
-  left: 0;
-  width: var(--radix-popper-anchor-width);
-  transform-origin: var(--radix-dropdown-menu-content-transform-origin);
-  z-index: 50;
-  will-change: transform;
-  backface-visibility: hidden;
-  contain: layout;
-}
-
 /* Enhanced positioning for high-DPI displays */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  [data-radix-popper-content-wrapper] {
-    transform: translateZ(0);
-    contain: layout paint;
-    position: fixed !important; /* Force fixed positioning on high-DPI displays */
-  }
-  
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+
   /* Prevent body from shifting when dropdown opens */
   body {
     overflow-x: hidden;
@@ -31,22 +14,6 @@
   }
 }
 
-/* Ensure portals don't cause layout shifts */
-[data-radix-portal] {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 999;
-}
-
-/* Dropdown specific styles to prevent CLS */
-[data-state="open"] > [data-radix-popper-content-wrapper] {
-  position: fixed !important;
-  z-index: 1000;
-}
 
 @plugin "daisyui" {
   prefix: "d-";
