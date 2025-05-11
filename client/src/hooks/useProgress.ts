@@ -88,25 +88,47 @@ export function useProgress() {
       return path.split('/').map(segment => segment.replace(/^\d+-/, '')).join('/');
     };
     
+    // Helper to extract just the base lesson name
+    const getBaseName = (path: string): string => {
+      // Return the final segment of a path (everything after the last slash)
+      return path.split('/').pop() || path;
+    };
+    
     // Normalize the input slug
-    let normalizedInputSlug = normalizePath(lessonSlug);
+    const normalizedInputSlug = normalizePath(lessonSlug);
+    const inputBaseName = getBaseName(normalizedInputSlug);
+    
+    // Get section from input slug if it exists
+    const inputSection = normalizedInputSlug.includes('/') 
+      ? normalizedInputSlug.split('/')[0] 
+      : null;
     
     // Check if this normalized slug exists in our completed lessons
     return Object.keys(progressData.completedLessons).some(completedSlug => {
-      // Also normalize the completed slug from the DB the same way
+      // Also normalize the completed slug from the DB
       const normalizedCompletedSlug = normalizePath(completedSlug);
+      const completedBaseName = getBaseName(normalizedCompletedSlug);
+      const completedSection = normalizedCompletedSlug.includes('/') 
+        ? normalizedCompletedSlug.split('/')[0] 
+        : null;
       
-      // First try full path match - this is the most reliable method with unique paths
+      // Priority 1: Exact full path match (most reliable)
       if (normalizedCompletedSlug === normalizedInputSlug) {
         return true;
       }
       
-      // For backward compatibility only, check the slug without the section prefix
-      // but ONLY if the input slug doesn't already have a section prefix
-      if (!normalizedInputSlug.includes('/')) {
-        const inputBaseName = normalizedInputSlug.split('/').pop() || '';
-        const completedBaseName = normalizedCompletedSlug.split('/').pop() || '';
-        return inputBaseName === completedBaseName;
+      // Priority 2: If both have sections and the base names match, but sections don't,
+      // we should NOT consider them the same
+      if (inputSection && completedSection && (inputSection !== completedSection) && 
+          (inputBaseName === completedBaseName)) {
+        // Different sections with same base name - NOT a match
+        return false;
+      }
+      
+      // Priority 3: If input has no section, fall back to base name match
+      // This is for backward compatibility
+      if (!inputSection && (inputBaseName === completedBaseName)) {
+        return true;
       }
       
       return false;

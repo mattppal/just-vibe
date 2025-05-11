@@ -24,8 +24,25 @@ export async function completeLesson(userId: string, lessonSlug: string) {
       lessonSlug,
     });
 
-    // Check if the lesson is already completed
-    // First try to find the exact lesson slug as provided
+    // Normalize the lesson slug to ensure consistent format
+    // Remove any numeric prefixes from all path segments
+    const normalizedSlug = lessonSlug.split('/').map(segment => {
+      return segment.replace(/^\d+-/, '');
+    }).join('/');
+
+    // Extract section name if available
+    let sectionName = null;
+    let baseName = normalizedSlug;
+    
+    if (normalizedSlug.includes('/')) {
+      const parts = normalizedSlug.split('/');
+      if (parts.length > 1 && parts[0]) {
+        sectionName = parts[0]; 
+        baseName = parts[parts.length - 1];
+      }
+    }
+    
+    // Check if the lesson is already completed - try exact match first
     const existingCompletion = await db.select({
       id: courseCompletions.id,
       userId: courseCompletions.userId,
@@ -36,7 +53,7 @@ export async function completeLesson(userId: string, lessonSlug: string) {
     .from(courseCompletions)
     .where(and(
       eq(courseCompletions.userId, userId),
-      eq(courseCompletions.lessonSlug, lessonSlug)
+      eq(courseCompletions.lessonSlug, normalizedSlug)
     ))
     .limit(1);
 
@@ -45,26 +62,7 @@ export async function completeLesson(userId: string, lessonSlug: string) {
       return existingCompletion[0];
     }
 
-    // Parse the section name and ensure we save the full path
-    // For format like "getting-started/installation", extract "getting-started" as section
-    // and save the full normalized path as the lessonSlug
-    let sectionName = null;
-    
-    // Normalize the lesson slug to ensure consistent format
-    // Remove any numeric prefixes from all path segments
-    const normalizedSlug = lessonSlug.split('/').map(segment => {
-      return segment.replace(/^\d+-/, '');
-    }).join('/');
-    
-    // Extract section name if available
-    if (normalizedSlug.includes('/')) {
-      const parts = normalizedSlug.split('/');
-      if (parts.length > 1 && parts[0]) {
-        sectionName = parts[0]; // Already normalized above
-      }
-    }
-    
-    // Otherwise, insert a new completion with the full normalized path
+    // Insert a new completion with the full normalized path
     const [newCompletion] = await db.insert(courseCompletions)
       .values({
         userId,
@@ -146,13 +144,66 @@ export async function uncompleteLesson(userId: string, lessonSlug: string) {
       return segment.replace(/^\d+-/, '');
     }).join('/');
     
-    await db.delete(courseCompletions)
+    // Extract section name if available (for advanced checks)
+    let sectionName = null;
+    let baseName = normalizedSlug;
+    
+    if (normalizedSlug.includes('/')) {
+      const parts = normalizedSlug.split('/');
+      if (parts.length > 1 && parts[0]) {
+        sectionName = parts[0]; 
+        baseName = parts[parts.length - 1];
+      }
+    }
+    
+    // First try to find and delete using the exact normalized slug
+    const result = await db.delete(courseCompletions)
       .where(
         and(
           eq(courseCompletions.userId, userId),
           eq(courseCompletions.lessonSlug, normalizedSlug)
         )
-      );
+      )
+      .returning({ id: courseCompletions.id });
+    
+    // If we found and deleted a record, return successfully
+    if (result && result.length > 0) {
+      return { success: true, message: 'Lesson uncompleted successfully' };
+    }
+    
+    // If no records were deleted, check if maybe the user is trying to uncomplete
+    // a lesson by a different section path (uncomplete test/welcome when completed getting-started/welcome)
+    // This is for advanced handling to deal with duplicate lesson names across sections
+    if (normalizedSlug.includes('/')) {
+      console.log(`No exact match found for ${normalizedSlug}, checking for base name matches`);
+      
+      // Try to find by base name only
+      const completions = await db.select({
+        id: courseCompletions.id,
+        lessonSlug: courseCompletions.lessonSlug
+      })
+      .from(courseCompletions)
+      .where(eq(courseCompletions.userId, userId));
+      
+      // Search for a matching record that ends with the base name
+      const matchingCompletion = completions.find(completion => {
+        const completionBase = completion.lessonSlug.split('/').pop() || '';
+        return completionBase === baseName;
+      });
+      
+      if (matchingCompletion) {
+        console.log(`Found matching completion: ${matchingCompletion.lessonSlug}`);
+        
+        // Delete the matching record
+        await db.delete(courseCompletions)
+          .where(eq(courseCompletions.id, matchingCompletion.id));
+          
+        return { 
+          success: true, 
+          message: `Lesson uncompleted successfully (using base name match from ${matchingCompletion.lessonSlug})` 
+        };
+      }
+    }
 
     return { success: true };
   } catch (error) {
