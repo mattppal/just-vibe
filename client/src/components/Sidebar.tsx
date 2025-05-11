@@ -1,10 +1,11 @@
 import { useLocation } from "wouter";
 import NavigationLink from "./NavigationLink";
 import { Input } from "@/components/ui/input";
-import { ChevronRight, Search, X, FileText, CheckCircle } from "lucide-react";
+import { ChevronRight, Search, X, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/hooks/useProgress";
 import { ProgressBar } from "./ProgressBar";
+import { Emoji } from 'react-apple-emojis';
 import {
   DocPage,
 } from "@/lib/docs";
@@ -244,7 +245,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                                 {doc.sidebarTitle || doc.title}
                               </span>
                               {isLessonCompleted(doc.slug) && (
-                                <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 ml-2" />
+                                <div className="flex-shrink-0 ml-2">
+                                  <Emoji name="check-mark-button" width={14} />
+                                </div>
                               )}
                             </div>
                             <span className="text-xs text-gray-500 truncate mt-1">
@@ -318,7 +321,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                           <div className="flex items-center gap-2 justify-between w-full">
                             <span>{doc.sidebarTitle}</span>
                             {isLessonCompleted(doc.slug) && (
-                              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 ml-1" />
+                              <div className="flex-shrink-0 ml-1">
+                                <Emoji name="white-heavy-check-mark" width={14} />
+                              </div>
                             )}
                           </div>
                         </NavigationLink>
