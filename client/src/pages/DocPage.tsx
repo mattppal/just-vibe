@@ -46,17 +46,9 @@ export default function DocPage() {
     enabled: !!path // Only run when path exists
   });
   
-  // Get all sections data for navigation
-  const { data: sectionsData } = useQuery<Record<string, DocPageType[]>>({  
-    queryKey: ['/api/sections'],
-    queryFn: async () => {
-      return await getDocsBySection();
-    },
-    staleTime: 24 * 60 * 60 * 1000, // 24 hours
-    gcTime: 7 * 24 * 60 * 60 * 1000, // 7 days
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-  });
+  // Use the existing queryClient to get sections data for navigation
+  // This avoids making another API request since the sections data should already be in the cache
+  const sectionsData = queryClient.getQueryData<Record<string, DocPageType[]>>(['/api/sections']);
   
   // Handle errors separately (React Query v5 doesn't accept onError in the options)
   useEffect(() => {
@@ -71,16 +63,36 @@ export default function DocPage() {
     }
   }, [queryError]);
 
+  // Use another effect to fetch sections data if needed
+  useEffect(() => {
+    // If sections data is not in the cache, fetch it
+    if (!queryClient.getQueryData(['/api/sections']) && !isLoading) {
+      // Only fetch if the document has loaded successfully and we need sections data
+      queryClient.prefetchQuery({
+        queryKey: ['/api/sections'],
+        queryFn: () => getDocsBySection()
+      });
+    }
+  }, [isLoading]);
+
   // Update component state when query data changes
   useEffect(() => {
-    if (docData && sectionsData) {
+    if (docData) {
+      // Get the latest sections data from cache each time we update
+      const sectionsData = queryClient.getQueryData<Record<string, DocPageType[]>>(['/api/sections']);
       setDoc(docData);
       document.title = `${docData.title} | Just Vibe Docs`;
       
-      // Find previous and next docs
-      const { previousDoc, nextDoc } = findAdjacentDocs(docData, sectionsData);
-      setPreviousDoc(previousDoc);
-      setNextDoc(nextDoc);
+      // Find previous and next docs if we have sections data
+      if (sectionsData) {
+        const { previousDoc, nextDoc } = findAdjacentDocs(docData, sectionsData);
+        setPreviousDoc(previousDoc);
+        setNextDoc(nextDoc);
+      } else {
+        // If no sections data yet, clear previous/next navigation
+        setPreviousDoc(null);
+        setNextDoc(null);
+      }
       
       // Use requestIdleCallback to prefetch only immediately adjacent docs when browser is idle
       const prefetchAdjacentDocs = () => {

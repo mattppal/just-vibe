@@ -3,12 +3,15 @@ import { useLocation } from 'wouter';
 import { getDocByPath, DocPage, getDocsBySection } from '@/lib/docs';
 import TableOfContents from '@/components/TableOfContents';
 import MDXProvider from '@/components/MDXProvider';
+import { DocNavigation } from '@/components/DocNavigation';
+import { queryClient } from '@/lib/queryClient';
 
 export default function Home() {
   const [, setLocation] = useLocation();
   const [homeDoc, setHomeDoc] = useState<DocPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorState, setErrorState] = useState<string | null>(null);
+  const [nextDoc, setNextDoc] = useState<{ title: string; path: string } | null>(null);
   
   // Use direct API request to bypass any cached errors
   useEffect(() => {
@@ -78,6 +81,59 @@ export default function Home() {
   useEffect(() => {
     if (homeDoc) {
       document.title = `${homeDoc.title} | Just Vibe Docs`;
+      
+      // Find the next document after home page
+      const findNextDoc = async () => {
+        // Get sections data from cache or fetch it
+        let sectionsData = queryClient.getQueryData<Record<string, DocPage[]>>(['/api/sections']);
+        
+        if (!sectionsData) {
+          try {
+            sectionsData = await getDocsBySection();
+            // Store in query cache
+            queryClient.setQueryData(['/api/sections'], sectionsData);
+          } catch (err) {
+            console.error('Error fetching sections for navigation:', err);
+            return;
+          }
+        }
+        
+        if (sectionsData) {
+          // Get the first document from the first section that's not "root"
+          const orderedSectionNames = Object.keys(sectionsData).sort((a, b) => {
+            // Always keep root first
+            if (a === 'root') return -1;
+            if (b === 'root') return 1;
+            
+            // Extract numeric prefix from section names for ordering
+            const getOrderPrefix = (name: string) => {
+              const match = name.match(/^(\d+)-/);
+              return match ? parseInt(match[1], 10) : 999;
+            };
+            
+            // Sort by numeric prefix
+            return getOrderPrefix(a) - getOrderPrefix(b);
+          });
+          
+          // Find the first non-root section with docs
+          for (const sectionName of orderedSectionNames) {
+            if (sectionName !== 'root') {
+              const sectionDocs = sectionsData[sectionName];
+              if (sectionDocs && sectionDocs.length > 0) {
+                // Found the first document in the ordered sections
+                const firstDoc = sectionDocs[0];
+                setNextDoc({
+                  title: firstDoc.title,
+                  path: firstDoc.path
+                });
+                break;
+              }
+            }
+          }
+        }
+      };
+      
+      findNextDoc();
     }
   }, [homeDoc]);
   
@@ -123,6 +179,9 @@ export default function Home() {
               <p className="text-gray-400">Loading content...</p>
             </div>
           )}
+          
+          {/* Navigation links - for home page we only show Next */}
+          <DocNavigation previousDoc={null} nextDoc={nextDoc} />
         </article>
         
         {/* Include TableOfContents for home page */}

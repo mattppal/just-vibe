@@ -57,8 +57,12 @@ export function DocNavigation({ previousDoc, nextDoc }: DocNavigationProps) {
 // Helper function to find previous and next docs
 export function findAdjacentDocs(
   currentDoc: DocPage,
-  sections: Record<string, DocPage[]>
+  sections: Record<string, DocPage[]> | undefined
 ): { previousDoc: DocNavigationLink | null; nextDoc: DocNavigationLink | null } {
+  // If sections data is not available, return null for both links
+  if (!sections) {
+    return { previousDoc: null, nextDoc: null };
+  }
   // Initialize result
   let previousDoc: DocNavigationLink | null = null;
   let nextDoc: DocNavigationLink | null = null;
