@@ -48,11 +48,14 @@ router.post('/lesson/:slug/complete', isAuthenticated, async (req: any, res) => 
     const lessonSlug = req.params.slug;
     const { version } = req.body;
     
+    console.log(`User ${userId} attempting to mark lesson ${lessonSlug} as complete`);
+    
     if (!lessonSlug) {
       return res.status(400).json({ message: 'Lesson slug is required' });
     }
     
     const updatedProgress = await progressService.markLessonComplete(userId, lessonSlug, version);
+    console.log('Updated progress for user:', { userId, lessonSlug, totalComplete: updatedProgress.totalCompletedCount });
     res.json(updatedProgress);
   } catch (error) {
     console.error('Error marking lesson as complete:', error);

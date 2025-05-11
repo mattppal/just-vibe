@@ -12,7 +12,7 @@ export function useProgress() {
     queryKey: ['/api/progress'],
     // Only fetch if user is authenticated
     enabled: !!queryClient.getQueryData(['/api/auth/user']),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 1 * 60 * 1000, // 1 minute
     refetchOnWindowFocus: true,
   });
   
@@ -22,6 +22,7 @@ export function useProgress() {
   // Mutation for marking a lesson as complete
   const markComplete = useMutation({
     mutationFn: async ({ lessonSlug, version }: { lessonSlug: string, version?: string }) => {
+      console.log(`Attempting to mark lesson ${lessonSlug} as complete`);
       const response = await fetch(`/api/progress/lesson/${lessonSlug}/complete`, {
         method: 'POST',
         headers: {
@@ -32,20 +33,32 @@ export function useProgress() {
       });
       
       if (!response.ok) {
+        console.error(`Error marking lesson as complete: ${response.status} ${response.statusText}`);
         throw new Error('Failed to mark lesson as complete');
       }
       
-      return response.json();
+      const data = await response.json();
+      console.log('Mark complete API response:', data);
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Mark complete mutation successful, invalidating queries');
       // Invalidate and refetch progress data
       queryClient.invalidateQueries({ queryKey: ['/api/progress'] });
+      
+      // Force an immediate refetch
+      queryClient.fetchQuery({
+        queryKey: ['/api/progress']
+      });
+      
+      console.log('Updated progress data:', data);
     },
   });
   
   // Mutation for marking a lesson as incomplete
   const markIncomplete = useMutation({
     mutationFn: async (lessonSlug: string) => {
+      console.log(`Attempting to mark lesson ${lessonSlug} as incomplete`);
       const response = await fetch(`/api/progress/lesson/${lessonSlug}/incomplete`, {
         method: 'POST',
         headers: {
@@ -55,21 +68,37 @@ export function useProgress() {
       });
       
       if (!response.ok) {
+        console.error(`Error marking lesson as incomplete: ${response.status} ${response.statusText}`);
         throw new Error('Failed to mark lesson as incomplete');
       }
       
-      return response.json();
+      const data = await response.json();
+      console.log('Mark incomplete API response:', data);
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Mark incomplete mutation successful, invalidating queries');
       // Invalidate and refetch progress data
       queryClient.invalidateQueries({ queryKey: ['/api/progress'] });
+      
+      // Force an immediate refetch
+      queryClient.fetchQuery({
+        queryKey: ['/api/progress']
+      });
+      
+      console.log('Updated progress data:', data);
     },
   });
   
   // Check if a specific lesson is completed
   const isLessonCompleted = (lessonSlug: string): boolean => {
-    if (!progress?.completedLessons) return false;
-    return !!progress.completedLessons[lessonSlug];
+    if (!progress?.completedLessons) {
+      console.log('No completed lessons data found for this user');
+      return false;
+    }
+    const isCompleted = !!progress.completedLessons[lessonSlug];
+    console.log(`Checking completion for lesson: ${lessonSlug} - Completed: ${isCompleted}`);
+    return isCompleted;
   };
   
   // Calculate progress percentage based on total lessons
