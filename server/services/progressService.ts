@@ -22,7 +22,7 @@ export class ProgressService {
         
       return progress;
     } catch (error) {
-      console.error("Error fetching user progress:", error);
+      console.error("[PROGRESS SERVICE] Error fetching user progress:", error);
       return undefined;
     }
   }
@@ -78,30 +78,21 @@ export class ProgressService {
         action: 'complete'
       });
       
-      // Direct query to see if we can update manually
-      const functionResult = await db.execute(
-        `SELECT update_user_progress($1, $2, $3, $4) as progress_data`,
+      // Execute SQL function to update progress directly
+      const result = await db.execute(
+        `SELECT * FROM update_user_progress($1, $2, $3, $4) as updated_data`,
         [userId, lessonSlug, version, 'complete']
       );
 
-      console.log('[PROGRESS SERVICE] Database function raw result:', functionResult);
+      console.log('[PROGRESS SERVICE] SQL function result:', result);
       
-      if (Array.isArray(functionResult) && functionResult.length > 0) {
-        console.log('[PROGRESS SERVICE] DB function response data:', functionResult[0]);
-      } else {
-        console.error('[PROGRESS SERVICE] Unexpected response format from database function');
-      }
-      
-      // Verifying if database was updated
-      console.log(`[PROGRESS SERVICE] Checking if database was updated for user ${userId}`);
-      
-      // Get the updated progress data from database
+      // Get the updated progress data from database to return to client
       const progressData = await this.getProgressData(userId);
-      console.log('[PROGRESS SERVICE] Progress data after update:', JSON.stringify(progressData));
+      console.log('[PROGRESS SERVICE] Final progress data returned to client:', JSON.stringify(progressData));
       
       return progressData;
     } catch (error) {
-      console.error('Error updating progress with database function:', error);
+      console.error('[PROGRESS SERVICE] Error updating progress with database function:', error);
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to update progress: ${errorMessage}`);
     }
@@ -121,38 +112,21 @@ export class ProgressService {
     console.log(`[PROGRESS SERVICE] Marking lesson ${lessonSlug} as incomplete for user ${userId}`);
     
     try {
-      // Tracing the params to make sure they are correctly passed
-      console.log('[PROGRESS SERVICE] Parameters for DB function:', {
-        userId, 
-        lessonSlug, 
-        version: null,
-        action: 'incomplete'
-      });
-      
-      // Direct query to see if we can update manually
-      const functionResult = await db.execute(
-        `SELECT update_user_progress($1, $2, $3, $4) as progress_data`,
+      // Execute SQL function to update progress directly
+      const result = await db.execute(
+        `SELECT * FROM update_user_progress($1, $2, $3, $4) as updated_data`,
         [userId, lessonSlug, null, 'incomplete']
       );
 
-      console.log('[PROGRESS SERVICE] Database function raw result:', functionResult);
+      console.log('[PROGRESS SERVICE] SQL function result:', result);
       
-      if (Array.isArray(functionResult) && functionResult.length > 0) {
-        console.log('[PROGRESS SERVICE] DB function response data:', functionResult[0]);
-      } else {
-        console.error('[PROGRESS SERVICE] Unexpected response format from database function');
-      }
-      
-      // Verifying if database was updated
-      console.log(`[PROGRESS SERVICE] Checking if database was updated for user ${userId}`);
-      
-      // Get the updated progress data from database
+      // Get the updated progress data from database to return to client
       const progressData = await this.getProgressData(userId);
-      console.log('[PROGRESS SERVICE] Progress data after update:', JSON.stringify(progressData));
+      console.log('[PROGRESS SERVICE] Final progress data returned to client:', JSON.stringify(progressData));
       
       return progressData;
     } catch (error) {
-      console.error('Error updating progress with database function:', error);
+      console.error('[PROGRESS SERVICE] Error updating progress with database function:', error);
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to update progress: ${errorMessage}`);
     }

@@ -13,6 +13,7 @@ import { Lock, LogIn, Home, AlertTriangle } from "lucide-react";
 import { Link } from "wouter";
 import { queryClient } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
+import ProgressDebugger from "@/components/ProgressDebugger";
 
 export default function DocPage() {
   const [location, setLocation] = useLocation();
