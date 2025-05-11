@@ -3,6 +3,7 @@ import type { Config } from "tailwindcss";
 export default {
   darkMode: ["class"],
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
+
   theme: {
     fontFamily: {
       sans: ["'Geist Sans'", "system-ui", "sans-serif"],
@@ -175,7 +176,7 @@ export default {
               color: "var(--tw-prose-code)",
               backgroundColor: "var(--tw-prose-pre-bg)",
               fontWeight: "400",
-              borderRadius: "0.25rem",
+              borderRadius: "var(--radius)",
               paddingTop: "0.125rem",
               paddingRight: "0.25rem",
               paddingBottom: "0.125rem",
@@ -184,7 +185,7 @@ export default {
             pre: {
               color: "var(--tw-prose-pre-code)",
               backgroundColor: "var(--tw-prose-pre-bg)",
-              borderRadius: "0.375rem",
+              borderRadius: "var(--radius)",
               padding: "0.75rem 1rem",
             },
           },
@@ -192,5 +193,9 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require("@tailwindcss/typography"),
+    require("daisyui"),
+  ],
 } satisfies Config;

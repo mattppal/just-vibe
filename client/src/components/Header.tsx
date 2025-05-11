@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuPortal
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -27,20 +27,20 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
   // Only add a class to body when dropdown is open for styling purposes
   useEffect(() => {
     const bodyEl = document.body;
-    
+
     if (dropdownOpen) {
-      bodyEl.classList.add('dropdown-open');
+      bodyEl.classList.add("dropdown-open");
     } else {
-      bodyEl.classList.remove('dropdown-open');
+      bodyEl.classList.remove("dropdown-open");
     }
-    
+
     return () => {
-      bodyEl.classList.remove('dropdown-open');
+      bodyEl.classList.remove("dropdown-open");
     };
   }, [dropdownOpen]);
 
   return (
-    <header 
+    <header
       ref={headerRef}
       className="sticky top-0 z-50 w-full border-b border-[#333] bg-black/90 backdrop-blur-sm"
     >
@@ -61,72 +61,43 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
           {isLoading ? (
             <div className="w-24 h-9 animate-pulse bg-[#111] rounded-md" />
           ) : isAuthenticated ? (
-            <DropdownMenu 
-              open={dropdownOpen} 
-              onOpenChange={setDropdownOpen}
-            >
+            <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="h-9 w-9 rounded-full bg-transparent p-0 hover:bg-[#111] focus:ring-0 focus:ring-offset-0 dropdown-menu-trigger-no-shift"
+                  className="h-9 w-9 rounded-full bg-transparent p-0 hover:bg-[#111] focus:ring-0 focus:ring-offset-0"
                   aria-label="User menu"
                 >
                   <Avatar className="h-9 w-9 border border-[#333]">
-                    {user?.profileImageUrl ? (
-                      <AvatarImage
-                        src={user.profileImageUrl}
-                        alt="Profile"
-                        style={{ objectFit: "cover" }}
-                      />
-                    ) : (
-                      <AvatarFallback className="bg-[#111] text-white">
-                        <User className="h-5 w-5" />
-                      </AvatarFallback>
-                    )}
+                    <AvatarImage src={user.profileImageUrl} alt="Profile" />
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuContent
-                  align="end"
-                  sideOffset={8}
-                  className="w-56 bg-black border border-[#333] p-1 text-white fixed-dropdown"
-                >
-                  <div className="flex items-center justify-start gap-3 p-2">
-                    <Avatar className="h-9 w-9 border border-[#333]">
-                      {user?.profileImageUrl ? (
-                        <AvatarImage
-                          src={user.profileImageUrl}
-                          alt="Profile"
-                          style={{ objectFit: "cover" }}
-                        />
-                      ) : (
-                        <AvatarFallback className="bg-[#111] text-white">
-                          <User className="h-5 w-5" />
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
-                    <div className="flex flex-col space-y-0.5">
-                      <p className="text-sm font-medium">
-                        {user?.firstName && user?.lastName
-                          ? `${user.firstName} ${user.lastName}`
-                          : "Welcome"}
-                      </p>
-                      <p className="text-xs text-gray-400 truncate">
-                        @{user?.id || "user"}
-                      </p>
-                    </div>
+              <DropdownMenuContent
+                sideOffset={8}
+                className="w-56 bg-black border border-[#333] p-1 text-white"
+              >
+                <div className="flex items-center justify-start gap-3 p-2">
+                  <div className="flex flex-col">
+                    <p className="text-sm font-medium">
+                      {user?.firstName && user?.lastName
+                        ? `${user.firstName} ${user.lastName}`
+                        : "Welcome"}
+                    </p>
+                    <p className="text-xs text-gray-400 truncate">
+                      {user?.id || "user"}
+                    </p>
                   </div>
-                  <DropdownMenuSeparator className="bg-[#333] my-1" />
-                  <DropdownMenuItem
-                    onClick={logout}
-                    className="cursor-pointer flex items-center gap-2 focus:bg-[#111] focus:text-white hover:bg-[#111] transition-colors duration-200"
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    <span>Sign out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenuPortal>
+                </div>
+                <DropdownMenuSeparator className="bg-[#333] my-1" />
+                <DropdownMenuItem
+                  onClick={logout}
+                  className="cursor-pointer flex items-center gap-2 focus:bg-[#111] focus:text-white hover:bg-[#111] transition-colors duration-200"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <Button

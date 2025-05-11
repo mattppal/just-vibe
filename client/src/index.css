@@ -2,14 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+@plugin "daisyui" {
+  prefix: "d-";
+}
+
+;
 
 @layer base {
   :root {
+    --radius: 0.375rem;
     --background: 0 0% 0%;
     /* Pure black background */
     --foreground: 0 0% 100%;
     /* Pure white text */
-
     --card: 0 0% 5%;
     /* Slightly lighter than black for cards */
     --card-foreground: 0 0% 100%;
@@ -177,26 +182,6 @@
 
 .prose hr {
   @apply border-border my-8;
-}
-
-/* Code blocks */
-.prose pre {
-  @apply p-4 bg-[hsl(var(--code))] text-sm;
-  /* Enable soft wrap with scrolling if needed */
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.prose code {
-  @apply font-mono text-[15px];
-  /* Enable soft wrap */
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-.prose :not(pre)>code {
-  @apply bg-[hsl(var(--code))] text-foreground rounded px-1.5 py-0.5 font-mono text-[15px];
 }
 
 /* Tables */
