@@ -96,36 +96,77 @@ export async function processMarkdown(
     // For MDX content, we need to preserve the React component tags
     if (isMdx) {
       // Process MDX by preserving React component syntax
-      // Temporarily replace custom component tags with placeholders
+      // Extract all the React component instances (both self-closing and with children)
       const componentRegex = /<([A-Z][a-zA-Z0-9]*)([^>]*)>([\s\S]*?)<\/\1>/g;
       const selfClosingRegex = /<([A-Z][a-zA-Z0-9]*)([^>]*?)\s*\/>/g;
       
-      // Generate unique placeholders for component tags
-      let componentPlaceholders: Record<string, string> = {};
-      let componentCounter = 0;
+      // Collect all components to process
+      const components: Array<{match: string, name: string, attrs: string, children?: string, selfClosing: boolean}> = [];
       
-      // Replace component tags with placeholders (for self-closing tags)
-      const contentWithSelfClosingPlaceholders = content.replace(selfClosingRegex, (_match, name, attrs) => {
-        const placeholder = `__MDX_COMPONENT_${componentCounter++}__`;
-        componentPlaceholders[placeholder] = `<${name}${attrs} />`;
-        return placeholder;
+      // Find all self-closing components
+      let selfClosingMatch;
+      while ((selfClosingMatch = selfClosingRegex.exec(content)) !== null) {
+        components.push({
+          match: selfClosingMatch[0],
+          name: selfClosingMatch[1],
+          attrs: selfClosingMatch[2] || '',
+          selfClosing: true
+        });
+      }
+      
+      // Find all components with children
+      let componentMatch;
+      while ((componentMatch = componentRegex.exec(content)) !== null) {
+        // Skip if it matches any of the already detected self-closing components
+        if (!components.some(c => c.match === componentMatch[0])) {
+          components.push({
+            match: componentMatch[0],
+            name: componentMatch[1],
+            attrs: componentMatch[2] || '',
+            children: componentMatch[3],
+            selfClosing: false
+          });
+        }
+      }
+      
+      // Create a copy of the content to work with
+      let contentToProcess = content;
+      
+      // Replace each component with a text placeholder
+      components.forEach((component, index) => {
+        contentToProcess = contentToProcess.replace(component.match, `MDX_COMPONENT_${index}`);
       });
       
-      // Replace component tags with placeholders (for normal tags with children)
-      const contentWithPlaceholders = contentWithSelfClosingPlaceholders.replace(componentRegex, (_match, name, attrs, children) => {
-        const placeholder = `__MDX_COMPONENT_${componentCounter++}__`;
-        componentPlaceholders[placeholder] = `<${name}${attrs}>${children}</${name}>`;
-        return placeholder;
-      });
-      
-      // Process content with placeholders as regular markdown
-      const processor = getProcessor(false); // Use regular MD processor
-      const vFile = await processor.process(contentWithPlaceholders);
+      // Process the markdown content (without the React components)
+      const processor = getProcessor(false);
+      const vFile = await processor.process(contentToProcess);
       let result = String(vFile);
       
-      // Replace placeholders with original component tags
-      Object.entries(componentPlaceholders).forEach(([placeholder, originalTag]) => {
-        result = result.replace(placeholder, originalTag);
+      // Now reinsert the original React components
+      components.forEach((component, index) => {
+        // Parse attributes to data-prop attributes for client-side processing
+        let dataProps = '';
+        if (component.attrs) {
+          const attrRegex = /([a-zA-Z0-9_]+)\s*=\s*["']([^"']*)["']/g;
+          let attrMatch;
+          while ((attrMatch = attrRegex.exec(component.attrs)) !== null) {
+            dataProps += ` data-prop-${attrMatch[1].toLowerCase()}="${attrMatch[2]}"`;  
+          }
+        }
+        
+        // For components with children, insert the children into a div that will be processed
+        // by the client-side rendering
+        if (!component.selfClosing && component.children) {
+          result = result.replace(
+            `MDX_COMPONENT_${index}`,
+            `<div class="mdx-component-placeholder" data-component="${component.name}"${dataProps}>${component.children}</div>`
+          );
+        } else {
+          result = result.replace(
+            `MDX_COMPONENT_${index}`,
+            `<div class="mdx-component-placeholder" data-component="${component.name}"${dataProps}></div>`
+          );
+        }
       });
       
       // Cache the result for future requests
