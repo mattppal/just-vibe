@@ -28,25 +28,22 @@ export function useProgress() {
   // Mark lesson as complete mutation
   const completeMutation = useMutation({
     mutationFn: async (lessonSlug: string) => {
-      // Ensure we're sending the slug without any ordering prefix
-      // Extract just the base part of the slug, removing section prefix and number ordering
-      // For example, "1-getting-started/course-welcome" → "course-welcome"
-      let cleanSlug = lessonSlug;
+      // Normalize the path format but preserve the full path structure
+      // Clean the slug by removing numeric prefixes but keep the full path
+      // For example, "1-getting-started/2-course-welcome" → "getting-started/course-welcome"
+      const normalizePath = (path: string): string => {
+        // Remove any numeric prefixes from path segments
+        return path.split('/').map(segment => segment.replace(/^\d+-/, '')).join('/');
+      };
       
-      // If the slug contains a slash, it might have section information
-      if (cleanSlug.includes('/')) {
-        // Extract just the part after the last slash
-        cleanSlug = cleanSlug.split('/').pop() || cleanSlug;
-      }
-      
-      // Remove any numeric prefix
-      cleanSlug = cleanSlug.replace(/^\d+-/, '');
+      // Normalize the path format
+      const normalizedSlug = normalizePath(lessonSlug);
       
       // Make a direct fetch request to bypass any middleware issues
       const response = await fetch('/api/progress/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lessonSlug: cleanSlug }),
+        body: JSON.stringify({ lessonSlug: normalizedSlug }),
         credentials: 'include'
       });
       
@@ -84,24 +81,27 @@ export function useProgress() {
     if (!progressData) return false;
     if (!progressData.completedLessons) return false;
     
-    // Extract the base slug - this matches how it's stored in the database
-    // The server stores just the simple slug without section prefix
-    let baseSlug = lessonSlug;
+    // Normalize the lesson slug to match database format
+    // Clean the slug by removing numeric prefixes and normalizing format
+    const normalizePath = (path: string): string => {
+      // Remove any numeric prefixes from path segments
+      return path.split('/').map(segment => segment.replace(/^\d+-/, '')).join('/');
+    };
     
-    // If it's a path with a section like "section/lesson"
-    if (baseSlug.includes('/')) {
-      // Extract just the lesson part (after the last slash)
-      baseSlug = baseSlug.split('/').pop() || baseSlug;
-    }
+    // Normalize the input slug
+    let normalizedInputSlug = normalizePath(lessonSlug);
     
-    // Remove any numeric prefix like "1-" from the slug
-    baseSlug = baseSlug.replace(/^\d+-/, '');
-    
-    // Check if this base slug exists in our completed lessons
+    // Check if this normalized slug exists in our completed lessons
     return Object.keys(progressData.completedLessons).some(completedSlug => {
-      // Also normalize the completed slug stored in the DB the same way
-      const normalizedCompletedSlug = completedSlug.replace(/^\d+-/, '');
-      return normalizedCompletedSlug === baseSlug;
+      // Also normalize the completed slug from the DB the same way
+      const normalizedCompletedSlug = normalizePath(completedSlug);
+      // First try full path match
+      if (normalizedCompletedSlug === normalizedInputSlug) return true;
+      
+      // As a fallback, check just the lesson name (backward compatibility)
+      const inputBaseName = normalizedInputSlug.split('/').pop() || '';
+      const completedBaseName = normalizedCompletedSlug.split('/').pop() || '';
+      return inputBaseName === completedBaseName;
     });
   }, [progressData]);
   
@@ -131,21 +131,21 @@ export function useProgress() {
   // Uncomplete lesson mutation
   const uncompleteMutation = useMutation({
     mutationFn: async (lessonSlug: string) => {
-      // Extract just the base part of the slug, removing section prefix
-      let cleanSlug = lessonSlug;
+      // Normalize the path format but preserve the full path structure
+      // Clean the slug by removing numeric prefixes but keep the full path
+      const normalizePath = (path: string): string => {
+        // Remove any numeric prefixes from path segments
+        return path.split('/').map(segment => segment.replace(/^\d+-/, '')).join('/');
+      };
       
-      if (cleanSlug.includes('/')) {
-        cleanSlug = cleanSlug.split('/').pop() || cleanSlug;
-      }
-      
-      // Remove any numeric prefix
-      cleanSlug = cleanSlug.replace(/^\d+-/, '');
+      // Normalize the path format
+      const normalizedSlug = normalizePath(lessonSlug);
       
       // Make a direct fetch request 
       const response = await fetch('/api/progress/uncomplete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lessonSlug: cleanSlug }),
+        body: JSON.stringify({ lessonSlug: normalizedSlug }),
         credentials: 'include'
       });
       

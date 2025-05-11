@@ -7,7 +7,7 @@ const Footer: React.FC = () => {
   
   return (
     <footer className="mt-10 pt-6 pb-10 border-t border-border">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-row justify-between items-center">
           <div className="text-sm text-muted-foreground">
             © {currentYear} Just Vibe Docs

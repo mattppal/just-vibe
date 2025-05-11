@@ -25,6 +25,7 @@ export async function completeLesson(userId: string, lessonSlug: string) {
     });
 
     // Check if the lesson is already completed
+    // First try to find the exact lesson slug as provided
     const existingCompletion = await db.select({
       id: courseCompletions.id,
       userId: courseCompletions.userId,
