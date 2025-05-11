@@ -15,8 +15,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication
   await setupAuth(app);
   
-  // Register progress tracking routes
+  // Register progress tracking routes with regular path
   app.use('/api/progress', progressRoutes);
+  
+  // Register special route to avoid Vite interception during development
+  app.use('/api-avoid-vite-interception/progress', (req, res, next) => {
+    // Set proper content type to ensure it's treated as JSON
+    res.set('Content-Type', 'application/json');
+    // Set cache control headers to prevent caching
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    // Forward to the progress routes
+    progressRoutes(req, res, next);
+  });
 
   // Auth routes
   app.get("/api/auth/user", async (req: Request, res: Response) => {

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ProgressData } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
+import { apiFetch } from '@/lib/apiFetch';
 
 /**
  * Hook for accessing and managing user's course progress
@@ -22,21 +23,12 @@ export function useProgress() {
     retry: 3, // Retry failed requests 3 times
     queryFn: async () => {
       try {
-        // Use absolute URL to avoid Vite intercepting the request
-        const baseUrl = window.location.origin;
-        const response = await fetch(`${baseUrl}/api/progress`, {
-          credentials: 'include'
+        // Use our special apiFetch utility to avoid Vite interception
+        const data = await apiFetch<ProgressData>('progress', {
+          method: 'GET',
         });
-        
-        if (!response.ok) {
-          console.error(`Error fetching progress: ${response.status} ${response.statusText}`);
-          throw new Error(`Failed to fetch progress data: ${response.statusText}`);
-        }
-        
-        // First get as text to debug any parsing issues
-        const responseText = await response.text();
-        console.log('Current progress data:', JSON.parse(responseText));
-        return JSON.parse(responseText);
+        console.log('Current progress data:', data);
+        return data;
       } catch (error) {
         console.error('Error fetching progress data:', error);
         throw error;
@@ -52,47 +44,16 @@ export function useProgress() {
     mutationFn: async ({ lessonSlug, version }: { lessonSlug: string, version?: string }) => {
       console.log(`Attempting to mark lesson ${lessonSlug} as complete`);
       try {
-        // Use absolute URL to avoid Vite intercepting the request
-        const baseUrl = window.location.origin;
-        const response = await fetch(`${baseUrl}/api/progress/lesson/${lessonSlug}/complete`, {
+        // Use our special apiFetch utility to avoid Vite interception
+        const data = await apiFetch<ProgressData>(`progress/lesson/${lessonSlug}/complete`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
           body: JSON.stringify({ version }),
-          credentials: 'include'
         });
-        
-        // Log the response status and key headers for debugging
-        console.log(`Response status: ${response.status} ${response.statusText}`);
-        console.log('Content-Type:', response.headers.get('content-type'));
-        console.log('Cache-Control:', response.headers.get('cache-control'));
-        
-        if (!response.ok) {
-          console.error(`Error marking lesson as complete: ${response.status} ${response.statusText}`);
-          // Try to get error details if possible
-          const errorText = await response.text();
-          console.error('Error response body:', errorText);
-          throw new Error(`Failed to mark lesson as complete: ${response.statusText}`);
-        }
-        
-        // First get response as text to debug any parsing issues
-        const responseText = await response.text();
-        console.log('Raw response text:', responseText);
-        
-        // Then parse the JSON
-        let data;
-        try {
-          data = JSON.parse(responseText);
-          console.log('Mark complete API response:', data);
-          return data;
-        } catch (parseError) {
-          console.error('Error parsing JSON response:', parseError);
-          console.error('Response text that failed to parse:', responseText);
-          throw new Error('Invalid JSON response from server');
-        }
+        console.log('Mark complete API response:', data);
+        return data;
       } catch (error) {
         console.error('Error during markComplete:', error);
+        console.error('Error during mark complete:', error);
         throw error;
       }
     },
@@ -124,46 +85,15 @@ export function useProgress() {
     mutationFn: async (lessonSlug: string) => {
       console.log(`Attempting to mark lesson ${lessonSlug} as incomplete`);
       try {
-        // Use absolute URL to avoid Vite intercepting the request
-        const baseUrl = window.location.origin;
-        const response = await fetch(`${baseUrl}/api/progress/lesson/${lessonSlug}/incomplete`, {
+        // Use our special apiFetch utility to avoid Vite interception
+        const data = await apiFetch<ProgressData>(`progress/lesson/${lessonSlug}/incomplete`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include'
         });
-        
-        // Log the response status and key headers for debugging
-        console.log(`Response status: ${response.status} ${response.statusText}`);
-        console.log('Content-Type:', response.headers.get('content-type'));
-        console.log('Cache-Control:', response.headers.get('cache-control'));
-        
-        if (!response.ok) {
-          console.error(`Error marking lesson as incomplete: ${response.status} ${response.statusText}`);
-          // Try to get error details if possible
-          const errorText = await response.text();
-          console.error('Error response body:', errorText);
-          throw new Error(`Failed to mark lesson as incomplete: ${response.statusText}`);
-        }
-        
-        // First get response as text to debug any parsing issues
-        const responseText = await response.text();
-        console.log('Raw response text:', responseText);
-        
-        // Then parse the JSON
-        let data;
-        try {
-          data = JSON.parse(responseText);
-          console.log('Mark incomplete API response:', data);
-          return data;
-        } catch (parseError) {
-          console.error('Error parsing JSON response:', parseError);
-          console.error('Response text that failed to parse:', responseText);
-          throw new Error('Invalid JSON response from server');
-        }
+        console.log('Mark incomplete API response:', data);
+        return data;
       } catch (error) {
         console.error('Error during markIncomplete:', error);
+        console.error('Error during mark incomplete:', error);
         throw error;
       }
     },
