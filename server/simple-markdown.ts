@@ -31,22 +31,7 @@ function getProcessor(isMdx: boolean): any {
         .use(remarkMdx)
         // Transform MDX to HTML
         .use(remarkRehype, { 
-          allowDangerousHtml: true,
-          // Add data attributes to code blocks for copy functionality
-          handlers: {
-            code: (h, node) => {
-              const value = String(node.value || '');
-              const lang = (node.lang || '').match(/^[^ \t]+(?=[\s\t]|$)/) || [];
-              const props = { 
-                className: lang.length > 0 ? `language-${lang[0]}` : undefined,
-                'data-copyable': 'true',
-                'data-code': value
-              };
-              return h(node, 'pre', props, [
-                h(node, 'code', { className: props.className }, [value])
-              ]);
-            }
-          }
+          allowDangerousHtml: true
         })
         // Process HTML in MDX
         .use(rehypeRaw)
@@ -69,22 +54,7 @@ function getProcessor(isMdx: boolean): any {
         .use(remarkGfm)
         // Transform Markdown to HTML
         .use(remarkRehype, { 
-          allowDangerousHtml: true,
-          // Add data attributes to code blocks for copy functionality
-          handlers: {
-            code: (h, node) => {
-              const value = String(node.value || '');
-              const lang = (node.lang || '').match(/^[^ \t]+(?=[\s\t]|$)/) || [];
-              const props = { 
-                className: lang.length > 0 ? `language-${lang[0]}` : undefined,
-                'data-copyable': 'true',
-                'data-code': value
-              };
-              return h(node, 'pre', props, [
-                h(node, 'code', { className: props.className }, [value])
-              ]);
-            }
-          } 
+          allowDangerousHtml: true
         })
         // Process HTML in Markdown
         .use(rehypeRaw)
@@ -123,17 +93,54 @@ export async function processMarkdown(
       return processedCache.get(cacheKey)!;
     }
 
-    // Get the appropriate processor
-    const processor = getProcessor(isMdx);
-    
-    // Process the content
-    const vFile = await processor.process(content);
-    const result = String(vFile);
-    
-    // Cache the result for future requests
-    processedCache.set(cacheKey, result);
-    
-    return result;
+    // For MDX content, we need to preserve the React component tags
+    if (isMdx) {
+      // Process MDX by preserving React component syntax
+      // Temporarily replace custom component tags with placeholders
+      const componentRegex = /<([A-Z][a-zA-Z0-9]*)([^>]*)>([\s\S]*?)<\/\1>/g;
+      const selfClosingRegex = /<([A-Z][a-zA-Z0-9]*)([^>]*?)\s*\/>/g;
+      
+      // Generate unique placeholders for component tags
+      let componentPlaceholders: Record<string, string> = {};
+      let componentCounter = 0;
+      
+      // Replace component tags with placeholders (for self-closing tags)
+      const contentWithSelfClosingPlaceholders = content.replace(selfClosingRegex, (_match, name, attrs) => {
+        const placeholder = `__MDX_COMPONENT_${componentCounter++}__`;
+        componentPlaceholders[placeholder] = `<${name}${attrs} />`;
+        return placeholder;
+      });
+      
+      // Replace component tags with placeholders (for normal tags with children)
+      const contentWithPlaceholders = contentWithSelfClosingPlaceholders.replace(componentRegex, (_match, name, attrs, children) => {
+        const placeholder = `__MDX_COMPONENT_${componentCounter++}__`;
+        componentPlaceholders[placeholder] = `<${name}${attrs}>${children}</${name}>`;
+        return placeholder;
+      });
+      
+      // Process content with placeholders as regular markdown
+      const processor = getProcessor(false); // Use regular MD processor
+      const vFile = await processor.process(contentWithPlaceholders);
+      let result = String(vFile);
+      
+      // Replace placeholders with original component tags
+      Object.entries(componentPlaceholders).forEach(([placeholder, originalTag]) => {
+        result = result.replace(placeholder, originalTag);
+      });
+      
+      // Cache the result for future requests
+      processedCache.set(cacheKey, result);
+      return result;
+    } else {
+      // Regular markdown processing
+      const processor = getProcessor(false);
+      const vFile = await processor.process(content);
+      const result = String(vFile);
+      
+      // Cache the result for future requests
+      processedCache.set(cacheKey, result);
+      return result;
+    }
   } catch (error) {
     console.error("Error processing markdown with Shiki:", error);
     return `<div class="markdown-error">Error processing content: ${error instanceof Error ? error.message : String(error)}</div>`;

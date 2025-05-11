@@ -1,0 +1,131 @@
+---
+title: Interactive MDX Example
+sidebarTitle: Interactive Components
+description: Test of interactive React components inside MDX documentation.
+---
+
+# Interactive MDX Example
+
+This page demonstrates the usage of interactive React components directly within MDX documents.
+
+## Using Alert Components
+
+Here's an example of how to use the Alert component with different types:
+
+<Alert type="info" title="Information">
+  This is an informational alert that provides helpful context.
+</Alert>
+
+<Alert type="warning" title="Warning">
+  This is a warning alert to draw attention to important considerations.
+</Alert>
+
+<Alert type="error" title="Error">
+  This is an error alert to highlight critical issues.
+</Alert>
+
+<Alert type="success" title="Success">
+  This is a success alert to confirm a positive outcome.
+</Alert>
+
+## Interactive Tabs
+
+Use tabs to organize related content in a space-efficient way:
+
+<Tabs>
+  <TabsList>
+    <TabTrigger value="overview">Overview</TabTrigger>
+    <TabTrigger value="example">Example</TabTrigger>
+    <TabTrigger value="api">API Reference</TabTrigger>
+  </TabsList>
+  
+  <TabItem value="overview" title="Overview">
+    The overview provides a high-level introduction to the concept.
+    
+    - Key benefit one
+    - Key benefit two
+    - Key benefit three
+  </TabItem>
+  
+  <TabItem value="example" title="Example">
+    ```javascript
+    // Example code
+    function greeting(name) {
+      return `Hello, ${name}!`;
+    }
+    
+    greeting('World');
+    ```
+  </TabItem>
+  
+  <TabItem value="api" title="API Reference">
+    | Parameter | Type | Description |
+    |-----------|------|-------------|
+    | name | string | The name to greet |
+    | options | object | Optional configuration |
+  </TabItem>
+</Tabs>
+
+## YouTube Video Embedding
+
+You can easily embed YouTube videos:
+
+<YouTubeEmbed id="dQw4w9WgXcQ" title="Never Gonna Give You Up" />
+
+## Code Blocks with Syntax Highlighting
+
+Code blocks support syntax highlighting:
+
+```typescript
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  roles: string[];
+}
+
+function getUserInfo(userId: number): Promise<User> {
+  return fetch(`/api/users/${userId}`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch user');
+      }
+      return response.json();
+    })
+    .then(data => data as User);
+}
+```
+
+## Combining Components with Markdown
+
+You can combine components with regular markdown content for rich documentation:
+
+### Step 1: Installation
+
+<Alert type="info" title="Prerequisite">
+  Make sure you have Node.js v14+ installed.
+</Alert>
+
+```bash
+npm install @acme/awesome-package
+```
+
+### Step 2: Configuration
+
+Create a configuration file:
+
+```json
+{
+  "apiKey": "YOUR_API_KEY",
+  "environment": "production",
+  "debug": false
+}
+```
+
+<Alert type="warning">
+  Never commit your API keys to version control.
+</Alert>
+
+## Conclusion
+
+This example demonstrates how MDX combines the simplicity of Markdown with the power of React components, creating more interactive and engaging documentation.
