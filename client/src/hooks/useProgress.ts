@@ -84,17 +84,36 @@ export function useProgress() {
     if (!progressData) return false;
     if (!progressData.completedLessons) return false;
     
-    // Extract the base slug without section prefix
-    let baseSlug = lessonSlug;
-    if (baseSlug.includes('/')) {
-      baseSlug = baseSlug.split('/').pop() || baseSlug;
-    }
-    baseSlug = baseSlug.replace(/^\d+-/, '');
+    // Normalize the input slug by keeping the full path
+    // This ensures we're checking the exact lesson in the right section
+    // Format: "section/lesson" or just "lesson"
+    let normalizedSlug = lessonSlug;
     
-    // Check if we have this lesson in our completed list
+    // Remove any numeric prefix from section and slug parts
+    if (normalizedSlug.includes('/')) {
+      const parts = normalizedSlug.split('/');
+      const section = parts[0].replace(/^\d+-/, '');
+      const lesson = parts[1].replace(/^\d+-/, '');
+      normalizedSlug = `${section}/${lesson}`;
+    } else {
+      normalizedSlug = normalizedSlug.replace(/^\d+-/, '');
+    }
+    
+    // Check if we have this lesson in our completed list with the same path structure
     return Object.keys(progressData.completedLessons).some(slug => {
-      const cleanSlug = slug.replace(/^\d+-/, '');
-      return cleanSlug === baseSlug;
+      let normalizedCompletedSlug = slug;
+      
+      // Normalize the completed slug in the same way
+      if (normalizedCompletedSlug.includes('/')) {
+        const parts = normalizedCompletedSlug.split('/');
+        const section = parts[0].replace(/^\d+-/, '');
+        const lesson = parts[1].replace(/^\d+-/, '');
+        normalizedCompletedSlug = `${section}/${lesson}`;
+      } else {
+        normalizedCompletedSlug = normalizedCompletedSlug.replace(/^\d+-/, '');
+      }
+      
+      return normalizedCompletedSlug === normalizedSlug;
     });
   }, [progressData]);
   

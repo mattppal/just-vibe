@@ -364,9 +364,9 @@ export default function DocPage() {
   
   return (
     <>
-      <div className="min-h-[calc(100vh-3.5rem-1px)] xl:pr-64">
-        {/* Main content column - full width with right padding on large screens to make room for fixed TOC */}
-        <article className="max-w-none xl:w-auto">
+      <div className="min-h-[calc(100vh-3.5rem-1px)] xl:pr-64 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        {/* Main content column - centered with max width for better readability */}
+        <article className="w-full">
           <nav className="flex items-center gap-1 text-sm mb-4">
             <Link href="/" className="text-gray-400 hover:text-white">
               Docs
