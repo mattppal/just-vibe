@@ -43,11 +43,20 @@ export function useProgress() {
       
       console.log('Clean slug:', cleanSlug);
       
-      return apiRequest('/api/progress/complete', {
-        method: 'POST',
-        body: JSON.stringify({ lessonSlug: cleanSlug }),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      try {
+        // First, ensure we have a CSRF token
+        await getCsrfToken(true); // Force refresh the token
+        
+        // Then use the apiRequest function which includes the token
+        return await apiRequest('/api/progress/complete', {
+          method: 'POST',
+          body: JSON.stringify({ lessonSlug: cleanSlug }),
+          headers: { 'Content-Type': 'application/json' },
+        });
+      } catch (error) {
+        console.error('Failed to complete lesson:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       // Invalidate the progress query to refetch
