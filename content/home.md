@@ -1,31 +1,18 @@
 ---
 title: Introduction
-sidebarTitle: Introduction
-description: Welcome to the documentation site. This is a public page anyone can access.
+sidebarTitle: Welcome
+description: This course will teach you everything you need to know about vibe coding on Replit.
 authenticated: false
 ---
 
-This is the introduction page of our documentation site. This page is publicly accessible to everyone, even if they're not logged in.
+We'll cover the following topics:
 
-## Public vs. Protected Content
+[ TOPICS ]
 
-In this documentation site:
+Through project-based, hands on work. 
 
-- Public pages (like this one) have `authenticated: false` in their frontmatter
-- Protected pages require authentication to view
-- Protected pages appear greyed out with a 🔒 lock icon in the sidebar
+You should be able to complete the first few lessons for free, but later lessons will require a paid Replit account.
 
-## Getting Started
+By the end of this course you will be able to:
 
-To get started with our platform, browse through the documentation sections in the sidebar. If you encounter locked content, you'll need to log in to view it.
-
-## Test Code Block
-
-```javascript
-// This is a test code block to verify syntax highlighting
-function greet(name) {
-  return `Hello, ${name}!`;
-}
-
-console.log(greet('User'));
-```
+[ OUTCOMES ]
