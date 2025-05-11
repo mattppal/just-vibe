@@ -404,7 +404,12 @@ export default function DocPage() {
           </div>
           
           {/* Navigation links to previous and next pages */}
-          {doc && <LessonCompleteButton lessonSlug={doc.slug} />}
+          {doc && (
+            <>
+              {/* Debug info */}
+              <LessonCompleteButton lessonSlug={doc.slug} />
+            </>
+          )}
           <DocNavigation previousDoc={previousDoc} nextDoc={nextDoc} />
         </article>
         

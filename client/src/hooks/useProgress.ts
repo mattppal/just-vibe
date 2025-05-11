@@ -25,6 +25,7 @@ export function useProgress() {
   // Mark lesson as complete mutation
   const completeMutation = useMutation({
     mutationFn: async (lessonSlug: string) => {
+      console.log('Sending API request with lesson slug:', lessonSlug);
       return apiRequest('/api/progress/complete', {
         method: 'POST',
         body: JSON.stringify({ lessonSlug }),
@@ -59,6 +60,18 @@ export function useProgress() {
   
   // Mark a lesson as complete
   const completeLesson = useCallback((lessonSlug: string) => {
+    console.log('Completing lesson with slug:', lessonSlug);
+    
+    if (!lessonSlug) {
+      console.error('Invalid lesson slug:', lessonSlug);
+      toast({
+        title: 'Error',
+        description: 'Invalid lesson slug. Please try again.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     if (!isAuthenticated) {
       toast({
         title: 'Authentication required',
