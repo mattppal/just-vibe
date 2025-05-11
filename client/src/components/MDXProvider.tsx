@@ -3,18 +3,10 @@ import { Alert, Tabs, TabItem, TabsList, TabTrigger } from './mdx';
 import CodeBlock from './CodeBlock';
 import YouTubeEmbed from './YouTubeEmbed';
 
-// Function to ensure image paths are correct
+// Simplified - Don't manipulate HTML directly
 const fixImagePaths = (html: string): string => {
-  // Process img tags by adding the proper public path if needed
-  return html.replace(/<img([^>]*)src=["']([^"']*)["']([^>]*)>/g, (match, before, src, after) => {
-    // If src is already a full URL or starts with a slash, don't modify it
-    if (src.startsWith('http') || src.startsWith('/')) {
-      return match;
-    }
-    
-    // Otherwise, add a leading slash for local paths
-    return `<img${before}src="/${src}"${after}>`;
-  });
+  // Just return the original HTML - we'll handle path resolution at the server level
+  return html;
 };
 
 interface MDXProviderProps {

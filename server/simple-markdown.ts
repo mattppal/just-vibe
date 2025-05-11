@@ -19,27 +19,13 @@ import path from "path";
 // Cache for processed content to avoid reprocessing the same markdown
 const processedCache = new Map<string, string>();
 
-// Define custom transformer for fixing image paths
+// Simplified image path handling - don't modify paths, just log them
 function remarkFixImagePaths() {
   return (tree: Node) => {
     visit(tree, 'image', (node: any) => {
-      // Handle image paths with special care for both markdown and MDX files
-      const url = node.url;
-      
-      if (url && typeof url === 'string') {
-        // If the URL is relative and doesn't start with a slash, add a slash
-        if (!url.startsWith('http') && !url.startsWith('/')) {
-          node.url = `/${url}`;
-        }
-
-        // Check if it's a content path and ensure public isn't included
-        if (url.includes('/public/')) {
-          // Remove '/public' from path as static files are served from the public dir root
-          node.url = url.replace('/public/', '/');
-        }
-
-        // Log for debugging when processing image paths
-        console.log(`Processing image path: ${url} -> ${node.url}`);
+      // Simply log the image paths being processed
+      if (node.url && typeof node.url === 'string') {
+        console.log(`Image in Markdown: ${node.url}`);
       }
     });
     return tree;
@@ -197,6 +183,9 @@ export async function processMarkdown(
       const vFile = await processor.process(contentToProcess);
       let result = String(vFile);
 
+      // Fix encoded URLs in image tags - the key issue!
+      result = result.replace(/src="(%22)([^"]+)(%22)"/g, 'src="$2"');
+
       // Now reinsert the original React components
       components.forEach((component, index) => {
         // Parse attributes to data-prop attributes for client-side processing
@@ -231,7 +220,10 @@ export async function processMarkdown(
       // Regular markdown processing
       const processor = getProcessor(false);
       const vFile = await processor.process(content);
-      const result = String(vFile);
+      let result = String(vFile);
+      
+      // Fix encoded URLs in image tags for regular markdown too
+      result = result.replace(/src="(%22)([^"]+)(%22)"/g, 'src="$2"');
 
       // Cache the result for future requests
       processedCache.set(cacheKey, result);
