@@ -45,7 +45,10 @@ export function useProgress() {
     },
     onSuccess: (data) => {
       console.log('Mark complete mutation successful, invalidating queries');
-      // Invalidate and refetch progress data
+      // Immediately update the local cache with the new data
+      queryClient.setQueryData(['/api/progress'], data);
+      
+      // Then invalidate and refetch to ensure data consistency
       queryClient.invalidateQueries({ queryKey: ['/api/progress'] });
       
       // Force an immediate refetch
@@ -87,7 +90,10 @@ export function useProgress() {
     },
     onSuccess: (data) => {
       console.log('Mark incomplete mutation successful, invalidating queries');
-      // Invalidate and refetch progress data
+      // Immediately update the local cache with the new data
+      queryClient.setQueryData(['/api/progress'], data);
+      
+      // Then invalidate and refetch to ensure data consistency
       queryClient.invalidateQueries({ queryKey: ['/api/progress'] });
       
       // Force an immediate refetch
@@ -108,12 +114,17 @@ export function useProgress() {
   
   // Check if a specific lesson is completed
   const isLessonCompleted = (lessonSlug: string): boolean => {
-    if (!progress?.completedLessons) {
+    if (!progress) {
+      console.log('Progress data not available yet');
+      return false;
+    }
+    if (!progress.completedLessons) {
       console.log('No completed lessons data found for this user');
       return false;
     }
     const isCompleted = !!progress.completedLessons[lessonSlug];
-    console.log(`Checking completion for lesson: ${lessonSlug} - Completed: ${isCompleted}`);
+    console.log(`Checking completion for lesson: ${lessonSlug} - Completed: ${isCompleted}`, 
+                { completedLessons: progress.completedLessons, totalCount: progress.totalCompletedCount });
     return isCompleted;
   };
   
