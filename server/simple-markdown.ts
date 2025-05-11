@@ -19,15 +19,10 @@ import path from "path";
 // Cache for processed content to avoid reprocessing the same markdown
 const processedCache = new Map<string, string>();
 
-// Simplified image path handling - don't modify paths, just log them
+// No image path handling needed
 function remarkFixImagePaths() {
   return (tree: Node) => {
-    visit(tree, 'image', (node: any) => {
-      // Simply log the image paths being processed
-      if (node.url && typeof node.url === 'string') {
-        console.log(`Image in Markdown: ${node.url}`);
-      }
-    });
+    // No modifications to image paths
     return tree;
   };
 }
@@ -183,9 +178,6 @@ export async function processMarkdown(
       const vFile = await processor.process(contentToProcess);
       let result = String(vFile);
 
-      // Fix encoded URLs in image tags - the key issue!
-      result = result.replace(/src="(%22)([^"]+)(%22)"/g, 'src="$2"');
-
       // Now reinsert the original React components
       components.forEach((component, index) => {
         // Parse attributes to data-prop attributes for client-side processing
@@ -220,10 +212,7 @@ export async function processMarkdown(
       // Regular markdown processing
       const processor = getProcessor(false);
       const vFile = await processor.process(content);
-      let result = String(vFile);
-      
-      // Fix encoded URLs in image tags for regular markdown too
-      result = result.replace(/src="(%22)([^"]+)(%22)"/g, 'src="$2"');
+      const result = String(vFile);
 
       // Cache the result for future requests
       processedCache.set(cacheKey, result);
