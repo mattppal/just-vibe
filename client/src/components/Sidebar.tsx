@@ -2,12 +2,13 @@ import { useLocation } from "wouter";
 import NavigationLink from "./NavigationLink";
 import { Input } from "@/components/ui/input";
 import { ChevronRight, Search, X, FileText, CheckCircle } from "lucide-react";
+import { EmojiProvider, Emoji } from "react-apple-emojis";
+import emojiData from "react-apple-emojis/src/data.json";
+
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/hooks/useProgress";
 import { ProgressBar } from "./ProgressBar";
-import {
-  DocPage,
-} from "@/lib/docs";
+import { DocPage } from "@/lib/docs";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { debounce } from "@/lib/utils";
@@ -171,7 +172,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             <ProgressBar />
           </div>
         )}
-        
+
         <div className="px-8 mb-8">
           <div className="relative">
             <Input
@@ -244,7 +245,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                                 {doc.sidebarTitle || doc.title}
                               </span>
                               {isLessonCompleted(doc.slug) && (
-                                <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 ml-2" />
+                                <EmojiProvider data={emojiData}>
+                                  <Emoji name="red-heart" />
+                                </EmojiProvider>
                               )}
                             </div>
                             <span className="text-xs text-gray-500 truncate mt-1">
@@ -267,67 +270,74 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             Object.entries(sections)
               .sort(([sectionNameA], [sectionNameB]) => {
                 // Always keep root first
-                if (sectionNameA === 'root') return -1;
-                if (sectionNameB === 'root') return 1;
-                
+                if (sectionNameA === "root") return -1;
+                if (sectionNameB === "root") return 1;
+
                 // Extract numeric prefix from section names
                 const getOrderPrefix = (name: string) => {
                   const match = name.match(/^(\d+)-/);
                   return match ? parseInt(match[1], 10) : 999;
                 };
-                
+
                 // Sort by numeric prefix
-                return getOrderPrefix(sectionNameA) - getOrderPrefix(sectionNameB);
+                return (
+                  getOrderPrefix(sectionNameA) - getOrderPrefix(sectionNameB)
+                );
               })
               .map(([sectionName, sectionDocs]) => (
-              <div key={sectionName} className="mb-8">
-                <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-300">
-                  {formatSectionName(sectionName).toUpperCase()}
-                </div>
-                <ul className="space-y-1">
-                  {sectionDocs.map((doc) => (
-                    <li key={doc.slug}>
-                      {doc.requiresAuth && !isAuthenticated ? (
-                        <div
-                          title="Login required to view this content"
-                          className={cn(
-                            "block px-3 py-1.5 rounded-md text-sm opacity-50 cursor-not-allowed" /* Adjusted padding */,
-                            location === doc.path
-                              ? "text-orange-500 bg-[#111]"
-                              : "text-gray-500",
-                          )}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span role="img" aria-label="lock">
-                              🔒
-                            </span>
-                            <span>{doc.sidebarTitle}</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <NavigationLink
-                          href={doc.path}
-                          className={cn(
-                            "nav-link block relative px-3 py-1.5 rounded-md hover:bg-[#111] text-sm transition-colors duration-150" /* Adjusted padding and added transition */,
-                            location === doc.path
-                              ? "active text-orange-500 bg-[#111] font-medium"
-                              : "text-gray-400 hover:text-orange-500",
-                          )}
-                          onClick={handleLinkClick}
-                        >
-                          <div className="flex items-center gap-2 justify-between w-full">
-                            <span>{doc.sidebarTitle}</span>
-                            {isLessonCompleted(doc.slug) && (
-                              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 ml-1" />
+                <div key={sectionName} className="mb-8">
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-300">
+                    {formatSectionName(sectionName).toUpperCase()}
+                  </div>
+                  <ul className="space-y-1">
+                    {sectionDocs.map((doc) => (
+                      <li key={doc.slug}>
+                        {doc.requiresAuth && !isAuthenticated ? (
+                          <div
+                            title="Login required to view this content"
+                            className={cn(
+                              "block px-3 py-1.5 rounded-md text-sm opacity-50 cursor-not-allowed" /* Adjusted padding */,
+                              location === doc.path
+                                ? "text-orange-500 bg-[#111]"
+                                : "text-gray-500",
                             )}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span role="img" aria-label="lock">
+                                🔒
+                              </span>
+                              <span>{doc.sidebarTitle}</span>
+                            </div>
                           </div>
-                        </NavigationLink>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))
+                        ) : (
+                          <NavigationLink
+                            href={doc.path}
+                            className={cn(
+                              "nav-link block relative px-3 py-1.5 rounded-md hover:bg-[#111] text-sm transition-colors duration-150" /* Adjusted padding and added transition */,
+                              location === doc.path
+                                ? "active text-orange-500 bg-[#111] font-medium"
+                                : "text-gray-400 hover:text-orange-500",
+                            )}
+                            onClick={handleLinkClick}
+                          >
+                            <div className="flex items-center gap-2 justify-between w-full">
+                              <span>{doc.sidebarTitle}</span>
+                              {isLessonCompleted(doc.slug) && (
+                                <EmojiProvider data={emojiData}>
+                                  <Emoji
+                                    name="check-mark-button"
+                                    className="h-4 w-4 flex-shrink-0 ml-1 opacity-75"
+                                  />
+                                </EmojiProvider>
+                              )}
+                            </div>
+                          </NavigationLink>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))
           )}
         </nav>
       </aside>

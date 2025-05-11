@@ -257,9 +257,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid user ID" });
       }
 
-      // Log the body for debugging
-      console.log('Received request body:', req.body);
-      
       // Handle nested request structure
       let lessonSlug;
       
@@ -278,7 +275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      console.log('Extracted lessonSlug:', lessonSlug);
+      // Process the lesson completion
       
       if (!lessonSlug) {
         return res.status(400).json({ message: "Lesson slug is required" });
