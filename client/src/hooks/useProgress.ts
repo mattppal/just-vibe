@@ -15,7 +15,7 @@ export function useProgress() {
     // Only fetch if user is authenticated
     enabled: !!queryClient.getQueryData(['/api/auth/user']),
     staleTime: 0, // Always consider data stale to ensure fresh data
-    cacheTime: 10 * 1000, // Short cache time of 10 seconds
+    gcTime: 10 * 1000, // Short cache time of 10 seconds (used to be cacheTime in React Query v4)
     refetchOnWindowFocus: true, 
     refetchOnMount: true,
     refetchInterval: 5000, // Refetch every 5 seconds to keep progress data updated
@@ -29,23 +29,48 @@ export function useProgress() {
   const markComplete = useMutation({
     mutationFn: async ({ lessonSlug, version }: { lessonSlug: string, version?: string }) => {
       console.log(`Attempting to mark lesson ${lessonSlug} as complete`);
-      const response = await fetch(`/api/progress/lesson/${lessonSlug}/complete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ version }),
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        console.error(`Error marking lesson as complete: ${response.status} ${response.statusText}`);
-        throw new Error('Failed to mark lesson as complete');
+      try {
+        const response = await fetch(`/api/progress/lesson/${lessonSlug}/complete`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ version }),
+          credentials: 'include'
+        });
+        
+        // Log the response status and key headers for debugging
+        console.log(`Response status: ${response.status} ${response.statusText}`);
+        console.log('Content-Type:', response.headers.get('content-type'));
+        console.log('Cache-Control:', response.headers.get('cache-control'));
+        
+        if (!response.ok) {
+          console.error(`Error marking lesson as complete: ${response.status} ${response.statusText}`);
+          // Try to get error details if possible
+          const errorText = await response.text();
+          console.error('Error response body:', errorText);
+          throw new Error(`Failed to mark lesson as complete: ${response.statusText}`);
+        }
+        
+        // First get response as text to debug any parsing issues
+        const responseText = await response.text();
+        console.log('Raw response text:', responseText);
+        
+        // Then parse the JSON
+        let data;
+        try {
+          data = JSON.parse(responseText);
+          console.log('Mark complete API response:', data);
+          return data;
+        } catch (parseError) {
+          console.error('Error parsing JSON response:', parseError);
+          console.error('Response text that failed to parse:', responseText);
+          throw new Error('Invalid JSON response from server');
+        }
+      } catch (error) {
+        console.error('Error during markComplete:', error);
+        throw error;
       }
-      
-      const data = await response.json();
-      console.log('Mark complete API response:', data);
-      return data;
     },
     onSuccess: (data) => {
       console.log('Mark complete mutation successful, updating cache with:', data);
@@ -74,22 +99,46 @@ export function useProgress() {
   const markIncomplete = useMutation({
     mutationFn: async (lessonSlug: string) => {
       console.log(`Attempting to mark lesson ${lessonSlug} as incomplete`);
-      const response = await fetch(`/api/progress/lesson/${lessonSlug}/incomplete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        console.error(`Error marking lesson as incomplete: ${response.status} ${response.statusText}`);
-        throw new Error('Failed to mark lesson as incomplete');
+      try {
+        const response = await fetch(`/api/progress/lesson/${lessonSlug}/incomplete`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        });
+        
+        // Log the response status and headers for debugging
+        console.log(`Response status: ${response.status} ${response.statusText}`);
+        console.log('Response headers:', Object.fromEntries([...response.headers.entries()]));
+        
+        if (!response.ok) {
+          console.error(`Error marking lesson as incomplete: ${response.status} ${response.statusText}`);
+          // Try to get error details if possible
+          const errorText = await response.text();
+          console.error('Error response body:', errorText);
+          throw new Error(`Failed to mark lesson as incomplete: ${response.statusText}`);
+        }
+        
+        // First get response as text to debug any parsing issues
+        const responseText = await response.text();
+        console.log('Raw response text:', responseText);
+        
+        // Then parse the JSON
+        let data;
+        try {
+          data = JSON.parse(responseText);
+          console.log('Mark incomplete API response:', data);
+          return data;
+        } catch (parseError) {
+          console.error('Error parsing JSON response:', parseError);
+          console.error('Response text that failed to parse:', responseText);
+          throw new Error('Invalid JSON response from server');
+        }
+      } catch (error) {
+        console.error('Error during markIncomplete:', error);
+        throw error;
       }
-      
-      const data = await response.json();
-      console.log('Mark incomplete API response:', data);
-      return data;
     },
     onSuccess: (data) => {
       console.log('Mark incomplete mutation successful, updating cache with:', data);
