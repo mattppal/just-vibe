@@ -5,6 +5,7 @@ import MDXProvider from "@/components/MDXProvider";
 import TableOfContents from "@/components/TableOfContents";
 import { DocNavigation, findAdjacentDocs } from "@/components/DocNavigation";
 import Footer from "@/components/Footer";
+import { LessonCompletionButton } from "@/components/LessonCompletionButton";
 import { useAuth } from "@/hooks/useAuth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";

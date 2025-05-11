@@ -25,6 +25,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const [sections, setSections] = useState<SectionData>({});
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
+  const { isLessonCompleted, getProgressPercentage } = useProgress();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<DocPage[]>([]);
   const [allDocs, setAllDocs] = useState<DocPage[]>([]);
@@ -185,6 +186,16 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
               <Search className="absolute right-3 top-2.5 w-4 h-4 text-orange-600" />
             )}
           </div>
+          
+          {/* Course Progress Bar (only shown for authenticated users) */}
+          {isAuthenticated && allDocs.length > 0 && (
+            <div className="mt-6">
+              <ProgressBar 
+                percentage={getProgressPercentage(allDocs.length)} 
+                size="sm"
+              />
+            </div>
+          )}
         </div>
 
         <nav className="px-8">
@@ -233,6 +244,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                           <div className="flex flex-col">
                             <span className="font-medium">
                               {doc.sidebarTitle || doc.title}
+                              {isLessonCompleted(doc.slug) && (
+                                <CheckCircle className="h-3 w-3 text-green-500 ml-1 inline-block" aria-label="Completed" />
+                              )}
                             </span>
                             <span className="text-xs text-gray-500 truncate mt-1">
                               {doc.description}
@@ -304,6 +318,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                         >
                           <div className="flex items-center gap-2">
                             <span>{doc.sidebarTitle}</span>
+                            {isLessonCompleted(doc.slug) && (
+                              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" aria-label="Completed" />
+                            )}
                           </div>
                         </NavigationLink>
                       )}
