@@ -1,9 +1,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Check } from 'lucide-react';
 import { useProgress } from '@/hooks/useProgress';
 import { useAuth } from '@/hooks/useAuth';
-import { Emoji } from 'react-apple-emojis';
 import { useToast } from '@/hooks/use-toast';
 
 interface LessonCompleteButtonProps {
@@ -57,9 +56,7 @@ export function LessonCompleteButton({ lessonSlug }: LessonCompleteButtonProps) 
           </>
         ) : isCompleted ? (
           <>
-            <div className="group-hover:hidden">
-              <Emoji name="check-mark-button" width={18} />
-            </div>
+            <Check className="h-5 w-5 text-green-500 group-hover:hidden" />
             <span className="font-medium group-hover:hidden">Completed</span>
             <span className="hidden group-hover:inline text-red-400 font-medium">Mark as uncompleted</span>
           </>
