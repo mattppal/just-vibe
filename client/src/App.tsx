@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import DocLayout from "@/layouts/DocLayout";
+import { EmojiProvider } from "@/components/EmojiProvider";
 
 // Import directly for now, we'll use better code splitting approaches
 import DocPage from "@/pages/DocPage";
@@ -42,12 +43,14 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <DocLayout>
-        <Router />
-      </DocLayout>
-      <Toaster />
-    </QueryClientProvider>
+    <EmojiProvider>
+      <QueryClientProvider client={queryClient}>
+        <DocLayout>
+          <Router />
+        </DocLayout>
+        <Toaster />
+      </QueryClientProvider>
+    </EmojiProvider>
   );
 }
 
