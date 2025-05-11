@@ -48,9 +48,22 @@ app.use(helmet({
 // Parse cookies before CSRF protection
 app.use(cookieParser());
 
-// Body parsing middleware
-app.use(express.json());
+// Body parsing middleware with enhanced debugging
+app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: false }));
+
+// Debug middleware for API requests
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/') && req.method === 'POST') {
+    console.log('API Request:', {
+      method: req.method,
+      path: req.path,
+      contentType: req.headers['content-type'],
+      body: req.body, // This will show the parsed body
+    });
+  }
+  next();
+});
 
 // Generate secure tokens for API access
 // In a production environment, these should ideally be set through environment variables

@@ -257,14 +257,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid user ID" });
       }
 
-      console.log('Request body:', req.body);
+      // Debug the raw request
+      console.log('Raw request body:', req.body);
+      console.log('Request headers:', req.headers);
       
-      // Check if lessonSlug exists and is a string
-      const { lessonSlug } = req.body;
+      // Check for different potential structures
+      let lessonSlug: string | undefined;
+      
+      if (typeof req.body === 'string') {
+        // If the body is a string, try to parse it as JSON
+        try {
+          const parsed = JSON.parse(req.body);
+          lessonSlug = parsed.lessonSlug;
+        } catch (e) {
+          console.error('Failed to parse request body as JSON:', e);
+        }
+      } else if (req.body && typeof req.body === 'object') {
+        // If the body is already an object, extract lessonSlug
+        if ('lessonSlug' in req.body) {
+          lessonSlug = req.body.lessonSlug;
+        } else if (req.body.body && typeof req.body.body === 'string') {
+          // Sometimes the body might be nested
+          try {
+            const parsed = JSON.parse(req.body.body);
+            lessonSlug = parsed.lessonSlug;
+          } catch (e) {
+            console.error('Failed to parse nested body as JSON:', e);
+          }
+        }
+      }
+      
       console.log('Extracted lessonSlug:', lessonSlug, 'type:', typeof lessonSlug);
       
       if (!lessonSlug) {
         return res.status(400).json({ message: "Lesson slug is required" });
+      }
+      
+      // Validate the slug format (basic check)
+      if (typeof lessonSlug !== 'string' || lessonSlug.trim() === '') {
+        return res.status(400).json({ message: "Invalid lesson slug format" });
       }
 
       await completeLesson(userId, lessonSlug);

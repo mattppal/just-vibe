@@ -26,9 +26,26 @@ export function useProgress() {
   const completeMutation = useMutation({
     mutationFn: async (lessonSlug: string) => {
       console.log('Sending API request with lesson slug:', lessonSlug);
+      
+      // Ensure we're sending the slug without any ordering prefix
+      // Extract just the base part of the slug, removing section prefix and number ordering
+      // For example, "1-getting-started/course-welcome" → "course-welcome"
+      let cleanSlug = lessonSlug;
+      
+      // If the slug contains a slash, it might have section information
+      if (cleanSlug.includes('/')) {
+        // Extract just the part after the last slash
+        cleanSlug = cleanSlug.split('/').pop() || cleanSlug;
+      }
+      
+      // Remove any numeric prefix
+      cleanSlug = cleanSlug.replace(/^\d+-/, '');
+      
+      console.log('Clean slug:', cleanSlug);
+      
       return apiRequest('/api/progress/complete', {
         method: 'POST',
-        body: JSON.stringify({ lessonSlug }),
+        body: JSON.stringify({ lessonSlug: cleanSlug }),
         headers: { 'Content-Type': 'application/json' },
       });
     },
