@@ -318,7 +318,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                           <div className="flex items-center gap-2 justify-between w-full">
                             <span>{doc.sidebarTitle}</span>
                             {isLessonCompleted(doc.slug) && (
-                              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 ml-1" />
                             )}
                           </div>
                         </NavigationLink>

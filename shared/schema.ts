@@ -33,6 +33,7 @@ export const courseCompletions = pgTable(
     id: serial("id").primaryKey(),
     userId: text("user_id").notNull().references(() => users.id),
     lessonSlug: text("lesson_slug").notNull(),
+    sectionName: text("section_name"),  // Add section information to organize by topics
     completedAt: timestamp("completed_at").defaultNow().notNull(),
     version: text("version"),  // For tracking content versions (optional)
   },
