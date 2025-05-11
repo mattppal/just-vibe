@@ -8,9 +8,30 @@ description: Learn how to use MDX features in your documentation pages.
 
 This documentation page demonstrates the MDX features available in our documentation platform with enhanced Shiki syntax highlighting.
 
+<Alert type="info" title="Testing MDX Components">
+  This alert box is rendered using the Alert component from our component library.
+</Alert>
+
 ## What is MDX?
 
 MDX is a format that combines Markdown with JSX (JavaScript XML) syntax. It allows you to use React components directly in your Markdown content.
+
+<Tabs>
+  <TabItem value="jsx" title="JSX Example">
+    ```jsx
+    function Welcome() {
+      return <h1>Hello, MDX World!</h1>;
+    }
+    ```
+  </TabItem>
+  <TabItem value="markdown" title="Markdown Example">
+    ```md
+    # Hello, Markdown World!
+
+    This is regular markdown content.
+    ```
+  </TabItem>
+</Tabs>
 
 ## Syntax Highlighting with Shiki
 
@@ -170,6 +191,12 @@ function process() {
 ## MDX Syntax
 
 MDX allows you to write JSX directly in your markdown files, combining the best of both worlds.
+
+## YouTube Embedding
+
+You can embed YouTube videos directly in your MDX files:
+
+<YouTubeEmbed id="dQw4w9WgXcQ" title="Example Video" />
 
 ## Conclusion
 
