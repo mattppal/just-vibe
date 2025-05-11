@@ -44,17 +44,12 @@ export function useProgress() {
       return data;
     },
     onSuccess: (data) => {
-      console.log('Mark complete mutation successful, invalidating queries');
+      console.log('Mark complete mutation successful, updating cache with:', data);
       // Immediately update the local cache with the new data
       queryClient.setQueryData(['/api/progress'], data);
       
-      // Then invalidate and refetch to ensure data consistency
+      // Then invalidate cached queries
       queryClient.invalidateQueries({ queryKey: ['/api/progress'] });
-      
-      // Force an immediate refetch
-      queryClient.fetchQuery({
-        queryKey: ['/api/progress']
-      });
       
       // Show success notification
       toast({
@@ -89,17 +84,12 @@ export function useProgress() {
       return data;
     },
     onSuccess: (data) => {
-      console.log('Mark incomplete mutation successful, invalidating queries');
+      console.log('Mark incomplete mutation successful, updating cache with:', data);
       // Immediately update the local cache with the new data
       queryClient.setQueryData(['/api/progress'], data);
       
-      // Then invalidate and refetch to ensure data consistency
+      // Then invalidate cached queries
       queryClient.invalidateQueries({ queryKey: ['/api/progress'] });
-      
-      // Force an immediate refetch
-      queryClient.fetchQuery({
-        queryKey: ['/api/progress']
-      });
       
       // Show notification
       toast({

@@ -73,7 +73,7 @@ export class ProgressService {
       // Execute SQL function to update progress
       const result = await db.execute(
         `SELECT update_user_progress($1, $2, $3, 'complete') as progress_data`,
-        [userId, lessonSlug, version || null]
+        [userId, lessonSlug, version]
       );
 
       console.log('Database function result:', result);
