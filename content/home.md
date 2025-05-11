@@ -38,8 +38,16 @@ To complete the course successfully, you'll need
 
 - A Replit Core subscription (you will likely hit usage limits)
 - Several hours
+
+You **do not** need to know how to code to complete this course. I want to emphasize that. I find the following traits characteristic of successful vibe coders:
+
+- The willingness to tinker
+- The courage to fail and try again
+- Logical thinking
 - Patience
 - Agency
+
+A good example is spreadsheets—if you've ever built out something even remotely complicated in a spreadsheet, you can succeed at vibe coding.
 
 ## Course feedback
 
