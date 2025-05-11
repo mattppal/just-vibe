@@ -108,9 +108,10 @@ export function useProgress() {
           credentials: 'include'
         });
         
-        // Log the response status and headers for debugging
+        // Log the response status and key headers for debugging
         console.log(`Response status: ${response.status} ${response.statusText}`);
-        console.log('Response headers:', Object.fromEntries([...response.headers.entries()]));
+        console.log('Content-Type:', response.headers.get('content-type'));
+        console.log('Cache-Control:', response.headers.get('cache-control'));
         
         if (!response.ok) {
           console.error(`Error marking lesson as incomplete: ${response.status} ${response.statusText}`);
