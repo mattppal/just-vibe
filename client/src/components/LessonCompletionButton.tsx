@@ -65,11 +65,17 @@ export function LessonCompletionButton({
   
   const isCompleted = isLessonCompleted(lessonSlug);
   
-  const handleToggleCompletion = () => {
-    if (isCompleted) {
-      markIncomplete.mutate(lessonSlug);
-    } else {
-      markComplete.mutate({ lessonSlug });
+  const handleToggleCompletion = async () => {
+    try {
+      if (isCompleted) {
+        console.log('Marking lesson as incomplete:', lessonSlug);
+        markIncomplete.mutate(lessonSlug);
+      } else {
+        console.log('Marking lesson as complete:', lessonSlug);
+        markComplete.mutate({ lessonSlug });
+      }
+    } catch (error) {
+      console.error('Error during toggle completion:', error);
     }
   };
   

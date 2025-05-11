@@ -20,6 +20,28 @@ export function useProgress() {
     refetchOnMount: true,
     refetchInterval: 5000, // Refetch every 5 seconds to keep progress data updated
     retry: 3, // Retry failed requests 3 times
+    queryFn: async () => {
+      try {
+        // Use absolute URL to avoid Vite intercepting the request
+        const baseUrl = window.location.origin;
+        const response = await fetch(`${baseUrl}/api/progress`, {
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          console.error(`Error fetching progress: ${response.status} ${response.statusText}`);
+          throw new Error(`Failed to fetch progress data: ${response.statusText}`);
+        }
+        
+        // First get as text to debug any parsing issues
+        const responseText = await response.text();
+        console.log('Current progress data:', JSON.parse(responseText));
+        return JSON.parse(responseText);
+      } catch (error) {
+        console.error('Error fetching progress data:', error);
+        throw error;
+      }
+    },
   });
   
   // Calculate total lessons completed
@@ -30,7 +52,9 @@ export function useProgress() {
     mutationFn: async ({ lessonSlug, version }: { lessonSlug: string, version?: string }) => {
       console.log(`Attempting to mark lesson ${lessonSlug} as complete`);
       try {
-        const response = await fetch(`/api/progress/lesson/${lessonSlug}/complete`, {
+        // Use absolute URL to avoid Vite intercepting the request
+        const baseUrl = window.location.origin;
+        const response = await fetch(`${baseUrl}/api/progress/lesson/${lessonSlug}/complete`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -100,7 +124,9 @@ export function useProgress() {
     mutationFn: async (lessonSlug: string) => {
       console.log(`Attempting to mark lesson ${lessonSlug} as incomplete`);
       try {
-        const response = await fetch(`/api/progress/lesson/${lessonSlug}/incomplete`, {
+        // Use absolute URL to avoid Vite intercepting the request
+        const baseUrl = window.location.origin;
+        const response = await fetch(`${baseUrl}/api/progress/lesson/${lessonSlug}/incomplete`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
