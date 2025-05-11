@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { getDocByPath, DocPage, getDocsBySection } from '@/lib/docs';
+import TableOfContents from '@/components/TableOfContents';
+import MDXProvider from '@/components/MDXProvider';
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -105,19 +107,27 @@ export default function Home() {
   // If we have content, render the DocPage content
   if (homeDoc) {
     return (
-      <div className="prose prose-invert max-w-none">
-        <h1>{homeDoc.title}</h1>
-        <p className="text-muted-foreground text-lg mb-8">{homeDoc.description}</p>
-        {homeDoc.html ? (
-          <div 
-            id="doc-content"
-            className="docs-html"
-            dangerouslySetInnerHTML={{ __html: homeDoc.html }}
-          />
-        ) : (
-          <div className="py-4">
-            <p className="text-gray-400">Loading content...</p>
-          </div>
+      <div className="min-h-[calc(100vh-3.5rem-1px)] xl:pr-64">
+        <article className="max-w-none xl:w-auto">
+          <h1 className="text-3xl lg:text-4xl font-medium mb-4">{homeDoc.title}</h1>
+          <p className="text-muted-foreground text-lg mb-8">{homeDoc.description}</p>
+          {homeDoc.html ? (
+            <div 
+              id="doc-content"
+              className="prose prose-invert prose-content font-sans text-white prose-headings:text-white prose-p:text-white prose-a:text-primary prose-pre:bg-[#111]"
+            >
+              <MDXProvider>{homeDoc.html}</MDXProvider>
+            </div>
+          ) : (
+            <div className="py-4">
+              <p className="text-gray-400">Loading content...</p>
+            </div>
+          )}
+        </article>
+        
+        {/* Include TableOfContents for home page */}
+        {homeDoc.headings && homeDoc.headings.length > 0 && (
+          <TableOfContents items={homeDoc.headings.map(h => ({ id: h.id, title: h.title, level: h.level }))} />
         )}
       </div>
     );

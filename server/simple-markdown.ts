@@ -24,6 +24,15 @@ let mdxProcessor: any = null;
  * Get the appropriate processor for markdown or MDX
  */
 function getProcessor(isMdx: boolean): any {
+  // Common transformers for both MD and MDX
+  const shikiTransformers = [
+    transformerNotationHighlight(),
+    transformerCopyButton({
+      visibility: "always",
+      feedbackDuration: 2000
+    })
+  ];
+
   if (isMdx) {
     if (!mdxProcessor) {
       mdxProcessor = unified()
@@ -41,7 +50,7 @@ function getProcessor(isMdx: boolean): any {
         // Apply syntax highlighting
         .use(rehypeShiki, {
           theme: "github-dark",
-          transformers: [transformerNotationHighlight()],
+          transformers: shikiTransformers,
           inline: "tailing-curly-colon",
         })
         // Convert to HTML string
@@ -64,7 +73,7 @@ function getProcessor(isMdx: boolean): any {
         // Apply syntax highlighting
         .use(rehypeShiki, {
           theme: "github-dark",
-          transformers: [transformerNotationHighlight()],
+          transformers: shikiTransformers,
           inline: "tailing-curly-colon",
         })
         // Convert to HTML string

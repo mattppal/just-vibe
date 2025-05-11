@@ -179,42 +179,9 @@ export default function DocPage() {
     }, 0);
   }, [doc]);
   
-  // Process code blocks to add copy buttons and make iframes responsive
+  // Process iframes to make them responsive
   useEffect(() => {
     if (!doc) return;
-    
-    // Find code blocks for copy buttons
-    const codeBlocks = document.querySelectorAll('pre[data-copyable="true"]');
-    codeBlocks.forEach((block) => {
-      const codeContent = block.getAttribute('data-code');
-      if (codeContent && !(block as any).__hasCopyButton) {
-        // Create a simpler copy button without React components
-        const copyButton = document.createElement('button');
-        copyButton.className = 'absolute top-2 right-2 h-7 w-7 rounded-sm bg-black/30 p-1 text-white opacity-70 hover:opacity-100 transition-opacity z-10';
-        copyButton.title = 'Copy code to clipboard';
-        copyButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
-        
-        // Ensure the original pre tag has relative positioning for absolute copy button
-        (block as HTMLElement).style.position = 'relative';
-        
-        // Add copy functionality
-        copyButton.addEventListener('click', () => {
-          navigator.clipboard.writeText(codeContent)
-            .then(() => {
-              // Show success indication
-              copyButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-              setTimeout(() => {
-                copyButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
-              }, 2000);
-            })
-            .catch(() => { /* Silent fail for clipboard errors */ });
-        });
-        
-        // Add the copy button to the pre tag
-        block.appendChild(copyButton);
-        (block as any).__hasCopyButton = true;
-      }
-    });
     
     // Make direct iframes responsive (proper wrapper approach)
     const contentNode = document.getElementById('doc-content');
