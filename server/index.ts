@@ -6,6 +6,7 @@ import csrf from "csurf";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import crypto from 'crypto';
+import path from 'path';
 
 const app = express();
 
@@ -279,6 +280,18 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app);
+
+  // IMPORTANT: Serve static files from public directory before any catch-all routes
+  // This ensures images and other assets can be accessed directly
+  app.use('/content', express.static(path.join(process.cwd(), 'public', 'content')));
+  app.use('/images', express.static(path.join(process.cwd(), 'public', 'images')));
+  app.use('/assets', express.static(path.join(process.cwd(), 'public', 'assets')));
+  
+  // Add logs for image requests to help troubleshoot
+  app.use('/content', (req, res, next) => {
+    console.log(`Files in the public directory are served at the root path.\nInstead of /public${req.path}, use ${req.path}.`);
+    next();
+  });
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

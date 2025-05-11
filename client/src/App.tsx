@@ -19,6 +19,15 @@ const PageLoader = () => (
 );
 
 function Router() {
+  // Regex to detect file extensions - helps differentiate between routes and static assets
+  const isFileExtension = (path: string) => /\.(png|jpe?g|gif|svg|mp4|webm|pdf|css|js)$/i.test(path);
+  
+  // Check if the current URL is for a file asset and bypass routing if so
+  const currentPath = window.location.pathname;
+  if (isFileExtension(currentPath)) {
+    return null; // Return null to let the server handle file requests
+  }
+
   return (
     <Switch>
       <Route path="/" component={Home} />
