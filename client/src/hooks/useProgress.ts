@@ -1,11 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ProgressData } from '@shared/schema';
+import { useToast } from '@/hooks/use-toast';
 
 /**
  * Hook for accessing and managing user's course progress
  */
 export function useProgress() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   
   // Fetch user progress data
   const { data: progress, isLoading, error } = useQuery<ProgressData>({
@@ -51,6 +53,13 @@ export function useProgress() {
         queryKey: ['/api/progress']
       });
       
+      // Show success notification
+      toast({
+        title: "Lesson completed!",
+        description: "Your progress has been saved.",
+        className: "bg-green-600 text-white border-green-700",
+      });
+      
       console.log('Updated progress data:', data);
     },
   });
@@ -84,6 +93,13 @@ export function useProgress() {
       // Force an immediate refetch
       queryClient.fetchQuery({
         queryKey: ['/api/progress']
+      });
+      
+      // Show notification
+      toast({
+        title: "Progress reset",
+        description: "Lesson marked as incomplete.",
+        variant: "default",
       });
       
       console.log('Updated progress data:', data);

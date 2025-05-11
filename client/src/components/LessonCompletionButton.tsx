@@ -36,11 +36,21 @@ export function LessonCompletionButton({
   }
   
   return (
-    <div className={className}>
+    <div className={`${className} flex justify-center items-center`}>
+      {markComplete.isPending && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-black/80 p-6 rounded-lg shadow-xl flex flex-col items-center space-y-4">
+            <div className="animate-bounce text-green-500">
+              <CheckCircle className="h-16 w-16" />
+            </div>
+            <p className="text-white font-medium">Saving progress...</p>
+          </div>
+        </div>
+      )}
       <Button
         variant={isCompleted ? 'outline' : 'default'}
         size="lg"
-        className={`w-full sm:w-auto ${isCompleted ? 'border-green-600 text-green-600 hover:bg-green-600/10' : 'bg-green-600 hover:bg-green-700'}`}
+        className={`${isCompleted ? 'border-green-600 text-green-600 hover:bg-green-600/10' : 'bg-green-600 hover:bg-green-700'} transition-all duration-300 max-w-md w-full`}
         onClick={handleToggleCompletion}
         disabled={markComplete.isPending || markIncomplete.isPending}
       >
