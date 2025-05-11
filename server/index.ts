@@ -281,35 +281,14 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
-  // IMPORTANT: Serve static files from public directory before any catch-all routes
-  // This ensures images and other assets can be accessed directly
-  app.use('/content', (req, res, next) => {
-    console.log(`Serving static content: ${req.path}`);
-    express.static(path.join(process.cwd(), 'public', 'content'))(req, res, next);
-  });
-  app.use('/images', express.static(path.join(process.cwd(), 'public', 'images')));
-  app.use('/assets', express.static(path.join(process.cwd(), 'public', 'assets')));
-
-  // For directly accessing files by path, including image files
-  app.get('*.png', (req, res) => {
-    console.log(`Direct PNG access: ${req.path}`);
-    const filePath = path.join(process.cwd(), 'public', req.path.replace(/^\/+/, ''));
-    res.sendFile(filePath, (err) => {
-      if (err) {
-        console.error(`Error serving PNG file ${filePath}:`, err);
-      }
-    });
-  });
+  // More direct approach to serving static files from public directory
+  app.use(express.static(path.join(process.cwd(), 'public')));
   
-  // Handle other image formats
-  app.get('*.jpg', (req, res) => {
-    const filePath = path.join(process.cwd(), 'public', req.path.replace(/^\/+/, ''));
-    res.sendFile(filePath);
-  });
-  
-  // Add logs for image requests to help troubleshoot
+  // Add middleware to log requests for debugging when accessing content files
   app.use('/content', (req, res, next) => {
-    console.log(`Files in the public directory are served at the root path.\nInstead of /public${req.path}, use ${req.path}.`);
+    // Log but don't interfere with request handling
+    console.log(`Content access: ${req.path}`);
+    console.log(`Serving from: ${path.join(process.cwd(), 'public', 'content', req.path)}`);
     next();
   });
 
