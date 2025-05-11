@@ -12,9 +12,39 @@ import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import { transformerNotationHighlight } from "@shikijs/transformers";
 import { transformerCopyButton } from "@rehype-pretty/transformers";
+import { visit } from "unist-util-visit";
+import { Node } from "unist";
+import path from "path";
 
 // Cache for processed content to avoid reprocessing the same markdown
 const processedCache = new Map<string, string>();
+
+// Define custom transformer for fixing image paths
+function remarkFixImagePaths() {
+  return (tree: Node) => {
+    visit(tree, 'image', (node: any) => {
+      // Handle image paths with special care for both markdown and MDX files
+      const url = node.url;
+      
+      if (url && typeof url === 'string') {
+        // If the URL is relative and doesn't start with a slash, add a slash
+        if (!url.startsWith('http') && !url.startsWith('/')) {
+          node.url = `/${url}`;
+        }
+
+        // Check if it's a content path and ensure public isn't included
+        if (url.includes('/public/')) {
+          // Remove '/public' from path as static files are served from the public dir root
+          node.url = url.replace('/public/', '/');
+        }
+
+        // Log for debugging when processing image paths
+        console.log(`Processing image path: ${url} -> ${node.url}`);
+      }
+    });
+    return tree;
+  };
+}
 
 // Reusable processor instances
 let markdownProcessor: any = null;
@@ -30,6 +60,8 @@ function getProcessor(isMdx: boolean): any {
         .use(remarkParse)
         .use(remarkGfm)
         .use(remarkMdx)
+        // Add our custom image path fixer
+        .use(remarkFixImagePaths)
         // Transform MDX to HTML
         .use(remarkRehype, {
           allowDangerousHtml: true,
@@ -42,6 +74,10 @@ function getProcessor(isMdx: boolean): any {
         .use(rehypeShiki, {
           theme: "vitesse-dark",
           inline: "tailing-curly-colon",
+          transformers: [
+            transformerNotationHighlight(),
+            transformerCopyButton()
+          ],
         })
         // Convert to HTML string
         .use(rehypeStringify, { allowDangerousHtml: true });
@@ -52,6 +88,8 @@ function getProcessor(isMdx: boolean): any {
       markdownProcessor = unified()
         .use(remarkParse)
         .use(remarkGfm)
+        // Add our custom image path fixer
+        .use(remarkFixImagePaths)
         // Transform Markdown to HTML
         .use(remarkRehype, {
           allowDangerousHtml: true,
@@ -64,6 +102,10 @@ function getProcessor(isMdx: boolean): any {
         .use(rehypeShiki, {
           theme: "vitesse-dark",
           inline: "tailing-curly-colon",
+          transformers: [
+            transformerNotationHighlight(),
+            transformerCopyButton()
+          ],
         })
         // Convert to HTML string
         .use(rehypeStringify, { allowDangerousHtml: true });
@@ -83,6 +125,9 @@ export async function processMarkdown(
   content: string,
   isMdx: boolean = false,
 ): Promise<string> {
+  // Clear caches to ensure changes are picked up immediately
+  processedCache.clear();
+  headingsCache.clear();
   try {
     // Generate a cache key based on content and type
     const cacheKey = `${isMdx ? "mdx" : "md"}:${content.substring(0, 100)}`;
@@ -147,7 +192,8 @@ export async function processMarkdown(
       });
 
       // Process the markdown content (without the React components)
-      const processor = getProcessor(false);
+      // Use the MDX processor (with image path fixing) but with MDX components temporarily removed
+      const processor = getProcessor(true);
       const vFile = await processor.process(contentToProcess);
       let result = String(vFile);
 
