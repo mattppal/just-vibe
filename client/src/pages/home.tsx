@@ -4,6 +4,7 @@ import { getDocByPath, DocPage, getDocsBySection } from '@/lib/docs';
 import TableOfContents from '@/components/TableOfContents';
 import MDXProvider from '@/components/MDXProvider';
 import { DocNavigation } from '@/components/DocNavigation';
+import Footer from '@/components/Footer';
 import { queryClient } from '@/lib/queryClient';
 
 export default function Home() {
@@ -163,40 +164,48 @@ export default function Home() {
   // If we have content, render the DocPage content
   if (homeDoc) {
     return (
-      <div className="min-h-[calc(100vh-3.5rem-1px)] xl:pr-64">
-        <article className="max-w-none xl:w-auto">
-          <h1 className="text-3xl lg:text-4xl font-medium mb-4">{homeDoc.title}</h1>
-          <p className="text-muted-foreground text-lg mb-8">{homeDoc.description}</p>
-          {homeDoc.html ? (
-            <div 
-              id="doc-content"
-              className="prose prose-invert prose-content font-sans text-white prose-headings:text-white prose-p:text-white prose-a:text-primary prose-pre:bg-[#111]"
-            >
-              <MDXProvider>{homeDoc.html}</MDXProvider>
-            </div>
-          ) : (
-            <div className="py-4">
-              <p className="text-gray-400">Loading content...</p>
-            </div>
-          )}
+      <>
+        <div className="min-h-[calc(100vh-3.5rem-1px)] xl:pr-64">
+          <article className="max-w-none xl:w-auto">
+            <h1 className="text-3xl lg:text-4xl font-medium mb-4">{homeDoc.title}</h1>
+            <p className="text-muted-foreground text-lg mb-8">{homeDoc.description}</p>
+            {homeDoc.html ? (
+              <div 
+                id="doc-content"
+                className="prose prose-invert prose-content font-sans text-white prose-headings:text-white prose-p:text-white prose-a:text-primary prose-pre:bg-[#111]"
+              >
+                <MDXProvider>{homeDoc.html}</MDXProvider>
+              </div>
+            ) : (
+              <div className="py-4">
+                <p className="text-gray-400">Loading content...</p>
+              </div>
+            )}
+            
+            {/* Navigation links - for home page we only show Next */}
+            <DocNavigation previousDoc={null} nextDoc={nextDoc} />
+          </article>
           
-          {/* Navigation links - for home page we only show Next */}
-          <DocNavigation previousDoc={null} nextDoc={nextDoc} />
-        </article>
+          {/* Include TableOfContents for home page */}
+          {homeDoc.headings && homeDoc.headings.length > 0 && (
+            <TableOfContents items={homeDoc.headings.map(h => ({ id: h.id, title: h.title, level: h.level }))} />
+          )}
+        </div>
         
-        {/* Include TableOfContents for home page */}
-        {homeDoc.headings && homeDoc.headings.length > 0 && (
-          <TableOfContents items={homeDoc.headings.map(h => ({ id: h.id, title: h.title, level: h.level }))} />
-        )}
-      </div>
+        {/* Add Footer component */}
+        <Footer />
+      </>
     );
   }
   
   // Error or no document found
   return (
-    <div className="py-20 text-center bg-black text-white">
-      <h1 className="text-2xl font-bold mb-4 text-white">Documentation Not Found</h1>
-      <p className="text-gray-400">{errorState || 'Redirecting to introduction page...'}</p>
-    </div>
+    <>
+      <div className="py-20 text-center bg-black text-white">
+        <h1 className="text-2xl font-bold mb-4 text-white">Documentation Not Found</h1>
+        <p className="text-gray-400">{errorState || 'Redirecting to introduction page...'}</p>
+      </div>
+      <Footer />
+    </>
   );
 }

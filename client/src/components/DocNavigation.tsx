@@ -18,7 +18,7 @@ export function DocNavigation({ previousDoc, nextDoc }: DocNavigationProps) {
   if (!previousDoc && !nextDoc) return null;
 
   return (
-    <div className="mt-12 pt-8 border-t border-border flex justify-between">
+    <div className="mt-16 pt-8 border-t border-border flex justify-between">
       {/* Previous Doc Link */}
       {previousDoc ? (
         <Link 

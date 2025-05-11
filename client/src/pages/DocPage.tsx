@@ -4,6 +4,7 @@ import { getDocByPath, DocPage as DocPageType, getDocsBySection } from "@/lib/do
 import MDXProvider from "@/components/MDXProvider";
 import TableOfContents from "@/components/TableOfContents";
 import { DocNavigation, findAdjacentDocs } from "@/components/DocNavigation";
+import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -314,94 +315,105 @@ export default function DocPage() {
   
   if (authRequired && !isAuthenticated) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 min-h-[400px] text-center">
-        <Lock className="h-12 w-12 text-yellow-500 mb-4" />
-        <h1 className="text-2xl font-bold mb-4">Login Required</h1>
-        <p className="text-gray-400 mb-8">You need to be logged in to view this content.</p>
-        <div className="flex gap-3">
-          <Button onClick={login} className="gap-2">
-            <LogIn className="h-4 w-4" /> Login to continue
-          </Button>
-          <Button variant="outline" onClick={() => setLocation('/')} className="gap-2">
-            <Home className="h-4 w-4" /> Back to Home
-          </Button>
+      <>
+        <div className="flex flex-col items-center justify-center p-8 min-h-[400px] text-center">
+          <Lock className="h-12 w-12 text-yellow-500 mb-4" />
+          <h1 className="text-2xl font-bold mb-4">Login Required</h1>
+          <p className="text-gray-400 mb-8">You need to be logged in to view this content.</p>
+          <div className="flex gap-3">
+            <Button onClick={login} className="gap-2">
+              <LogIn className="h-4 w-4" /> Login to continue
+            </Button>
+            <Button variant="outline" onClick={() => setLocation('/')} className="gap-2">
+              <Home className="h-4 w-4" /> Back to Home
+            </Button>
+          </div>
+          <Alert variant="default" className="mt-8 max-w-md bg-[#111] border-yellow-700/50">
+            <Lock className="h-4 w-4" />
+            <AlertTitle>Protected Content</AlertTitle>
+            <AlertDescription>
+              This documentation page requires authentication. Please login to access all content.
+            </AlertDescription>
+          </Alert>
         </div>
-        <Alert variant="default" className="mt-8 max-w-md bg-[#111] border-yellow-700/50">
-          <Lock className="h-4 w-4" />
-          <AlertTitle>Protected Content</AlertTitle>
-          <AlertDescription>
-            This documentation page requires authentication. Please login to access all content.
-          </AlertDescription>
-        </Alert>
-      </div>
+        <Footer />
+      </>
     );
   }
   
   if (error || !doc) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 min-h-[400px] text-center">
-        <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
-        <h1 className="text-2xl font-bold mb-4">{!doc ? "Page Not Found" : "Error Loading Page"}</h1>
-        <p className="text-gray-400 mb-8">{error || "The document you're looking for doesn't exist or has been moved."}</p>
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={() => window.location.reload()} className="gap-2">
-            Try again
-          </Button>
-          <Button variant="default" onClick={() => setLocation('/')} className="gap-2">
-            <Home className="h-4 w-4" /> Back to Home
-          </Button>
+      <>
+        <div className="flex flex-col items-center justify-center p-8 min-h-[400px] text-center">
+          <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
+          <h1 className="text-2xl font-bold mb-4">{!doc ? "Page Not Found" : "Error Loading Page"}</h1>
+          <p className="text-gray-400 mb-8">{error || "The document you're looking for doesn't exist or has been moved."}</p>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => window.location.reload()} className="gap-2">
+              Try again
+            </Button>
+            <Button variant="default" onClick={() => setLocation('/')} className="gap-2">
+              <Home className="h-4 w-4" /> Back to Home
+            </Button>
+          </div>
         </div>
-      </div>
+        <Footer />
+      </>
     );
   }
   
   return (
-    <div className="min-h-[calc(100vh-3.5rem-1px)] xl:pr-64">
-      {/* Main content column - full width with right padding on large screens to make room for fixed TOC */}
-      <article className="max-w-none xl:w-auto">
-        <nav className="flex items-center gap-1 text-sm mb-4">
-          <Link href="/" className="text-gray-400 hover:text-white">
-            Docs
-          </Link>
-          {doc.section && (
-            <>
-              <span className="text-gray-400">/</span>
-              <span className="text-gray-400">
-                {doc.section
-                  .replace(/^\d+-/, "")
-                  .split("-")
-                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                  .join(" ")}
-              </span>
-            </>
-          )}
-          {doc.title && (
-            <>
-              <span className="text-gray-400">/</span>
-              <span className="text-white">{doc.title}</span>
-            </>
-          )}
-        </nav>
-        <h1 className="text-3xl lg:text-4xl font-medium mb-4">{doc.title}</h1>
-        <p className="text-muted-foreground text-lg mb-8">{doc.description}</p>
+    <>
+      <div className="min-h-[calc(100vh-3.5rem-1px)] xl:pr-64">
+        {/* Main content column - full width with right padding on large screens to make room for fixed TOC */}
+        <article className="max-w-none xl:w-auto">
+          <nav className="flex items-center gap-1 text-sm mb-4">
+            <Link href="/" className="text-gray-400 hover:text-white">
+              Docs
+            </Link>
+            {doc.section && (
+              <>
+                <span className="text-gray-400">/</span>
+                <span className="text-gray-400">
+                  {doc.section
+                    .replace(/^\d+-/, "")
+                    .split("-")
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" ")}
+                </span>
+              </>
+            )}
+            {doc.title && (
+              <>
+                <span className="text-gray-400">/</span>
+                <span className="text-white">{doc.title}</span>
+              </>
+            )}
+          </nav>
+          <h1 className="text-3xl lg:text-4xl font-medium mb-4">{doc.title}</h1>
+          <p className="text-muted-foreground text-lg mb-8">{doc.description}</p>
+          
+          {/* Render the HTML content with prose class - constraining width for better readability */}
+          <div 
+            id="doc-content"
+            className="prose prose-invert prose-content font-sans text-white prose-headings:text-white prose-p:text-white prose-a:text-primary prose-pre:bg-[#111]" 
+          >
+            {/* Use MDXProvider for any content, which handles both MDX and regular markdown */}
+            <MDXProvider>{doc.html}</MDXProvider>
+          </div>
+          
+          {/* Navigation links to previous and next pages */}
+          <DocNavigation previousDoc={previousDoc} nextDoc={nextDoc} />
+        </article>
         
-        {/* Render the HTML content with prose class - constraining width for better readability */}
-        <div 
-          id="doc-content"
-          className="prose prose-invert prose-content font-sans text-white prose-headings:text-white prose-p:text-white prose-a:text-primary prose-pre:bg-[#111]" 
-        >
-          {/* Use MDXProvider for any content, which handles both MDX and regular markdown */}
-          <MDXProvider>{doc.html}</MDXProvider>
-        </div>
-        
-        {/* Navigation links to previous and next pages */}
-        <DocNavigation previousDoc={previousDoc} nextDoc={nextDoc} />
-      </article>
+        {/* TOC is now positioned with fixed positioning in the TableOfContents component */}
+        {doc.headings.length > 0 && (
+          <TableOfContents items={doc.headings.map(h => ({ id: h.id, title: h.title, level: h.level }))} />
+        )}
+      </div>
       
-      {/* TOC is now positioned with fixed positioning in the TableOfContents component */}
-      {doc.headings.length > 0 && (
-        <TableOfContents items={doc.headings.map(h => ({ id: h.id, title: h.title, level: h.level }))} />
-      )}
-    </div>
+      {/* Add the Footer component */}
+      <Footer />
+    </>
   );
 }
