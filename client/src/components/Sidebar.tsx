@@ -4,12 +4,8 @@ import { ChevronRight, Search, X, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DocPage,
-  getAllDocs,
-  getDocsBySection,
-  getDocByPath,
 } from "@/lib/docs";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { debounce } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -250,11 +246,24 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
               No documentation found.
             </div>
           ) : (
-            // Normal navigation by sections
-            Object.entries(sections).map(([sectionName, sectionDocs]) => (
+            // Normal navigation by sections - sort the sections by numeric prefix for proper ordering
+            Object.entries(sections)
+              .sort(([sectionNameA], [sectionNameB]) => {
+                // Always keep root first
+                if (sectionNameA === 'root') return -1;
+                if (sectionNameB === 'root') return 1;
+                
+                // Extract numeric prefix from section names
+                const getOrderPrefix = (name: string) => {
+                  const match = name.match(/^(\d+)-/);
+                  return match ? parseInt(match[1], 10) : 999;
+                };
+                
+                // Sort by numeric prefix
+                return getOrderPrefix(sectionNameA) - getOrderPrefix(sectionNameB);
+              })
+              .map(([sectionName, sectionDocs]) => (
               <div key={sectionName} className="mb-8">
-                {" "}
-                {/* Increased margin bottom */}
                 <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-300">
                   {formatSectionName(sectionName).toUpperCase()}
                 </div>

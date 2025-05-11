@@ -46,7 +46,11 @@ function getOrderFromDir(dir: string): number {
   // Extract order from directory name if it follows any number prefix pattern: "1-directory-name"
   const match = dir.match(/^(\d+)-/);
   if (match) {
+    return parseInt(match[1], 10); // Use the numeric prefix as the order
   }
+
+  // If the directory name doesn't have a numeric prefix, extract from the normalized name
+  const normalizedDir = dir.replace(/^\d+-/, ""); // Remove numeric prefix
 
   // Fallback to predefined order if no number prefix
   const sectionOrder: Record<string, number> = {
@@ -55,7 +59,7 @@ function getOrderFromDir(dir: string): number {
     "api-reference": 2,
   };
 
-  return sectionOrder[dir] !== undefined ? sectionOrder[dir] : 999;
+  return sectionOrder[normalizedDir] !== undefined ? sectionOrder[normalizedDir] : 999;
 }
 
 // Extract slug from filename by removing order prefix and extension
