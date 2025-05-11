@@ -70,29 +70,44 @@ export class ProgressService {
     console.log(`[PROGRESS SERVICE] Marking lesson ${lessonSlug} as complete for user ${userId}`);
     
     try {
-      // Tracing the params to make sure they are correctly passed
-      console.log('[PROGRESS SERVICE] Parameters for DB function:', {
-        userId, 
-        lessonSlug, 
-        version,
-        action: 'complete'
-      });
-      
-      // Execute SQL function to update progress directly
-      const result = await db.execute(
-        `SELECT * FROM update_user_progress($1, $2, $3, $4) as updated_data`,
-        [userId, lessonSlug, version, 'complete']
-      );
-
-      console.log('[PROGRESS SERVICE] SQL function result:', result);
-      
-      // Get the updated progress data from database to return to client
+      // Get existing progress first
       const progressData = await this.getProgressData(userId);
-      console.log('[PROGRESS SERVICE] Final progress data returned to client:', JSON.stringify(progressData));
       
-      return progressData;
+      // Clone the existing data to avoid modifying the original
+      const updatedProgressData: ProgressData = {
+        completedLessons: { ...progressData.completedLessons },
+        lastActivity: new Date().toISOString(),
+        totalCompletedCount: progressData.totalCompletedCount
+      };
+      
+      // Check if the lesson was previously completed
+      const wasCompleted = !!updatedProgressData.completedLessons[lessonSlug];
+      
+      // Update the lesson in the completed list
+      updatedProgressData.completedLessons[lessonSlug] = {
+        completedAt: new Date().toISOString(),
+        version: version || null
+      };
+      
+      // Increment the total completed count if not previously completed
+      if (!wasCompleted) {
+        updatedProgressData.totalCompletedCount++;
+      }
+      
+      // Update the database
+      await db
+        .update(userProgress)
+        .set({
+          progressData: updatedProgressData as any,
+          lastUpdated: new Date()
+        })
+        .where(eq(userProgress.userId, userId));
+        
+      console.log('[PROGRESS SERVICE] Updated progress data:', JSON.stringify(updatedProgressData));
+      
+      return updatedProgressData;
     } catch (error) {
-      console.error('[PROGRESS SERVICE] Error updating progress with database function:', error);
+      console.error('[PROGRESS SERVICE] Error updating progress:', error);
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to update progress: ${errorMessage}`);
     }
@@ -112,21 +127,41 @@ export class ProgressService {
     console.log(`[PROGRESS SERVICE] Marking lesson ${lessonSlug} as incomplete for user ${userId}`);
     
     try {
-      // Execute SQL function to update progress directly
-      const result = await db.execute(
-        `SELECT * FROM update_user_progress($1, $2, $3, $4) as updated_data`,
-        [userId, lessonSlug, null, 'incomplete']
-      );
-
-      console.log('[PROGRESS SERVICE] SQL function result:', result);
-      
-      // Get the updated progress data from database to return to client
+      // Get existing progress first
       const progressData = await this.getProgressData(userId);
-      console.log('[PROGRESS SERVICE] Final progress data returned to client:', JSON.stringify(progressData));
       
-      return progressData;
+      // Clone the existing data to avoid modifying the original
+      const updatedProgressData: ProgressData = {
+        completedLessons: { ...progressData.completedLessons },
+        lastActivity: new Date().toISOString(),
+        totalCompletedCount: progressData.totalCompletedCount
+      };
+      
+      // Check if the lesson was previously completed
+      if (updatedProgressData.completedLessons[lessonSlug]) {
+        // Delete the lesson from the completed list
+        delete updatedProgressData.completedLessons[lessonSlug];
+        
+        // Decrement the total completed count
+        updatedProgressData.totalCompletedCount = Math.max(0, updatedProgressData.totalCompletedCount - 1);
+        
+        // Update the database
+        await db
+          .update(userProgress)
+          .set({
+            progressData: updatedProgressData as any,
+            lastUpdated: new Date()
+          })
+          .where(eq(userProgress.userId, userId));
+          
+        console.log('[PROGRESS SERVICE] Updated progress data:', JSON.stringify(updatedProgressData));
+      } else {
+        console.log('[PROGRESS SERVICE] Lesson was not previously completed, no change needed');
+      }
+      
+      return updatedProgressData;
     } catch (error) {
-      console.error('[PROGRESS SERVICE] Error updating progress with database function:', error);
+      console.error('[PROGRESS SERVICE] Error updating progress:', error);
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to update progress: ${errorMessage}`);
     }
