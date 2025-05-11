@@ -1,20 +1,39 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useProgress } from '@/hooks/useProgress';
+import { useQuery } from '@tanstack/react-query';
+import { DocPage } from '@/lib/docs';
 
 export function ProgressBar() {
   const { progress, isLoading } = useProgress();
   
-  // Calculate completion percentage
-  const totalLessons = countTotalLessons();
-  const completedCount = progress?.totalCompletedCount || 0;
-  const completionPercentage = totalLessons ? Math.round((completedCount / totalLessons) * 100) : 0;
+  // Get sections data from API for accurate lesson count
+  const { data: sections, isLoading: isSectionsLoading } = useQuery<Record<string, any>>({ 
+    queryKey: ['/api/sections'],
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+  });
   
-  // Function to count total lessons across all sections
-  function countTotalLessons() {
-    // This is a simple estimate - ideally we would get this from the backend
-    // For now, we'll use a hard-coded number based on the typical content structure
-    return 12; // Approximate number of lessons
-  }
+  // Calculate total lessons and completion percentage
+  const { totalLessons, completedCount, completionPercentage } = useMemo(() => {
+    // Calculate total number of lessons
+    let total = 0;
+    if (sections) {
+      // Count all documents in all sections except root
+      Object.entries(sections).forEach(([sectionName, docs]) => {
+        if (sectionName !== 'root' && Array.isArray(docs)) {
+          total += docs.length;
+        }
+      });
+    }
+    
+    const completed = progress?.totalCompletedCount || 0;
+    const percentage = total ? Math.round((completed / total) * 100) : 0;
+    
+    return {
+      totalLessons: total,
+      completedCount: completed,
+      completionPercentage: percentage
+    };
+  }, [sections, progress]);
   
   if (isLoading) {
     return null;

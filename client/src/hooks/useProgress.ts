@@ -15,6 +15,9 @@ export function useProgress() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
+  // State to track completion actions
+  const [completingSlug, setCompletingSlug] = useState<string | null>(null);
+  
   // Fetch progress data
   const { data: progressData, isLoading, error } = useQuery<ProgressResponse>({
     queryKey: ['/api/progress'],
@@ -125,12 +128,87 @@ export function useProgress() {
     completeMutation.mutate(lessonSlug);
   }, [isAuthenticated, completeMutation, toast]);
   
+  // Uncomplete lesson mutation
+  const uncompleteMutation = useMutation({
+    mutationFn: async (lessonSlug: string) => {
+      console.log('Sending API request to uncomplete lesson:', lessonSlug);
+      
+      // Extract just the base part of the slug, removing section prefix
+      let cleanSlug = lessonSlug;
+      
+      if (cleanSlug.includes('/')) {
+        cleanSlug = cleanSlug.split('/').pop() || cleanSlug;
+      }
+      
+      // Remove any numeric prefix
+      cleanSlug = cleanSlug.replace(/^\d+-/, '');
+      
+      console.log('Clean slug for uncomplete:', cleanSlug);
+      
+      // Make a direct fetch request 
+      const response = await fetch('/api/progress/uncomplete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lessonSlug: cleanSlug }),
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Progress API error:', errorText);
+        throw new Error(errorText || 'Failed to uncomplete lesson');
+      }
+      
+      return await response.json();
+    },
+    onSuccess: () => {
+      // Invalidate the progress query to refetch
+      queryClient.invalidateQueries({ queryKey: ['/api/progress'] });
+      // Show success toast
+      toast({
+        title: 'Lesson marked as not completed',
+        description: 'Your progress has been updated.',
+        variant: 'default',
+      });
+    },
+    onError: (error) => {
+      console.error('Error uncompleting lesson:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update lesson status.',
+        variant: 'destructive',
+      });
+    },
+  });
+  
+  // Uncomplete a lesson
+  const uncompleteLesson = useCallback((lessonSlug: string) => {
+    console.log('Uncompleting lesson with slug:', lessonSlug);
+    
+    if (!lessonSlug) {
+      console.error('Invalid lesson slug for uncomplete:', lessonSlug);
+      return;
+    }
+    
+    if (!isAuthenticated) {
+      toast({
+        title: 'Authentication required',
+        description: 'Please log in to track your progress.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    uncompleteMutation.mutate(lessonSlug);
+  }, [isAuthenticated, uncompleteMutation, toast]);
+
   return {
     progress: progressData as ProgressResponse | undefined,
     isLoading,
     error,
     isLessonCompleted,
     completeLesson,
-    isCompleting: completeMutation.isPending,
+    uncompleteLesson,
+    isCompleting: completeMutation.isPending || uncompleteMutation.isPending,
   };
 }

@@ -10,7 +10,7 @@ interface LessonCompleteButtonProps {
 
 export function LessonCompleteButton({ lessonSlug }: LessonCompleteButtonProps) {
   const { isAuthenticated } = useAuth();
-  const { isLessonCompleted, completeLesson, isCompleting } = useProgress();
+  const { isLessonCompleted, completeLesson, uncompleteLesson, isCompleting } = useProgress();
   
   const isCompleted = isLessonCompleted(lessonSlug);
   
@@ -24,9 +24,9 @@ export function LessonCompleteButton({ lessonSlug }: LessonCompleteButtonProps) 
       <Button
         variant={isCompleted ? "outline" : "default"}
         size="lg"
-        onClick={() => !isCompleted && completeLesson(lessonSlug)}
+        onClick={() => isCompleted ? uncompleteLesson(lessonSlug) : completeLesson(lessonSlug)}
         disabled={isCompleting}
-        className={`flex items-center gap-2 transition-all duration-300 ${isCompleted ? 'border-green-500 text-green-500 bg-green-50/10 hover:bg-green-50/20 hover:text-green-600' : 'hover:bg-primary/90'}`}
+        className={`flex items-center gap-2 transition-all duration-300 ease-in-out ${isCompleted ? 'border-green-500 text-green-500 bg-green-50/10 hover:bg-red-50/10 hover:text-red-400 hover:border-red-400' : 'hover:bg-primary/90'}`}
       >
         {isCompleting ? (
           <>
