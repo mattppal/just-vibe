@@ -246,7 +246,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                               </span>
                               {isLessonCompleted(doc.slug) && (
                                 <div className="flex-shrink-0 ml-2">
-                                  <Emoji name="check-mark-button" width={14} />
+                                  <Emoji name="check-mark" width={14} />
                                 </div>
                               )}
                             </div>
