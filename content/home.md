@@ -5,9 +5,13 @@ description: This course will teach you everything you need to know about vibe c
 authenticated: false
 ---
 
-This course encompasses everything I've learned about building with AI (or vibe coding) on Replit through project-based, hands on material. 
+This course encompasses everything I've learned about building with AI (or vibe coding) on Replit through project-based, hands on material.
 
-Everything in the course will revolve around creating _real_ applications, including the logic and skills necessary to get you there. 
+The course will be mostly video, with supplementary written content.
+
+Everything lesson will revolve around creating _real_ applications, including the logic and skills necessary to get you there.
+
+If you complete the course, you'll get a nifty certificate.
 
 ## Course structure
 
