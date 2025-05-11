@@ -24,15 +24,6 @@ let mdxProcessor: any = null;
  * Get the appropriate processor for markdown or MDX
  */
 function getProcessor(isMdx: boolean): any {
-  // Common transformers for both MD and MDX
-  const shikiTransformers = [
-    transformerNotationHighlight(),
-    transformerCopyButton({
-      visibility: "always",
-      feedbackDuration: 2000
-    })
-  ];
-
   if (isMdx) {
     if (!mdxProcessor) {
       mdxProcessor = unified()
@@ -40,8 +31,8 @@ function getProcessor(isMdx: boolean): any {
         .use(remarkGfm)
         .use(remarkMdx)
         // Transform MDX to HTML
-        .use(remarkRehype, { 
-          allowDangerousHtml: true
+        .use(remarkRehype, {
+          allowDangerousHtml: true,
         })
         // Process HTML in MDX
         .use(rehypeRaw)
@@ -49,8 +40,7 @@ function getProcessor(isMdx: boolean): any {
         .use(rehypeSlug)
         // Apply syntax highlighting
         .use(rehypeShiki, {
-          theme: "github-dark",
-          transformers: shikiTransformers,
+          theme: "vitesse-dark",
           inline: "tailing-curly-colon",
         })
         // Convert to HTML string
@@ -63,8 +53,8 @@ function getProcessor(isMdx: boolean): any {
         .use(remarkParse)
         .use(remarkGfm)
         // Transform Markdown to HTML
-        .use(remarkRehype, { 
-          allowDangerousHtml: true
+        .use(remarkRehype, {
+          allowDangerousHtml: true,
         })
         // Process HTML in Markdown
         .use(rehypeRaw)
@@ -72,8 +62,7 @@ function getProcessor(isMdx: boolean): any {
         .use(rehypeSlug)
         // Apply syntax highlighting
         .use(rehypeShiki, {
-          theme: "github-dark",
-          transformers: shikiTransformers,
+          theme: "vitesse-dark",
           inline: "tailing-curly-colon",
         })
         // Convert to HTML string
@@ -96,8 +85,8 @@ export async function processMarkdown(
 ): Promise<string> {
   try {
     // Generate a cache key based on content and type
-    const cacheKey = `${isMdx ? 'mdx' : 'md'}:${content.substring(0, 100)}`;
-    
+    const cacheKey = `${isMdx ? "mdx" : "md"}:${content.substring(0, 100)}`;
+
     // Check if we have a cached version
     if (processedCache.has(cacheKey)) {
       return processedCache.get(cacheKey)!;
@@ -109,77 +98,86 @@ export async function processMarkdown(
       // Extract all the React component instances (both self-closing and with children)
       const componentRegex = /<([A-Z][a-zA-Z0-9]*)([^>]*)>([\s\S]*?)<\/\1>/g;
       const selfClosingRegex = /<([A-Z][a-zA-Z0-9]*)([^>]*?)\s*\/>/g;
-      
+
       // Collect all components to process
-      const components: Array<{match: string, name: string, attrs: string, children?: string, selfClosing: boolean}> = [];
-      
+      const components: Array<{
+        match: string;
+        name: string;
+        attrs: string;
+        children?: string;
+        selfClosing: boolean;
+      }> = [];
+
       // Find all self-closing components
       let selfClosingMatch: RegExpExecArray | null;
       while ((selfClosingMatch = selfClosingRegex.exec(content)) !== null) {
         components.push({
           match: selfClosingMatch[0],
           name: selfClosingMatch[1],
-          attrs: selfClosingMatch[2] || '',
-          selfClosing: true
+          attrs: selfClosingMatch[2] || "",
+          selfClosing: true,
         });
       }
-      
+
       // Find all components with children
       const componentMatches = Array.from(content.matchAll(componentRegex));
-      
+
       for (const match of componentMatches) {
         // Skip if it matches any of the already detected self-closing components
-        if (!components.some(c => c.match === match[0])) {
+        if (!components.some((c) => c.match === match[0])) {
           components.push({
             match: match[0],
             name: match[1],
-            attrs: match[2] || '',
-            children: match[3] || '',
-            selfClosing: false
+            attrs: match[2] || "",
+            children: match[3] || "",
+            selfClosing: false,
           });
         }
       }
-      
+
       // Create a copy of the content to work with
       let contentToProcess = content;
-      
+
       // Replace each component with a text placeholder
       components.forEach((component, index) => {
-        contentToProcess = contentToProcess.replace(component.match, `MDX_COMPONENT_${index}`);
+        contentToProcess = contentToProcess.replace(
+          component.match,
+          `MDX_COMPONENT_${index}`,
+        );
       });
-      
+
       // Process the markdown content (without the React components)
       const processor = getProcessor(false);
       const vFile = await processor.process(contentToProcess);
       let result = String(vFile);
-      
+
       // Now reinsert the original React components
       components.forEach((component, index) => {
         // Parse attributes to data-prop attributes for client-side processing
-        let dataProps = '';
+        let dataProps = "";
         if (component.attrs) {
           const attrRegex = /([a-zA-Z0-9_]+)\s*=\s*["']([^"']*)["']/g;
           let attrMatch;
           while ((attrMatch = attrRegex.exec(component.attrs)) !== null) {
-            dataProps += ` data-prop-${attrMatch[1].toLowerCase()}="${attrMatch[2]}"`;  
+            dataProps += ` data-prop-${attrMatch[1].toLowerCase()}="${attrMatch[2]}"`;
           }
         }
-        
+
         // For components with children, insert the children into a div that will be processed
         // by the client-side rendering
         if (!component.selfClosing && component.children) {
           result = result.replace(
             `MDX_COMPONENT_${index}`,
-            `<div class="mdx-component-placeholder" data-component="${component.name}"${dataProps}>${component.children}</div>`
+            `<div class="mdx-component-placeholder" data-component="${component.name}"${dataProps}>${component.children}</div>`,
           );
         } else {
           result = result.replace(
             `MDX_COMPONENT_${index}`,
-            `<div class="mdx-component-placeholder" data-component="${component.name}"${dataProps}></div>`
+            `<div class="mdx-component-placeholder" data-component="${component.name}"${dataProps}></div>`,
           );
         }
       });
-      
+
       // Cache the result for future requests
       processedCache.set(cacheKey, result);
       return result;
@@ -188,7 +186,7 @@ export async function processMarkdown(
       const processor = getProcessor(false);
       const vFile = await processor.process(content);
       const result = String(vFile);
-      
+
       // Cache the result for future requests
       processedCache.set(cacheKey, result);
       return result;
@@ -200,7 +198,10 @@ export async function processMarkdown(
 }
 
 // Cache for extracted headings to avoid reprocessing the same content
-const headingsCache = new Map<string, Array<{ id: string; title: string; level: number }>>();
+const headingsCache = new Map<
+  string,
+  Array<{ id: string; title: string; level: number }>
+>();
 
 /**
  * Extract headings from markdown content with caching for better performance
@@ -210,19 +211,22 @@ export async function extractHeadings(
 ): Promise<Array<{ id: string; title: string; level: number }>> {
   // Generate a cache key based on content
   const cacheKey = content.substring(0, 100);
-  
+
   // Check if we have a cached version
   if (headingsCache.has(cacheKey)) {
     return headingsCache.get(cacheKey)!;
   }
-  
+
   const headings: Array<{ id: string; title: string; level: number }> = [];
   const usedIds = new Set<string>();
 
   // First, remove all code blocks to prevent headings in code from being captured
   // This regex matches all fenced code blocks (```code```) and inline code (`code`)
-  const contentWithoutCodeBlocks = content.replace(/```[\s\S]*?```|`[^`\n]+`/g, '');
-  
+  const contentWithoutCodeBlocks = content.replace(
+    /```[\s\S]*?```|`[^`\n]+`/g,
+    "",
+  );
+
   // Extract headings using regex, now from content with code blocks removed
   const headingRegex = /^(#{1,6})\s+(.+)$/gm;
   let match;
@@ -251,6 +255,6 @@ export async function extractHeadings(
 
   // Cache the result for future requests
   headingsCache.set(cacheKey, headings);
-  
+
   return headings;
 }
