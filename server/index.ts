@@ -130,7 +130,14 @@ app.use('/api/', generalApiLimiter);
 app.use('/api/auth/', authApiLimiter); // Stricter limits for auth routes
 
 // Enable CSRF protection for all routes
-const csrfProtection = csrf({ cookie: { sameSite: 'strict', secure: !isDevelopment } });
+// In development, make csrf more lenient for debugging
+const csrfProtection = csrf({ 
+  cookie: { 
+    sameSite: 'strict', 
+    secure: !isDevelopment 
+  },
+  ignoreMethods: isDevelopment ? ['GET', 'HEAD', 'OPTIONS', 'POST'] : ['GET', 'HEAD', 'OPTIONS']
+});
 
 // Middleware to check Origin header and referer for all API requests
 app.use('/api', (req, res, next) => {

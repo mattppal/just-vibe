@@ -257,30 +257,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid user ID" });
       }
 
-      // Simplified approach - log the complete body for debugging
-      console.log('Complete request:', {
-        body: req.body,
-        headers: req.headers
-      });
-
-      // Manual basic body parsing if needed
-      let lessonSlug = null;
+      // Log the body to check what we're receiving
+      console.log('Received request body:', req.body);
       
-      // Handle the case where the body is already an object
-      if (req.body && typeof req.body === 'object') {
-        lessonSlug = req.body.lessonSlug || null;
-      }
-
-      console.log('Extracted lessonSlug:', lessonSlug, typeof lessonSlug);
-      
-      // Hard fallback for debugging - if no slug found but we have course-welcome in path
-      if (!lessonSlug && req.originalUrl.includes('course-welcome')) {
-        console.log('Using fallback slug from URL path');
-        lessonSlug = 'course-welcome';
-      }
+      const { lessonSlug } = req.body;
       
       if (!lessonSlug) {
         return res.status(400).json({ message: "Lesson slug is required" });
+      }
+      
+      // Make sure it's a string
+      if (typeof lessonSlug !== 'string') {
+        return res.status(400).json({ 
+          message: `Invalid lesson slug type: ${typeof lessonSlug}. Expected string.`
+        });
       }
 
       await completeLesson(userId, lessonSlug);

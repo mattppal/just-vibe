@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest, getCsrfToken } from '@/lib/queryClient';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
 
@@ -43,20 +43,13 @@ export function useProgress() {
       
       console.log('Clean slug:', cleanSlug);
       
-      try {
-        // First, ensure we have a CSRF token
-        await getCsrfToken(true); // Force refresh the token
-        
-        // Then use the apiRequest function which includes the token
-        return await apiRequest('/api/progress/complete', {
-          method: 'POST',
-          body: JSON.stringify({ lessonSlug: cleanSlug }),
-          headers: { 'Content-Type': 'application/json' },
-        });
-      } catch (error) {
-        console.error('Failed to complete lesson:', error);
-        throw error;
-      }
+      // Use the apiRequest function which handles CSRF tokens internally
+      return apiRequest('/api/progress/complete', {
+        method: 'POST',
+        body: JSON.stringify({ lessonSlug: cleanSlug }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      
     },
     onSuccess: () => {
       // Invalidate the progress query to refetch
