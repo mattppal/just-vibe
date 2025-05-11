@@ -405,7 +405,7 @@ export default function DocPage() {
           {/* Lesson completion button - right aligned */}
           {doc && (
             <div className="flex justify-end mt-8 mb-4">
-              <LessonCompleteButton lessonSlug={doc.slug} />
+              <LessonCompleteButton lessonSlug={doc.section ? `${doc.section}/${doc.slug.split('/').pop() || doc.slug}` : doc.slug} />
             </div>
           )}
           

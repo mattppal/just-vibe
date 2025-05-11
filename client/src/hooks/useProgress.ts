@@ -95,13 +95,21 @@ export function useProgress() {
     return Object.keys(progressData.completedLessons).some(completedSlug => {
       // Also normalize the completed slug from the DB the same way
       const normalizedCompletedSlug = normalizePath(completedSlug);
-      // First try full path match
-      if (normalizedCompletedSlug === normalizedInputSlug) return true;
       
-      // As a fallback, check just the lesson name (backward compatibility)
-      const inputBaseName = normalizedInputSlug.split('/').pop() || '';
-      const completedBaseName = normalizedCompletedSlug.split('/').pop() || '';
-      return inputBaseName === completedBaseName;
+      // First try full path match - this is the most reliable method with unique paths
+      if (normalizedCompletedSlug === normalizedInputSlug) {
+        return true;
+      }
+      
+      // For backward compatibility only, check the slug without the section prefix
+      // but ONLY if the input slug doesn't already have a section prefix
+      if (!normalizedInputSlug.includes('/')) {
+        const inputBaseName = normalizedInputSlug.split('/').pop() || '';
+        const completedBaseName = normalizedCompletedSlug.split('/').pop() || '';
+        return inputBaseName === completedBaseName;
+      }
+      
+      return false;
     });
   }, [progressData]);
   
