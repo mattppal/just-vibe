@@ -84,36 +84,24 @@ export function useProgress() {
     if (!progressData) return false;
     if (!progressData.completedLessons) return false;
     
-    // Normalize the input slug by keeping the full path
-    // This ensures we're checking the exact lesson in the right section
-    // Format: "section/lesson" or just "lesson"
-    let normalizedSlug = lessonSlug;
+    // Extract the base slug - this matches how it's stored in the database
+    // The server stores just the simple slug without section prefix
+    let baseSlug = lessonSlug;
     
-    // Remove any numeric prefix from section and slug parts
-    if (normalizedSlug.includes('/')) {
-      const parts = normalizedSlug.split('/');
-      const section = parts[0].replace(/^\d+-/, '');
-      const lesson = parts[1].replace(/^\d+-/, '');
-      normalizedSlug = `${section}/${lesson}`;
-    } else {
-      normalizedSlug = normalizedSlug.replace(/^\d+-/, '');
+    // If it's a path with a section like "section/lesson"
+    if (baseSlug.includes('/')) {
+      // Extract just the lesson part (after the last slash)
+      baseSlug = baseSlug.split('/').pop() || baseSlug;
     }
     
-    // Check if we have this lesson in our completed list with the same path structure
-    return Object.keys(progressData.completedLessons).some(slug => {
-      let normalizedCompletedSlug = slug;
-      
-      // Normalize the completed slug in the same way
-      if (normalizedCompletedSlug.includes('/')) {
-        const parts = normalizedCompletedSlug.split('/');
-        const section = parts[0].replace(/^\d+-/, '');
-        const lesson = parts[1].replace(/^\d+-/, '');
-        normalizedCompletedSlug = `${section}/${lesson}`;
-      } else {
-        normalizedCompletedSlug = normalizedCompletedSlug.replace(/^\d+-/, '');
-      }
-      
-      return normalizedCompletedSlug === normalizedSlug;
+    // Remove any numeric prefix like "1-" from the slug
+    baseSlug = baseSlug.replace(/^\d+-/, '');
+    
+    // Check if this base slug exists in our completed lessons
+    return Object.keys(progressData.completedLessons).some(completedSlug => {
+      // Also normalize the completed slug stored in the DB the same way
+      const normalizedCompletedSlug = completedSlug.replace(/^\d+-/, '');
+      return normalizedCompletedSlug === baseSlug;
     });
   }, [progressData]);
   

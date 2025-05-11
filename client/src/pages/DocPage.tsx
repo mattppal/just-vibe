@@ -402,13 +402,14 @@ export default function DocPage() {
             <MDXProvider>{doc.html}</MDXProvider>
           </div>
           
-          {/* Navigation links to previous and next pages */}
+          {/* Lesson completion button - right aligned */}
           {doc && (
-            <>
-              {/* Lesson completion button */}
+            <div className="flex justify-end mt-8 mb-4">
               <LessonCompleteButton lessonSlug={doc.slug} />
-            </>
+            </div>
           )}
+          
+          {/* Navigation links to previous and next pages */}
           <DocNavigation previousDoc={previousDoc} nextDoc={nextDoc} />
         </article>
         

@@ -40,15 +40,14 @@ export function LessonCompleteButton({ lessonSlug }: LessonCompleteButtonProps) 
   };
   
   return (
-    <div className="flex justify-end mt-8">
-      <Button
-        variant={isCompleted ? "outline" : "default"}
-        size="lg"
-        onClick={handleButtonClick}
-        disabled={isCompleting}
-        title={isCompleted ? "Click to mark as not completed" : "Mark this lesson as complete"}
-        className={`flex items-center gap-2 min-w-[160px] justify-center transition-all duration-300 ease-in-out group ${isCompleted ? 'border-green-500 text-green-500 bg-green-50/10 hover:bg-red-50/10 hover:text-red-400 hover:border-red-400' : 'bg-green-500/90 text-white hover:bg-green-600'}`}
-      >
+    <Button
+      variant={isCompleted ? "outline" : "default"}
+      size="lg"
+      onClick={handleButtonClick}
+      disabled={isCompleting}
+      title={isCompleted ? "Click to mark as not completed" : "Mark this lesson as complete"}
+      className={`flex items-center gap-2 min-w-[160px] justify-center transition-all duration-300 ease-in-out group ${isCompleted ? 'border-green-500 text-green-500 bg-green-50/10 hover:bg-red-50/10 hover:text-red-400 hover:border-red-400' : 'bg-green-500/90 text-white hover:bg-green-600'}`}
+    >
         {isCompleting ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -65,7 +64,6 @@ export function LessonCompleteButton({ lessonSlug }: LessonCompleteButtonProps) 
             <span>Mark as Complete</span>
           </>
         )}
-      </Button>
-    </div>
+    </Button>
   );
 }
