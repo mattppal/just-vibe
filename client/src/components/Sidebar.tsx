@@ -1,13 +1,15 @@
 import { useLocation } from "wouter";
 import NavigationLink from "./NavigationLink";
 import { Input } from "@/components/ui/input";
-import { ChevronRight, Search, X, FileText } from "lucide-react";
+import { ChevronRight, Search, X, FileText, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DocPage,
 } from "@/lib/docs";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useProgress } from "@/hooks/useProgress";
+import { ProgressBar } from "./ProgressBar";
 import { debounce } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 

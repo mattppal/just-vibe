@@ -9,10 +9,14 @@ import {
 } from "./markdown";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { storage } from "./storage";
+import progressRoutes from "./routes/progress";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication
   await setupAuth(app);
+  
+  // Register progress tracking routes
+  app.use('/api/progress', progressRoutes);
 
   // Auth routes
   app.get("/api/auth/user", async (req: Request, res: Response) => {
