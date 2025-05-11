@@ -26,7 +26,8 @@ export function LessonCompleteButton({ lessonSlug }: LessonCompleteButtonProps) 
         size="lg"
         onClick={() => isCompleted ? uncompleteLesson(lessonSlug) : completeLesson(lessonSlug)}
         disabled={isCompleting}
-        className={`flex items-center gap-2 transition-all duration-300 ease-in-out ${isCompleted ? 'border-green-500 text-green-500 bg-green-50/10 hover:bg-red-50/10 hover:text-red-400 hover:border-red-400' : 'hover:bg-primary/90'}`}
+        title={isCompleted ? "Click to mark as not completed" : "Mark this lesson as complete"}
+        className={`flex items-center gap-2 min-w-[160px] justify-center transition-all duration-300 ease-in-out group ${isCompleted ? 'border-green-500 text-green-500 bg-green-50/10 hover:bg-red-50/10 hover:text-red-400 hover:border-red-400' : 'hover:bg-primary/90'}`}
       >
         {isCompleting ? (
           <>
@@ -35,8 +36,9 @@ export function LessonCompleteButton({ lessonSlug }: LessonCompleteButtonProps) 
           </>
         ) : isCompleted ? (
           <>
-            <Check className="h-4 w-4 text-green-500" />
-            <span className="font-medium">Completed</span>
+            <Check className="h-4 w-4 text-green-500 group-hover:hidden" />
+            <span className="font-medium group-hover:hidden">Completed</span>
+            <span className="hidden group-hover:inline text-red-400 font-medium">Mark as uncompleted</span>
           </>
         ) : (
           <>
