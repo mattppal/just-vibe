@@ -1,9 +1,8 @@
 import { useLocation } from "wouter";
 import NavigationLink from "./NavigationLink";
 import { Input } from "@/components/ui/input";
-import { ChevronRight, Search, X, FileText, CheckCircle } from "lucide-react";
-import { EmojiProvider, Emoji } from "react-apple-emojis";
-import emojiData from "react-apple-emojis/src/data.json";
+import { ChevronRight, Search, X, FileText, CheckCircle, Lock } from "lucide-react";
+// We're using Lucide icons for UI elements
 
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/hooks/useProgress";
@@ -208,17 +207,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 className="absolute right-3 top-2.5 text-gray-400 hover:text-orange-500"
                 aria-label="Clear search"
               >
-                <EmojiProvider data={emojiData}>
-                  <Emoji name="multiply" className="w-4 h-4 " />
-                </EmojiProvider>
+                <X className="w-4 h-4" />
               </button>
             ) : (
-              <EmojiProvider data={emojiData}>
-                <Emoji
-                  name="magnifying-glass-tilted-left"
-                  className="absolute right-3 top-2.5 w-4 h-4 "
-                />
-              </EmojiProvider>
+              <Search className="absolute right-3 top-2.5 w-4 h-4" />
             )}
           </div>
         </div>
@@ -272,12 +264,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                               {isLessonCompleted(
                                 getFullLessonPath(doc, doc.section || "root"),
                               ) && (
-                                <EmojiProvider data={emojiData}>
-                                  <Emoji
-                                    name="check-mark-button"
-                                    className="h-4 w-4 flex-shrink-0 ml-1 opacity-75"
-                                  />
-                                </EmojiProvider>
+                                <CheckCircle className="h-4 w-4 flex-shrink-0 ml-1 opacity-75 text-green-500" />
                               )}
                             </div>
                             <span className="text-xs text-gray-500 truncate mt-1">
@@ -333,9 +320,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                             )}
                           >
                             <div className="flex items-center gap-2">
-                              <span role="img" aria-label="lock">
-                                🔒
-                              </span>
+                              <Lock className="h-4 w-4 text-gray-500 mr-1" />
                               <span>{doc.sidebarTitle}</span>
                             </div>
                           </div>
@@ -355,12 +340,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                               {isLessonCompleted(
                                 getFullLessonPath(doc, sectionName),
                               ) && (
-                                <EmojiProvider data={emojiData}>
-                                  <Emoji
-                                    name="check-mark-button"
-                                    className="h-4 w-4 flex-shrink-0 ml-1 opacity-75"
-                                  />
-                                </EmojiProvider>
+                                <CheckCircle className="h-4 w-4 flex-shrink-0 ml-1 opacity-75 text-green-500" />
                               )}
                             </div>
                           </NavigationLink>
