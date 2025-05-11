@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { AlertCircle, AlertTriangle, CheckCircle, Info } from 'lucide-react';
 
 interface AlertProps {
   type?: 'info' | 'warning' | 'error' | 'success';
@@ -7,33 +8,28 @@ interface AlertProps {
   children: React.ReactNode;
 }
 
-const getAlertColors = (type: AlertProps['type'] = 'info') => {
-  switch (type) {
-    case 'info':
-      return 'bg-blue-900/20 border-blue-500 text-blue-200';
-    case 'warning':
-      return 'bg-amber-900/20 border-amber-500 text-amber-200';
-    case 'error':
-      return 'bg-red-900/20 border-red-500 text-red-200';
-    case 'success':
-      return 'bg-green-900/20 border-green-500 text-green-200';
-    default:
-      return 'bg-blue-900/20 border-blue-500 text-blue-200';
-  }
-};
+export function Alert({ type = 'info', title, children }: AlertProps) {
+  const icons = {
+    info: <Info className="h-4 w-4" />,
+    warning: <AlertTriangle className="h-4 w-4" />,
+    error: <AlertCircle className="h-4 w-4" />,
+    success: <CheckCircle className="h-4 w-4" />
+  };
 
-export default function Alert({ type = 'info', title, children }: AlertProps) {
-  const colorClasses = getAlertColors(type);
-  
+  const styles = {
+    info: 'bg-blue-900/20 border-blue-800 text-blue-100',
+    warning: 'bg-yellow-900/20 border-yellow-800 text-yellow-100',
+    error: 'bg-red-900/20 border-red-800 text-red-100',
+    success: 'bg-green-900/20 border-green-800 text-green-100'
+  };
+
   return (
-    <div className={cn(
-      'rounded-md border-l-4 p-4 my-4',
-      colorClasses
-    )}>
-      {title && (
-        <h5 className="text-lg font-medium mb-2">{title}</h5>
-      )}
-      <div className="text-sm">{children}</div>
+    <div className={cn('p-4 border rounded-md mb-4', styles[type])}>
+      <div className="flex gap-2 mb-2 items-center">
+        {icons[type]}
+        {title && <div className="font-medium">{title}</div>}
+      </div>
+      <div className="ml-6">{children}</div>
     </div>
   );
 }

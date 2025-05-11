@@ -8,6 +8,8 @@ import remarkGfm from "remark-gfm";
 import rehypeStringify from "rehype-stringify";
 import rehypeShiki from "@shikijs/rehype";
 import remarkMdx from "remark-mdx";
+import rehypeRaw from "rehype-raw";
+import rehypeSlug from "rehype-slug";
 import { transformerNotationHighlight } from "@shikijs/transformers";
 
 // Cache for processed content to avoid reprocessing the same markdown
@@ -27,12 +29,36 @@ function getProcessor(isMdx: boolean): any {
         .use(remarkParse)
         .use(remarkGfm)
         .use(remarkMdx)
-        .use(remarkRehype, { allowDangerousHtml: true })
+        // Transform MDX to HTML
+        .use(remarkRehype, { 
+          allowDangerousHtml: true,
+          // Add data attributes to code blocks for copy functionality
+          handlers: {
+            code: (h, node) => {
+              const value = String(node.value || '');
+              const lang = (node.lang || '').match(/^[^ \t]+(?=[\s\t]|$)/) || [];
+              const props = { 
+                className: lang.length > 0 ? `language-${lang[0]}` : undefined,
+                'data-copyable': 'true',
+                'data-code': value
+              };
+              return h(node, 'pre', props, [
+                h(node, 'code', { className: props.className }, [value])
+              ]);
+            }
+          }
+        })
+        // Process HTML in MDX
+        .use(rehypeRaw)
+        // Add IDs to headings for anchor links
+        .use(rehypeSlug)
+        // Apply syntax highlighting
         .use(rehypeShiki, {
           theme: "github-dark",
           transformers: [transformerNotationHighlight()],
           inline: "tailing-curly-colon",
         })
+        // Convert to HTML string
         .use(rehypeStringify, { allowDangerousHtml: true });
     }
     return mdxProcessor;
@@ -41,12 +67,36 @@ function getProcessor(isMdx: boolean): any {
       markdownProcessor = unified()
         .use(remarkParse)
         .use(remarkGfm)
-        .use(remarkRehype, { allowDangerousHtml: true })
+        // Transform Markdown to HTML
+        .use(remarkRehype, { 
+          allowDangerousHtml: true,
+          // Add data attributes to code blocks for copy functionality
+          handlers: {
+            code: (h, node) => {
+              const value = String(node.value || '');
+              const lang = (node.lang || '').match(/^[^ \t]+(?=[\s\t]|$)/) || [];
+              const props = { 
+                className: lang.length > 0 ? `language-${lang[0]}` : undefined,
+                'data-copyable': 'true',
+                'data-code': value
+              };
+              return h(node, 'pre', props, [
+                h(node, 'code', { className: props.className }, [value])
+              ]);
+            }
+          } 
+        })
+        // Process HTML in Markdown
+        .use(rehypeRaw)
+        // Add IDs to headings for anchor links
+        .use(rehypeSlug)
+        // Apply syntax highlighting
         .use(rehypeShiki, {
           theme: "github-dark",
           transformers: [transformerNotationHighlight()],
           inline: "tailing-curly-colon",
         })
+        // Convert to HTML string
         .use(rehypeStringify, { allowDangerousHtml: true });
     }
     return markdownProcessor;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface TabsProps {
@@ -17,18 +17,29 @@ type TabsContextType = {
   children?: React.ReactNode;
 };
 
-const TabsContext = React.createContext<TabsContextType | undefined>(undefined);
+const TabsContext = createContext<TabsContextType | null>(null);
+
+function useTabsContext() {
+  const context = useContext(TabsContext);
+  if (!context) {
+    throw new Error('useTabsContext must be used within a TabsProvider');
+  }
+  return context;
+}
 
 export function Tabs({ children }: TabsProps) {
-  // Find all child TabItems to get their values
-  const childArray = React.Children.toArray(children);
-  const firstTabValue = (childArray[0] as React.ReactElement<TabItemProps>)?.props?.value || '';
-  
-  const [activeValue, setActiveValue] = useState<string>(firstTabValue);
-  
+  // Find the first TabItem to set as default active tab
+  const firstTabValue = React.Children.toArray(children).find(
+    (child) => React.isValidElement(child) && child.type === TabItem
+  ) as React.ReactElement<TabItemProps> | undefined;
+
+  const [activeValue, setActiveValue] = useState<string>(
+    firstTabValue?.props.value || ''
+  );
+
   return (
-    <TabsContext.Provider value={{ activeValue, setActiveValue, children }}>
-      <div className="my-6">
+    <TabsContext.Provider value={{ activeValue, setActiveValue }}>
+      <div className="mb-4">
         {children}
       </div>
     </TabsContext.Provider>
@@ -36,46 +47,59 @@ export function Tabs({ children }: TabsProps) {
 }
 
 export function TabItem({ value, title, children }: TabItemProps) {
-  const context = React.useContext(TabsContext);
-  if (!context) {
-    throw new Error('TabItem must be used within a Tabs component');
-  }
-  
-  const { activeValue, setActiveValue } = context;
+  const { activeValue, setActiveValue } = useTabsContext();
   const isActive = activeValue === value;
-  
-  // Only render tab content when it's active
+
+  // Only render tab content for the active tab
+  if (!isActive) return null;
+
   return (
-    <>
-      {/* Render this only for the first TabItem to avoid duplicating the tab bar */}
-      {React.Children.toArray(context.children)[0] === children && (
-        <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4">
-          {React.Children.map(context.children, (child: any) => (
-            <button
-              key={child.props.value}
-              className={cn(
-                'px-4 py-2 text-sm font-medium',
-                'focus:outline-none',
-                child.props.value === activeValue
-                  ? 'border-b-2 border-blue-500 text-blue-500'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-blue-500'
-              )}
-              onClick={() => setActiveValue(child.props.value)}
-            >
-              {child.props.title}
-            </button>
-          ))}
-        </div>
-      )}
-      
-      {/* Tab content */}
-      {isActive && (
-        <div className="tab-content">
-          {children}
-        </div>
-      )}
-    </>
+    <div className="border rounded-md p-4 mt-2">
+      {children}
+    </div>
   );
 }
 
-TabItem.displayName = 'TabItem';
+export function TabsList({ children }: { children: React.ReactNode }) {
+  const { activeValue, setActiveValue } = useTabsContext();
+
+  return (
+    <div className="flex border-b mb-0">
+      {React.Children.map(children, (child) => {
+        if (React.isValidElement(child) && child.type === TabTrigger) {
+          return React.cloneElement(child as React.ReactElement<any>, {
+            isActive: activeValue === child.props.value,
+            onClick: () => setActiveValue(child.props.value),
+          });
+        }
+        return child;
+      })}
+    </div>
+  );
+}
+
+export function TabTrigger({
+  value,
+  children,
+  isActive,
+  onClick,
+}: {
+  value: string;
+  children: React.ReactNode;
+  isActive?: boolean;
+  onClick?: () => void;
+}) {
+  return (
+    <button
+      className={cn(
+        'px-3 py-2 border-b-2 text-sm font-medium',
+        isActive
+          ? 'border-primary text-primary'
+          : 'border-transparent text-muted-foreground hover:border-gray-600 hover:text-gray-300'
+      )}
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+}
