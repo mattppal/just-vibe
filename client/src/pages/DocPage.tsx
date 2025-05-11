@@ -36,7 +36,6 @@ export default function DocPage() {
         const result = await getDocByPath(path);
         return result || null;
       } catch (error) {
-        console.error('Error fetching doc:', error);
         throw error;
       }
     },
