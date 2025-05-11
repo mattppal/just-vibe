@@ -9,21 +9,18 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   onOpenSidebar: () => void;
 }
 
 export default function Header({ onOpenSidebar }: HeaderProps) {
-  const [location] = useLocation();
   const { isAuthenticated, isLoading, user, login, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
-  
+
   // We're removing the body class manipulation which might be causing CLS
 
   return (
@@ -64,7 +61,10 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
                 sideOffset={8}
                 align="end"
                 className="w-56 bg-black border border-[#333] p-1 text-white"
-                style={{ transformOrigin: "var(--radix-dropdown-menu-content-transform-origin)" }}
+                style={{
+                  transformOrigin:
+                    "var(--radix-dropdown-menu-content-transform-origin)",
+                }}
               >
                 <div className="flex items-center justify-start gap-3 p-2">
                   <div className="flex flex-col">
