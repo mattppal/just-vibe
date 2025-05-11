@@ -405,7 +405,9 @@ export default function DocPage() {
           
           {/* Lesson completion button */}
           {doc && (
-            <LessonCompletionButton lessonSlug={doc.slug} className="mb-8 mt-12" />
+            <div className="flex justify-center w-full mb-8 mt-12">
+              <LessonCompletionButton lessonSlug={doc.slug} />
+            </div>
           )}
 
           {/* Navigation links to previous and next pages */}
