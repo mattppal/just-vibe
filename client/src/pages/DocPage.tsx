@@ -9,12 +9,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { LessonCompleteButton } from "@/components/LessonCompleteButton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { LogIn, Home, AlertTriangle } from "lucide-react";
+import { LogIn, Home, AlertTriangle, Lock } from "lucide-react";
 import { Link } from "wouter";
 import { queryClient } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
-import { EmojiProvider } from "@/components/EmojiProvider";
-import { Emoji } from "react-apple-emojis";
+// We're using Lucide icons for UI elements
 
 export default function DocPage() {
   const [location, setLocation] = useLocation();
@@ -319,9 +318,7 @@ export default function DocPage() {
     return (
       <>
         <div className="flex flex-col items-center justify-center p-8 min-h-[400px] text-center">
-          <EmojiProvider data={emojiData}>
-            <Emoji name="locked" className="h-12 w-12 mb-4" />
-          </EmojiProvider>
+          <Lock className="h-12 w-12 text-yellow-500 mb-4" />
           <h1 className="text-2xl font-bold mb-4">Login Required</h1>
           <p className="text-gray-400 mb-8">You need to be logged in to view this content.</p>
           <div className="flex gap-3">
@@ -333,9 +330,7 @@ export default function DocPage() {
             </Button>
           </div>
           <Alert variant="default" className="mt-8 max-w-md bg-[#111] border-yellow-700/50">
-            <EmojiProvider data={emojiData}>
-              <Emoji name="locked" className="h-4 w-4" />
-            </EmojiProvider>
+            <Lock className="h-4 w-4" />
             <AlertTitle>Protected Content</AlertTitle>
             <AlertDescription>
               This documentation page requires authentication. Please login to access all content.

@@ -249,9 +249,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                           className="block px-3 py-2 rounded-md text-sm opacity-50 cursor-not-allowed text-gray-500"
                         >
                           <div className="flex items-center gap-2">
-                            <span role="img" aria-label="lock">
-                              🔒
-                            </span>
+                            <Lock className="h-4 w-4 text-gray-500 mr-1" />
                             <span>{doc.sidebarTitle || doc.title}</span>
                           </div>
                         </div>
