@@ -83,7 +83,20 @@ export function useProgress() {
   // Check if a lesson is completed
   const isLessonCompleted = useCallback((lessonSlug: string): boolean => {
     if (!progressData) return false;
-    return progressData.completedLessons && lessonSlug in progressData.completedLessons;
+    if (!progressData.completedLessons) return false;
+    
+    // Extract the base slug without section prefix
+    let baseSlug = lessonSlug;
+    if (baseSlug.includes('/')) {
+      baseSlug = baseSlug.split('/').pop() || baseSlug;
+    }
+    baseSlug = baseSlug.replace(/^\d+-/, '');
+    
+    // Check if we have this lesson in our completed list
+    return Object.keys(progressData.completedLessons).some(slug => {
+      const cleanSlug = slug.replace(/^\d+-/, '');
+      return cleanSlug === baseSlug;
+    });
   }, [progressData]);
   
   // Mark a lesson as complete

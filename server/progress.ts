@@ -25,22 +25,49 @@ export async function completeLesson(userId: string, lessonSlug: string) {
     });
 
     // Check if the lesson is already completed
-    const existingCompletion = await db.query.courseCompletions.findFirst({
-      where: and(
-        eq(courseCompletions.userId, userId),
-        eq(courseCompletions.lessonSlug, lessonSlug)
-      )
-    });
+    const existingCompletion = await db.select({
+      id: courseCompletions.id,
+      userId: courseCompletions.userId,
+      lessonSlug: courseCompletions.lessonSlug,
+      completedAt: courseCompletions.completedAt,
+      version: courseCompletions.version
+    })
+    .from(courseCompletions)
+    .where(and(
+      eq(courseCompletions.userId, userId),
+      eq(courseCompletions.lessonSlug, lessonSlug)
+    ))
+    .limit(1);
 
     // If already completed, just return the existing data
-    if (existingCompletion) {
-      return existingCompletion;
+    if (existingCompletion && existingCompletion.length > 0) {
+      return existingCompletion[0];
+    }
+
+    // Parse the section name from the lessonSlug if available
+    // For format like "1-getting-started/installation", extract "getting-started"
+    let sectionName = null;
+    if (lessonSlug.includes('/')) {
+      const parts = lessonSlug.split('/');
+      if (parts.length > 1 && parts[0]) {
+        // Remove numeric prefix if present (e.g., "1-getting-started" -> "getting-started")
+        sectionName = parts[0].replace(/^\d+-/, '');
+      }
     }
 
     // Otherwise, insert a new completion
     const [newCompletion] = await db.insert(courseCompletions)
-      .values(validData)
-      .returning();
+      .values({
+        ...validData,
+        sectionName
+      })
+      .returning({ 
+        id: courseCompletions.id,
+        userId: courseCompletions.userId,
+        lessonSlug: courseCompletions.lessonSlug,
+        completedAt: courseCompletions.completedAt,
+        version: courseCompletions.version
+      });
 
     return newCompletion;
   } catch (error) {
@@ -57,10 +84,16 @@ export async function completeLesson(userId: string, lessonSlug: string) {
 export async function getUserProgress(userId: string): Promise<ProgressResponse> {
   try {
     // Get all completed lessons for the user
-    const completions = await db.query.courseCompletions.findMany({
-      where: eq(courseCompletions.userId, userId),
-      orderBy: (columns) => columns.completedAt,
-    });
+    const completions = await db.select({
+      id: courseCompletions.id,
+      userId: courseCompletions.userId,
+      lessonSlug: courseCompletions.lessonSlug,
+      completedAt: courseCompletions.completedAt,
+      version: courseCompletions.version
+    })
+    .from(courseCompletions)
+    .where(eq(courseCompletions.userId, userId))
+    .orderBy(courseCompletions.completedAt);
 
     // Format the response
     const completedLessons: Record<string, { version: string | null, completedAt: string }> = {};
