@@ -11,6 +11,7 @@ import remarkMdx from "remark-mdx";
 import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import { transformerNotationHighlight } from "@shikijs/transformers";
+import { transformerCopyButton } from "@rehype-pretty/transformers";
 
 // Cache for processed content to avoid reprocessing the same markdown
 const processedCache = new Map<string, string>();
