@@ -1,7 +1,7 @@
 import { useLocation } from "wouter";
 import NavigationLink from "./NavigationLink";
 import { Input } from "@/components/ui/input";
-import { ChevronRight, Search, X, FileText, CheckCircle } from "lucide-react";
+import { ChevronRight, Search, X, FileText, CheckCircle, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DocPage,
@@ -25,12 +25,39 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const [sections, setSections] = useState<SectionData>({});
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
-  const { isLessonCompleted, getProgressPercentage } = useProgress();
+  const { isLessonCompleted, getProgressPercentage, progress } = useProgress();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<DocPage[]>([]);
   const [allDocs, setAllDocs] = useState<DocPage[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  
+  // Track progress for animation
+  const [previousProgress, setPreviousProgress] = useState(0);
+  const [showProgressUpdate, setShowProgressUpdate] = useState(false);
+  const [currentPercentage, setCurrentPercentage] = useState(0);
 
+  // Track progress changes to show progress update animation
+  useEffect(() => {
+    if (!progress || !allDocs.length) return;
+    
+    const newPercentage = getProgressPercentage(allDocs.length);
+    
+    // Only show animation if progress has increased
+    if (newPercentage > previousProgress && previousProgress > 0) {
+      setCurrentPercentage(newPercentage);
+      setShowProgressUpdate(true);
+      
+      // Hide after animation completes
+      const timer = setTimeout(() => {
+        setShowProgressUpdate(false);
+      }, 4000);
+      
+      return () => clearTimeout(timer);
+    }
+    
+    setPreviousProgress(newPercentage);
+  }, [progress, allDocs.length, previousProgress, getProgressPercentage]);
+  
   // Use React Query for data fetching with built-in caching
   const { data, isLoading: isSectionsLoading } = useQuery({
     queryKey: ["/api/sections"],
@@ -189,7 +216,17 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           
           {/* Course Progress Bar (only shown for authenticated users) */}
           {isAuthenticated && allDocs.length > 0 && (
-            <div className="mt-6">
+            <div className="mt-6 relative">
+              {/* Progress update notification */}
+              {showProgressUpdate && (
+                <div className="absolute -top-12 left-0 right-0 animate-fade-in-up">
+                  <div className="bg-orange-600/90 text-white px-3 py-2 rounded-md text-xs flex items-center gap-2 shadow-md">
+                    <TrendingUp className="h-3.5 w-3.5" />
+                    <span>Progress increased to {currentPercentage}%!</span>
+                  </div>
+                </div>
+              )}
+              
               <ProgressBar 
                 percentage={getProgressPercentage(allDocs.length)} 
                 size="sm"
@@ -245,7 +282,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                             <span className="font-medium">
                               {doc.sidebarTitle || doc.title}
                               {isLessonCompleted(doc.slug) && (
-                                <CheckCircle className="h-3 w-3 text-green-500 ml-1 inline-block" aria-label="Completed" />
+                                <CheckCircle className="h-3 w-3 text-green-500 ml-1 inline-block animate-pulse" aria-label="Completed" />
                               )}
                             </span>
                             <span className="text-xs text-gray-500 truncate mt-1">
@@ -319,7 +356,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                           <div className="flex items-center gap-2">
                             <span>{doc.sidebarTitle}</span>
                             {isLessonCompleted(doc.slug) && (
-                              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" aria-label="Completed" />
+                              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 animate-pulse" aria-label="Completed" />
                             )}
                           </div>
                         </NavigationLink>
