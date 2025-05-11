@@ -403,6 +403,11 @@ export default function DocPage() {
             <MDXProvider>{doc.html}</MDXProvider>
           </div>
           
+          {/* Lesson completion button */}
+          {doc && (
+            <LessonCompletionButton lessonSlug={doc.slug} className="mb-8 mt-12" />
+          )}
+
           {/* Navigation links to previous and next pages */}
           <DocNavigation previousDoc={previousDoc} nextDoc={nextDoc} />
         </article>
