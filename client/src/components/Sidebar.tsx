@@ -165,6 +165,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           open ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
       >
+        {/* Progress Bar */}
+        {isAuthenticated && (
+          <div className="px-8 mb-4">
+            <ProgressBar />
+          </div>
+        )}
+        
         <div className="px-8 mb-8">
           <div className="relative">
             <Input

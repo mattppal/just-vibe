@@ -1,6 +1,5 @@
 import React from 'react';
 import { useProgress } from '@/hooks/useProgress';
-import { Progress } from '@/components/ui/progress';
 
 export function ProgressBar() {
   const { progress, isLoading } = useProgress();
@@ -22,12 +21,17 @@ export function ProgressBar() {
   }
   
   return (
-    <div className="px-8 pb-4">
+    <div className="py-2">
       <div className="flex justify-between items-center mb-2 text-xs text-gray-400">
         <span>{completedCount} of {totalLessons} lessons complete</span>
         <span>{completionPercentage}%</span>
       </div>
-      <Progress value={completionPercentage} className="h-1 bg-gray-800" indicatorClassName="bg-green-500" />
+      <div className="h-1 w-full bg-gray-800 rounded-full relative overflow-hidden">
+        <div 
+          className="h-full bg-green-500 transition-all duration-300" 
+          style={{ width: `${completionPercentage}%` }}
+        />
+      </div>
     </div>
   );
 }

@@ -24,9 +24,9 @@ export function LessonCompleteButton({ lessonSlug }: LessonCompleteButtonProps) 
       <Button
         variant={isCompleted ? "outline" : "default"}
         size="lg"
-        onClick={() => completeLesson(lessonSlug)}
-        disabled={isCompleted || isCompleting}
-        className={`flex items-center gap-2 ${isCompleted ? 'border-green-500 text-green-500 hover:bg-green-50 hover:text-green-600' : ''}`}
+        onClick={() => !isCompleted && completeLesson(lessonSlug)}
+        disabled={isCompleting}
+        className={`flex items-center gap-2 transition-all duration-300 ${isCompleted ? 'border-green-500 text-green-500 bg-green-50/10 hover:bg-green-50/20 hover:text-green-600' : 'hover:bg-primary/90'}`}
       >
         {isCompleting ? (
           <>
@@ -35,8 +35,8 @@ export function LessonCompleteButton({ lessonSlug }: LessonCompleteButtonProps) 
           </>
         ) : isCompleted ? (
           <>
-            <Check className="h-4 w-4" />
-            <span>Completed</span>
+            <Check className="h-4 w-4 text-green-500" />
+            <span className="font-medium">Completed</span>
           </>
         ) : (
           <>
