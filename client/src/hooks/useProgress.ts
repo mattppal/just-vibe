@@ -43,12 +43,21 @@ export function useProgress() {
       
       console.log('Clean slug:', cleanSlug);
       
-      // Use the apiRequest function which handles CSRF tokens internally
-      return apiRequest('/api/progress/complete', {
+      // Make a direct fetch request to bypass any middleware issues
+      const response = await fetch('/api/progress/complete', {
         method: 'POST',
-        body: JSON.stringify({ lessonSlug: cleanSlug }),
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lessonSlug: cleanSlug }),
+        credentials: 'include'
       });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Progress API error:', errorText);
+        throw new Error(errorText || 'Failed to complete lesson');
+      }
+      
+      return await response.json();
       
     },
     onSuccess: () => {

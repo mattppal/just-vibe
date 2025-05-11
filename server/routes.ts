@@ -257,10 +257,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid user ID" });
       }
 
-      // Log the body to check what we're receiving
+      // Log the body for debugging
       console.log('Received request body:', req.body);
       
-      const { lessonSlug } = req.body;
+      // Handle nested request structure
+      let lessonSlug;
+      
+      // Handle direct format: { lessonSlug: 'value' }
+      if (req.body && req.body.lessonSlug) {
+        lessonSlug = req.body.lessonSlug;
+      } 
+      // Handle nested format: { body: '{"lessonSlug":"value"}' }
+      else if (req.body && req.body.body && typeof req.body.body === 'string') {
+        try {
+          // Parse the inner JSON string
+          const parsedBody = JSON.parse(req.body.body);
+          lessonSlug = parsedBody.lessonSlug;
+        } catch (e) {
+          console.error('Failed to parse inner body JSON:', e);
+        }
+      }
+      
+      console.log('Extracted lessonSlug:', lessonSlug);
       
       if (!lessonSlug) {
         return res.status(400).json({ message: "Lesson slug is required" });
