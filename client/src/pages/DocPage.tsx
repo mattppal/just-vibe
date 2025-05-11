@@ -5,7 +5,6 @@ import MDXProvider from "@/components/MDXProvider";
 import TableOfContents from "@/components/TableOfContents";
 import { DocNavigation, findAdjacentDocs } from "@/components/DocNavigation";
 import Footer from "@/components/Footer";
-import { LessonCompletionButton } from "@/components/LessonCompletionButton";
 import { useAuth } from "@/hooks/useAuth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,6 @@ import { Lock, LogIn, Home, AlertTriangle } from "lucide-react";
 import { Link } from "wouter";
 import { queryClient } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
-import ProgressDebugger from "@/components/ProgressDebugger";
 
 export default function DocPage() {
   const [location, setLocation] = useLocation();
@@ -404,25 +402,8 @@ export default function DocPage() {
             <MDXProvider>{doc.html}</MDXProvider>
           </div>
           
-          {/* Lesson completion button */}
-          {doc && (
-            <div className="flex justify-center w-full mb-8 mt-12">
-              <LessonCompletionButton lessonSlug={doc.slug} />
-            </div>
-          )}
-
           {/* Navigation links to previous and next pages */}
           <DocNavigation previousDoc={previousDoc} nextDoc={nextDoc} />
-
-          {/* Debug tool for development */}
-          {isAuthenticated && (path.includes('youtube-embed') || path.includes('quick-start')) && (
-            <div className="mt-8 border-t border-border pt-6">
-              <details>
-                <summary className="text-lg font-semibold cursor-pointer mb-4">🐛 Progress Debugging Tools</summary>
-                <ProgressDebugger />
-              </details>
-            </div>
-          )}
         </article>
         
         {/* TOC is now positioned with fixed positioning in the TableOfContents component */}
