@@ -1,7 +1,6 @@
 import { useLocation } from "wouter";
 import NavigationLink from "./NavigationLink";
 import { Input } from "@/components/ui/input";
-import { ChevronRight, Search, X, FileText, CheckCircle } from "lucide-react";
 import { EmojiProvider, Emoji } from "react-apple-emojis";
 import emojiData from "react-apple-emojis/src/data.json";
 
@@ -137,24 +136,24 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
   };
-  
+
   // Helper function to construct consistent full path for lessons
   const getFullLessonPath = (doc: any, section: string) => {
     // If the slug already includes a path, use it as is
-    if (doc.slug.includes('/')) {
+    if (doc.slug.includes("/")) {
       return doc.slug;
     }
-    
+
     // Otherwise, construct a full path with section and lesson name
     // Normalize section name - remove numeric prefixes
-    const normalizedSection = section.replace(/^\d+-/, '');
-    const baseSlug = doc.slug.split('/').pop() || doc.slug;
-    
+    const normalizedSection = section.replace(/^\d+-/, "");
+    const baseSlug = doc.slug.split("/").pop() || doc.slug;
+
     // Special case for root section
-    if (section === 'root') {
+    if (section === "root") {
       return baseSlug;
     }
-    
+
     return `${normalizedSection}/${baseSlug}`;
   };
 
@@ -178,189 +177,198 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       />
 
       {/* Sidebar */}
-      <aside
-        className={cn(
-          "fixed top-[calc(3.5rem+1px)] bottom-0 left-0 z-30 w-72 min-w-[272px] bg-black text-white sidebar-with-border overflow-y-auto pb-10 pt-6",
-          "lg:sticky lg:block lg:top-[calc(3.5rem+1px)] lg:h-[calc(100vh-3.5rem-1px)] lg:w-72 lg:min-w-[272px] lg:shrink-0",
-          "transition-transform duration-300 ease-in-out scrollbar-thin",
-          open ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
-        )}
-      >
-        {/* Progress Bar */}
-        {isAuthenticated && (
-          <div className="px-8 mb-4">
-            <ProgressBar />
-          </div>
-        )}
-
-        <div className="px-8 mb-8">
-          <div className="relative">
-            <Input
-              type="text" /* Changed from search to text to remove default browser behavior */
-              placeholder="Search..."
-              className="w-full bg-[#111] text-white border-[#333] placeholder-gray-500"
-              value={searchQuery}
-              onChange={handleSearch}
-            />
-            {searchQuery ? (
-              <button
-                onClick={clearSearch}
-                className="absolute right-3 top-2.5 text-gray-400 hover:text-orange-500"
-                aria-label="Clear search"
-              >
-                <X className="w-4 h-4 text-orange-600" />
-              </button>
-            ) : (
-              <Search className="absolute right-3 top-2.5 w-4 h-4 text-orange-600" />
-            )}
-          </div>
-        </div>
-
-        <nav className="px-8">
-          {loading ? (
-            <div className="text-secondary text-sm p-4">
-              Loading documentation...
+      <EmojiProvider data={emojiData}>
+        <aside
+          className={cn(
+            "fixed top-[calc(3.5rem+1px)] bottom-0 left-0 z-30 w-72 min-w-[272px] bg-black text-white sidebar-with-border overflow-y-auto pb-10 pt-6",
+            "lg:sticky lg:block lg:top-[calc(3.5rem+1px)] lg:h-[calc(100vh-3.5rem-1px)] lg:w-72 lg:min-w-[272px] lg:shrink-0",
+            "transition-transform duration-300 ease-in-out scrollbar-thin",
+            open ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+          )}
+        >
+          {/* Progress Bar */}
+          {isAuthenticated && (
+            <div className="px-8 mb-4">
+              <ProgressBar />
             </div>
-          ) : isSearching ? (
-            // Search results view
-            <div>
-              <div className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-300">
-                SEARCH RESULTS
-              </div>
+          )}
 
-              {searchResults.length === 0 ? (
-                <div className="text-secondary text-sm p-2 bg-[#111]/50 rounded-md">
-                  No results found for "{searchQuery}"
-                </div>
+          <div className="px-8 mb-8">
+            <div className="relative">
+              <Input
+                type="text" /* Changed from search to text to remove default browser behavior */
+                placeholder="Search..."
+                className="w-full bg-[#111] text-white border-[#333] placeholder-gray-500"
+                value={searchQuery}
+                onChange={handleSearch}
+              />
+              {searchQuery ? (
+                <button
+                  onClick={clearSearch}
+                  className="absolute right-3 top-2.5 text-gray-400 hover:text-orange-500"
+                  aria-label="Clear search"
+                >
+                  <Emoji name="multiply" className="w-4 h-4 " />
+                </button>
               ) : (
-                <ul className="space-y-1 mb-6">
-                  {searchResults.map((doc) => (
-                    <li key={doc.slug}>
-                      {doc.requiresAuth && !isAuthenticated ? (
-                        <div
-                          title="Login required to view this content"
-                          className="block px-3 py-2 rounded-md text-sm opacity-50 cursor-not-allowed text-gray-500"
-                        >
-                          <div className="flex items-center gap-2">
-                            <span role="img" aria-label="lock">
-                              🔒
-                            </span>
-                            <span>{doc.sidebarTitle || doc.title}</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <NavigationLink
-                          href={doc.path}
-                          className={cn(
-                            "nav-link block relative px-3 py-2 rounded-md hover:bg-[#111] text-sm",
-                            location === doc.path
-                              ? "active text-orange-500 bg-[#111] font-medium"
-                              : "text-gray-400 hover:text-orange-500",
-                          )}
-                          onClick={handleLinkClick}
-                        >
-                          <div className="flex flex-col w-full">
-                            <div className="flex items-center justify-between w-full">
-                              <span className="font-medium">
-                                {doc.sidebarTitle || doc.title}
-                              </span>
-                              {isLessonCompleted(getFullLessonPath(doc, doc.section || 'root')) && (
-                                <EmojiProvider data={emojiData}>
-                                  <Emoji name="check-mark-button" className="h-4 w-4 flex-shrink-0 ml-1 opacity-75"/>
-                                </EmojiProvider>
-                              )}
-                            </div>
-                            <span className="text-xs text-gray-500 truncate mt-1">
-                              {doc.description}
-                            </span>
-                          </div>
-                        </NavigationLink>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+                <Emoji
+                  name="magnifying-glass-tilted-left"
+                  className="absolute right-3 top-2.5 w-4 h-4 "
+                />
               )}
             </div>
-          ) : Object.keys(sections).length === 0 ? (
-            <div className="text-secondary text-sm p-4">
-              No documentation found.
-            </div>
-          ) : (
-            // Normal navigation by sections - sort the sections by numeric prefix for proper ordering
-            Object.entries(sections)
-              .sort(([sectionNameA], [sectionNameB]) => {
-                // Always keep root first
-                if (sectionNameA === "root") return -1;
-                if (sectionNameB === "root") return 1;
+          </div>
 
-                // Extract numeric prefix from section names
-                const getOrderPrefix = (name: string) => {
-                  const match = name.match(/^(\d+)-/);
-                  return match ? parseInt(match[1], 10) : 999;
-                };
+          <nav className="px-8">
+            {loading ? (
+              <div className="text-secondary text-sm p-4">
+                Loading documentation...
+              </div>
+            ) : isSearching ? (
+              // Search results view
+              <div>
+                <div className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-300">
+                  SEARCH RESULTS
+                </div>
 
-                // Sort by numeric prefix
-                return (
-                  getOrderPrefix(sectionNameA) - getOrderPrefix(sectionNameB)
-                );
-              })
-              .map(([sectionName, sectionDocs]) => (
-                <div key={sectionName} className="mb-8">
-                  <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-300">
-                    {formatSectionName(sectionName).toUpperCase()}
+                {searchResults.length === 0 ? (
+                  <div className="text-secondary text-sm p-2 bg-[#111]/50 rounded-md">
+                    No results found for "{searchQuery}"
                   </div>
-                  <ul className="space-y-1">
-                    {sectionDocs.map((doc) => (
+                ) : (
+                  <ul className="space-y-1 mb-6">
+                    {searchResults.map((doc) => (
                       <li key={doc.slug}>
                         {doc.requiresAuth && !isAuthenticated ? (
                           <div
                             title="Login required to view this content"
-                            className={cn(
-                              "block px-3 py-1.5 rounded-md text-sm opacity-50 cursor-not-allowed" /* Adjusted padding */,
-                              location === doc.path
-                                ? "text-orange-500 bg-[#111]"
-                                : "text-gray-500",
-                            )}
+                            className="block px-3 py-2 rounded-md text-sm opacity-50 cursor-not-allowed text-gray-500"
                           >
                             <div className="flex items-center gap-2">
-                              <span role="img" aria-label="lock">
-                                🔒
+                              <span>
+                                <Emoji name="locked" className="h-4 w-4" />
                               </span>
-                              <span>{doc.sidebarTitle}</span>
+                              <span>{doc.sidebarTitle || doc.title}</span>
                             </div>
                           </div>
                         ) : (
                           <NavigationLink
                             href={doc.path}
                             className={cn(
-                              "nav-link block relative px-3 py-1.5 rounded-md hover:bg-[#111] text-sm transition-colors duration-150" /* Adjusted padding and added transition */,
+                              "nav-link block relative px-3 py-2 rounded-md hover:bg-[#111] text-sm",
                               location === doc.path
                                 ? "active text-orange-500 bg-[#111] font-medium"
                                 : "text-gray-400 hover:text-orange-500",
                             )}
                             onClick={handleLinkClick}
                           >
-                            <div className="flex items-center gap-2 justify-between w-full">
-                              <span>{doc.sidebarTitle}</span>
-                              {isLessonCompleted(getFullLessonPath(doc, sectionName)) && (
-                                <EmojiProvider data={emojiData}>
+                            <div className="flex flex-col w-full">
+                              <div className="flex items-center justify-between w-full">
+                                <span className="font-medium">
+                                  {doc.sidebarTitle || doc.title}
+                                </span>
+                                {isLessonCompleted(
+                                  getFullLessonPath(doc, doc.section || "root"),
+                                ) && (
                                   <Emoji
                                     name="check-mark-button"
                                     className="h-4 w-4 flex-shrink-0 ml-1 opacity-75"
                                   />
-                                </EmojiProvider>
-                              )}
+                                )}
+                              </div>
+                              <span className="text-xs text-gray-500 truncate mt-1">
+                                {doc.description}
+                              </span>
                             </div>
                           </NavigationLink>
                         )}
                       </li>
                     ))}
                   </ul>
-                </div>
-              ))
-          )}
-        </nav>
-      </aside>
+                )}
+              </div>
+            ) : Object.keys(sections).length === 0 ? (
+              <div className="text-secondary text-sm p-4">
+                No documentation found.
+              </div>
+            ) : (
+              // Normal navigation by sections - sort the sections by numeric prefix for proper ordering
+              Object.entries(sections)
+                .sort(([sectionNameA], [sectionNameB]) => {
+                  // Always keep root first
+                  if (sectionNameA === "root") return -1;
+                  if (sectionNameB === "root") return 1;
+
+                  // Extract numeric prefix from section names
+                  const getOrderPrefix = (name: string) => {
+                    const match = name.match(/^(\d+)-/);
+                    return match ? parseInt(match[1], 10) : 999;
+                  };
+
+                  // Sort by numeric prefix
+                  return (
+                    getOrderPrefix(sectionNameA) - getOrderPrefix(sectionNameB)
+                  );
+                })
+                .map(([sectionName, sectionDocs]) => (
+                  <div key={sectionName} className="mb-8">
+                    <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-300">
+                      {formatSectionName(sectionName).toUpperCase()}
+                    </div>
+                    <ul className="space-y-1">
+                      {sectionDocs.map((doc) => (
+                        <li key={doc.slug}>
+                          {doc.requiresAuth && !isAuthenticated ? (
+                            <div
+                              title="Login required to view this content"
+                              className={cn(
+                                "block px-3 py-1.5 rounded-md text-sm opacity-50 cursor-not-allowed" /* Adjusted padding */,
+                                location === doc.path
+                                  ? "text-orange-500 bg-[#111]"
+                                  : "text-gray-500",
+                              )}
+                            >
+                              <div className="flex items-center gap-2">
+                                <Emoji
+                                  name="locked"
+                                  className="h-4 w-4 flex-shrink-0 ml-1 opacity-75"
+                                />
+                                <span>{doc.sidebarTitle}</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <NavigationLink
+                              href={doc.path}
+                              className={cn(
+                                "nav-link block relative px-3 py-1.5 rounded-md hover:bg-[#111] text-sm transition-colors duration-150" /* Adjusted padding and added transition */,
+                                location === doc.path
+                                  ? "active text-orange-500 bg-[#111] font-medium"
+                                  : "text-gray-400 hover:text-orange-500",
+                              )}
+                              onClick={handleLinkClick}
+                            >
+                              <div className="flex items-center gap-2 justify-between w-full">
+                                <span>{doc.sidebarTitle}</span>
+                                {isLessonCompleted(
+                                  getFullLessonPath(doc, sectionName),
+                                ) && (
+                                  <Emoji
+                                    name="check-mark-button"
+                                    className="h-4 w-4 flex-shrink-0 ml-1 opacity-75"
+                                  />
+                                )}
+                              </div>
+                            </NavigationLink>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))
+            )}
+          </nav>
+        </aside>
+      </EmojiProvider>
     </>
   );
 }

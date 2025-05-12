@@ -296,7 +296,7 @@ export default function DocPage() {
   
   if (isLoading) {
     return (
-      <div className="flex-1 py-8">
+      <div className="min-h-[calc(100vh-16rem)] xl:pr-64 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="animate-pulse">
           <div className="h-10 w-1/3 bg-[#111] rounded mb-6"></div>
           <div className="h-6 w-2/3 bg-[#111]/50 rounded mb-10"></div>
@@ -316,7 +316,7 @@ export default function DocPage() {
   if (authRequired && !isAuthenticated) {
     return (
       <>
-        <div className="flex flex-col items-center justify-center p-8 min-h-[400px] text-center">
+        <div className="flex flex-col items-center justify-center p-8 min-h-[calc(100vh-16rem)] text-center">
           <Lock className="h-12 w-12 text-yellow-500 mb-4" />
           <h1 className="text-2xl font-bold mb-4">Login Required</h1>
           <p className="text-gray-400 mb-8">You need to be logged in to view this content.</p>
@@ -344,7 +344,7 @@ export default function DocPage() {
   if (error || !doc) {
     return (
       <>
-        <div className="flex flex-col items-center justify-center p-8 min-h-[400px] text-center">
+        <div className="flex flex-col items-center justify-center p-8 min-h-[calc(100vh-16rem)] text-center">
           <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
           <h1 className="text-2xl font-bold mb-4">{!doc ? "Page Not Found" : "Error Loading Page"}</h1>
           <p className="text-gray-400 mb-8">{error || "The document you're looking for doesn't exist or has been moved."}</p>
@@ -364,7 +364,7 @@ export default function DocPage() {
   
   return (
     <>
-      <div className="min-h-[calc(90vh-3.5rem-1px)] xl:pr-64 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <div className="min-h-[calc(100vh-16rem)] xl:pr-64 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         {/* Main content column - centered with max width for better readability */}
         <article className="w-full">
           <nav className="flex items-center gap-1 text-sm mb-4">
